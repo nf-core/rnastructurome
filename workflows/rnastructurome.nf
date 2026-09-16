@@ -24,10 +24,7 @@ include { BROWSER_TRACKS           } from '../subworkflows/local/browser_tracks/
 include {
     resolveReferenceKey
     parseFlagstatMappedReads
-    parseFlagstatMappedPct
     parseRfcountCoveredTranscripts
-    parseRfcountSummaryRow
-    parseFastqcSummary
     parseRfnormLog
     parseRffoldLog
     parseRfevalMetrics
@@ -37,8 +34,6 @@ include {
     rfevalStatsMultiqc
     filterSummaryParams
     addModuleOptionsSummary
-    rnacentralQcGate
-    rnacentralQcWarn
 } from '../subworkflows/local/utils_nfcore_rnastructurome_pipeline/main'
 
 /*
@@ -54,35 +49,12 @@ workflow RNASTRUCTUROME {
     transcriptome          // boolean: transcriptome (Bowtie) route, including auto-detection
     main:
 
-    // --rnacentral FastQC gate: modules that stay PASS on real, otherwise-healthy chemical-probing
-    // reads (confirmed against real MultiQC data across 6 organisms). Adapter Content is checked on
-    // the first mate only — R2 reliably fails post-trim even on clean data (paired-end artifact).
-    def RNACENTRAL_FASTQC_ALLOWLIST = [
-        'Basic Statistics', 'Per base sequence quality', 'Per tile sequence quality',
-        'Per sequence quality scores', 'Per base N content', 'Adapter Content'
-    ]
-
     ch_multiqc_files = channel.empty()
     // SUBWORKFLOW: FASTQ_QC_TRIM — cat → FastQC → UMI → cutadapt → FastQC
     FASTQ_QC_TRIM (
         ch_samplesheet
     )
     ch_multiqc_files = ch_multiqc_files.mix(FASTQ_QC_TRIM.out.multiqc_files)
-
-    // --rnacentral check 1: post-trim FastQC. First mate gets the full allowlist; a second mate
-    // (paired-end) skips Adapter Content — see RNACENTRAL_FASTQC_ALLOWLIST above. Parsing only runs
-    // when the gate is enabled: -stub's FASTQC output is an empty placeholder file, not a real zip.
-    def ch_fastqc_post_gate = FASTQ_QC_TRIM.out.fastqc_post_zip.map { meta, zips ->
-        if (params.rnacentral) {
-            def zipList = (zips instanceof List) ? zips.sort { zip -> zip.name } : [zips]
-            def fails = zipList.withIndex().collect { zip, idx ->
-                def allowlist = (idx == 0) ? RNACENTRAL_FASTQC_ALLOWLIST : (RNACENTRAL_FASTQC_ALLOWLIST - 'Adapter Content')
-                parseFastqcSummary(zip, allowlist)
-            }.flatten()
-            rnacentralQcGate('FastQC', fails.isEmpty(), "${meta.id}: ${fails.unique()}")
-        }
-        [ meta, zips ]
-    }
 
     def ch_samplesheet_for_branching = FASTQ_QC_TRIM.out.reads_branched
     def ch_rtstop_trimmed_for_align = FASTQ_QC_TRIM.out.rtstop_trimmed
@@ -150,73 +122,11 @@ workflow RNASTRUCTUROME {
             storeDir: "${params.outdir}/count"
         )
 
-    // --rnacentral check 3: rf-count reactivity signal, treated vs untreated per sample_group +
-    // replicate (exact group-key match only, no fuzzy fallback — this is a QC gate, not the real
-    // pairing logic). Guarded behind params.rnacentral since -stub's summary TSV isn't real data.
-    if (params.rnacentral) {
-        def ch_rfcount_signal_by_group = ch_rfcount_summary
-            .filter { meta, _tsv -> meta.sample_group && meta.replicate }
-            .map { meta, tsv ->
-                def group     = "${meta.sample_group}_${meta.replicate}".toString()
-                def condition = (meta.condition ?: 'treated').toLowerCase()
-                [ group, condition, meta, parseRfcountSummaryRow(tsv) ]
-            }
-
-        def ch_rfcount_treated = ch_rfcount_signal_by_group
-            .filter { _group, condition, _meta, _row -> condition == 'treated' }
-            .map    { group, _condition, meta, row -> [ group, meta, row ] }
-
-        def ch_rfcount_untreated = ch_rfcount_signal_by_group
-            .filter { _group, condition, _meta, _row -> condition == 'untreated' }
-            .map    { group, _condition, _meta, row -> [ group, row ] }
-
-        ch_rfcount_treated
-            .join(ch_rfcount_untreated, remainder: true)
-            .map { group, meta, treated, untreated ->
-                if (!meta) return // untreated-only leftover, nothing to gate
-                if (!untreated) {
-                    log.warn("--rnacentral check 3: no untreated match for group '${group}'; skipping rf-count signal check.")
-                    return
-                }
-                def isDms      = (meta.method ?: '').toString().toLowerCase() == 'dms'
-                def isDmsBroad = isDms && meta.pH && (meta.pH as Double) >= 8.0
-                if (isDms && !isDmsBroad) {
-                    rnacentralQcGate('DMS signal', treated.pct_a + treated.pct_c > treated.pct_g + treated.pct_u,
-                        "${group} treated A+C ${treated.pct_a + treated.pct_c} not > G+U ${treated.pct_g + treated.pct_u}")
-                }
-                def spread = [untreated.pct_a, untreated.pct_c, untreated.pct_g, untreated.pct_u].max() -
-                             [untreated.pct_a, untreated.pct_c, untreated.pct_g, untreated.pct_u].min()
-                rnacentralQcGate('Untreated background uniformity', spread <= params.rnacentral_max_untreated_base_spread,
-                    "${group} base spread ${spread} (> ${params.rnacentral_max_untreated_base_spread})")
-                // Warn-only: pct_mutated is the share of alignments carrying >=1 mutation, which
-                // saturates (~99% for treated AND untreated) on transcriptome-wide runs with long
-                // aligned reads, so treated > untreated is noise there. A per-nucleotide rate
-                // (sum mutations / sum coverage from the .rc) is needed before this can be a hard gate.
-                if (treated.pct_mutated != null && untreated.pct_mutated != null) {
-                    rnacentralQcWarn('Mutation rate', treated.pct_mutated > untreated.pct_mutated,
-                        "${group} treated ${treated.pct_mutated} not > untreated ${untreated.pct_mutated}")
-                    if (params.rnacentral_min_treated_mutation_rate > 0) {
-                        rnacentralQcWarn('Mutation rate floor', treated.pct_mutated >= params.rnacentral_min_treated_mutation_rate,
-                            "${group} treated ${treated.pct_mutated} (< ${params.rnacentral_min_treated_mutation_rate})")
-                    }
-                }
-            }
-    }
-
     def ch_pre_dedup_mapped_reads = ALIGN_READS.out.flagstat_pre
         .map { meta, flagstat -> [ meta.id.toString(), parseFlagstatMappedReads(flagstat) ] }
 
     def ch_post_dedup_mapped_reads = ALIGN_READS.out.flagstat_post
         .map { meta, flagstat -> [ meta.id.toString(), parseFlagstatMappedReads(flagstat) ] }
-
-    // --rnacentral check 2: mapped read %, post-dedup.
-    ALIGN_READS.out.flagstat_post.map { meta, flagstat ->
-        if (params.rnacentral) {
-            def pct = parseFlagstatMappedPct(flagstat)
-            rnacentralQcGate('Mapped reads', pct >= params.rnacentral_min_mapped_pct, "${meta.id} at ${pct}% (< ${params.rnacentral_min_mapped_pct}%)")
-        }
-        [ meta, flagstat ]
-    }
 
     def ch_rfcount_covered_transcripts = ch_rfcount_summary
         .map { meta, summary_tsv -> [ meta.id.toString(), parseRfcountCoveredTranscripts(summary_tsv) ] }

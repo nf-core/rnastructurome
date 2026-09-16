@@ -7,7 +7,6 @@ include { RNAFRAMEWORK_RFCORRELATE as RNAFRAMEWORK_RFCORRELATE_SPEARMAN } from '
 include {
     parseRfcorrelateMatrix
     rfCorrelateMultiqc
-    rnacentralQcGate
 } from '../utils_nfcore_rnastructurome_pipeline/main'
 
 workflow CORRELATE_REPLICATES {
@@ -36,20 +35,10 @@ workflow CORRELATE_REPLICATES {
 
     // Summarise both methods' overall pairwise correlations into one combined MultiQC table.
     // Join per sample_group so each row carries mean Pearson + mean Spearman side by side.
-    // --rnacentral check 4: replicate correlation (runs after check 3's rf-count signal gate,
-    // since CORRELATE_REPLICATES sits later in the pipeline DAG than QUANTIFY_REACTIVITY).
     def ch_pearson_by_id = RNAFRAMEWORK_RFCORRELATE_PEARSON.out.matrix
-        .map { meta, matrix ->
-            def stats = parseRfcorrelateMatrix(matrix)
-            rnacentralQcGate('Replicate correlation (Pearson)', stats.min_corr >= params.rnacentral_min_correlation, "${meta.id} min pairwise corr ${stats.min_corr} (< ${params.rnacentral_min_correlation})")
-            [ meta.id.toString(), stats ]
-        }
+        .map { meta, matrix -> [ meta.id.toString(), parseRfcorrelateMatrix(matrix) ] }
     def ch_spearman_by_id = RNAFRAMEWORK_RFCORRELATE_SPEARMAN.out.matrix
-        .map { meta, matrix ->
-            def stats = parseRfcorrelateMatrix(matrix)
-            rnacentralQcGate('Replicate correlation (Spearman)', stats.min_corr >= params.rnacentral_min_correlation, "${meta.id} min pairwise corr ${stats.min_corr} (< ${params.rnacentral_min_correlation})")
-            [ meta.id.toString(), stats ]
-        }
+        .map { meta, matrix -> [ meta.id.toString(), parseRfcorrelateMatrix(matrix) ] }
 
     def ch_multiqc = ch_pearson_by_id
         .join(ch_spearman_by_id)

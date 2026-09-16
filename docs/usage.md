@@ -280,17 +280,6 @@ A 2D diagram is drawn for each extracted motif with ViennaRNA RNAplot, coloured 
 
 For the full list of available options see the [rf-structextract documentation](https://rnaframework-docs.readthedocs.io/en/latest/rf-structextract/).
 
-### `--rnacentral` (fail-fast QC gate, optional)
-
-By default, QC problems are only ever reported — the run finishes regardless, and a bad sample only shows up in MultiQC afterward for a human to notice, by which point it may have already burned hours of compute through fold and R2DT. Set `--rnacentral true` to instead abort the run immediately, at the point a check fails, on any of four conditions:
-
-1. **Post-trim FastQC.** Any FAIL (not WARN) on Basic Statistics, per-base/tile sequence quality, per-sequence quality scores, per-base N content, or Adapter Content. Assay-typical markers that fail on essentially all chemical-probing data regardless of quality (per-base sequence content, duplication levels, GC content, overrepresented sequences) are deliberately excluded.
-2. **Mapped read %**, from `samtools flagstat` post-deduplication. Minimum set by `--rnacentral_min_mapped_pct` (default `60.0`).
-3. **rf-count reactivity signal**, comparing each sample_group + replicate's treated and untreated rf-count summaries. The untreated sample's mutation rate must be roughly uniform across A/C/G/U (max − min spread within `--rnacentral_max_untreated_base_spread`, default `15.0` percentage points) — a biased untreated background suggests contamination rather than genuine background noise. For DMS samples (`method` DMS, excluding high-pH DMS run in broad/SHAPE-like mode at `pH >= 8.0`, which mutates all four bases like SHAPE rather than just A/C), the treated sample's mutations must fall predominantly on A/C. Where both samples report an overall mutation rate (MaP only — RT-stop measures RT drop-off, not mutations, so it has no equivalent rate to compare), the treated rate is expected to exceed the untreated rate, optionally with a floor set by `--rnacentral_min_treated_mutation_rate` (default `0`, disabled). These two mutation-rate checks are currently **advisory only** (a warning, recorded in the QC report but not aborting the run): the rf-count figure is the share of alignments carrying at least one mutation, which saturates near 100% for both treated and untreated libraries on transcriptome-wide runs with long aligned reads, so the comparison is not reliable as a hard gate.
-4. **Replicate correlation**, from `rf-correlate`. Minimum pairwise Pearson and Spearman correlation (per sample_group) set by `--rnacentral_min_correlation` (default `0.6`).
-
-All four thresholds are plain pipeline parameters, so they can be retuned without a code change. On failure, the reason is both printed (the run aborts with it) and appended to `<outdir>/pipeline_info/rnacentral_qc_report.txt`, so it can be read back later independent of run logs. `--rnacentral false` (the default) leaves every stage exactly as it behaves today.
-
 ## Running the pipeline
 
 Typical usage (genome route, auto-downloads reference from Ensembl):

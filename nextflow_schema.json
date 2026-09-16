@@ -825,37 +825,6 @@
                     "description": "Generate the rf-correlate correlation heatmap PDF (`-g`; requires R).",
                     "default": false
                 },
-                "rnacentral": {
-                    "type": "boolean",
-                    "description": "Abort the run immediately on the first failing QC check (post-trim FastQC, mapped read %, replicate correlation, rf-count reactivity signal), instead of only reporting it in MultiQC.",
-                    "default": false
-                },
-                "rnacentral_min_mapped_pct": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 100,
-                    "description": "Minimum % mapped reads (samtools flagstat) per sample required by the --rnacentral QC gate.",
-                    "default": 60.0
-                },
-                "rnacentral_min_correlation": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 1,
-                    "description": "Minimum pairwise replicate reactivity correlation (rf-correlate) per sample_group required by the --rnacentral QC gate.",
-                    "default": 0.6
-                },
-                "rnacentral_max_untreated_base_spread": {
-                    "type": "number",
-                    "minimum": 0,
-                    "description": "Maximum allowed spread (percentage points) between the highest and lowest of pct_a/c/g/u_muts on the untreated sample's rf-count summary, required by the --rnacentral QC gate.",
-                    "default": 15.0
-                },
-                "rnacentral_min_treated_mutation_rate": {
-                    "type": "number",
-                    "minimum": 0,
-                    "description": "Optional floor on the treated sample's rf-count pct_mutated (MaP only), required by the --rnacentral QC gate. 0 disables this specific check.",
-                    "default": 0
-                },
                 "rffold_ct": {
                     "type": "boolean",
                     "description": "Write CT format structures with rf-fold (`-ct`). Disabled by default to keep dot-bracket output.",

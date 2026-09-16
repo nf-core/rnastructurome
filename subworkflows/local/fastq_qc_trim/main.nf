@@ -138,9 +138,8 @@ workflow FASTQ_QC_TRIM {
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC_POST.out.zip.collect { fastqc_zip -> fastqc_zip[1] })
 
     emit:
-    reads_branched  = ch_samplesheet_for_branching // channel: [ val(meta), [ reads ] ] (post-cat)
-    rtstop_trimmed  = ch_rtstop_trimmed_for_align   // channel: [ val(meta), [ reads ] ]
-    map_trimmed     = ch_map_trimmed_for_align      // channel: [ val(meta), [ reads ] ]
-    fastqc_post_zip = FASTQC_POST.out.zip           // channel: [ val(meta), path(zip) ] — for the --rnacentral QC gate
-    multiqc_files   = ch_multiqc_files              // channel: queue of mqc files
+    reads_branched = ch_samplesheet_for_branching // channel: [ val(meta), [ reads ] ] (post-cat)
+    rtstop_trimmed = ch_rtstop_trimmed_for_align   // channel: [ val(meta), [ reads ] ]
+    map_trimmed    = ch_map_trimmed_for_align      // channel: [ val(meta), [ reads ] ]
+    multiqc_files  = ch_multiqc_files              // channel: queue of mqc files
 }

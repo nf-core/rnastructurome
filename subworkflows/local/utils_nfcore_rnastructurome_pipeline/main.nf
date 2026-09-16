@@ -497,20 +497,6 @@ def parseFlagstatMappedReads(flagstatFile) {
     (mappedLine.tokenize()[0]) as long
 }
 
-def parseFlagstatMappedPct(flagstatFile) {
-    def mappedLine = flagstatFile.readLines().find { line ->
-        line ==~ /^\d+\s+\+\s+\d+\s+mapped\s+\(.*/
-    }
-    if (!mappedLine) {
-        error("Could not parse mapped read percentage from flagstat file: ${flagstatFile}")
-    }
-    def pctMatch = (mappedLine =~ /\(([\d.]+)%/)
-    if (!pctMatch.find()) {
-        error("Could not parse mapped read percentage from flagstat file: ${flagstatFile}")
-    }
-    pctMatch.group(1) as double
-}
-
 def parseRfcountCoveredTranscripts(summaryFile) {
     def summaryLines = summaryFile.readLines().findAll { line -> line?.trim() }
     if (summaryLines.size() < 2) {
@@ -521,72 +507,6 @@ def parseRfcountCoveredTranscripts(summaryFile) {
         error("rf-count summary TSV is missing the covered transcript column: ${summaryFile}")
     }
     (fields[1]) as long
-}
-
-// rf-count summary TSV has 8 columns for MaP (sample, covered, mutated_alignments, pct_mutated,
-// pct_a/c/g/u_muts) and 6 for RT-stop (sample, covered, pct_a/c/g/u_muts — no rate column, since
-// RT-stop measures RT drop-off, not mutations). pct_mutated is null for RT-stop rows.
-def parseRfcountSummaryRow(summaryFile) {
-    def summaryLines = summaryFile.readLines().findAll { line -> line?.trim() }
-    if (summaryLines.size() < 2) {
-        error("Could not parse rf-count summary TSV: ${summaryFile}")
-    }
-    def fields = summaryLines[1].split('\t')
-    def isMap = fields.size() >= 8
-    [
-        pct_a       : (isMap ? fields[4] : fields[2]) as double,
-        pct_c       : (isMap ? fields[5] : fields[3]) as double,
-        pct_g       : (isMap ? fields[6] : fields[4]) as double,
-        pct_u       : (isMap ? fields[7] : fields[5]) as double,
-        pct_mutated : (isMap && fields[3] != 'NA') ? (fields[3] as double) : null
-    ]
-}
-
-// Reads the */summary.txt entry out of a FastQC zip (PASS/WARN/FAIL per module) without needing a
-// process — java.util.zip is available directly in Nextflow's Groovy runtime. Returns the names of
-// any `allowlist` modules that are present and FAIL; ignores WARN and modules absent from the file
-// (e.g. "Per tile sequence quality" is commonly missing for reads without Illumina tile coordinates).
-def parseFastqcSummary(zipFile, List<String> allowlist) {
-    def zip = new java.util.zip.ZipFile(zipFile.toString())
-    def entry = zip.entries().find { e -> e.name.endsWith('/summary.txt') }
-    if (!entry) {
-        zip.close()
-        return []
-    }
-    def fails = []
-    zip.getInputStream(entry).withReader { reader ->
-        reader.eachLine { line ->
-            def fields = line.split('\t')
-            if (fields.size() >= 2 && fields[0] == 'FAIL' && allowlist.contains(fields[1])) {
-                fails << fields[1]
-            }
-        }
-    }
-    zip.close()
-    fails
-}
-
-// Shared --rnacentral QC gate: a no-op unless params.rnacentral is set. On failure, writes the
-// reason to pipeline_info/rnacentral_qc_report.txt (for later reference — separate from this run's
-// own stderr/log) before aborting via error(), consistent with this file's other hard-stop checks.
-def rnacentralQcGate(String checkName, boolean pass, String message) {
-    if (params.rnacentral && !pass) {
-        def report = file("${params.outdir}/pipeline_info/rnacentral_qc_report.txt")
-        report.parent.mkdirs()
-        report << "[${new Date().format('yyyy-MM-dd HH:mm:ss')}] FAILED — ${checkName}: ${message}\n"
-        error("[--rnacentral QC gate] ${checkName}: ${message}")
-    }
-}
-
-// Advisory counterpart to rnacentralQcGate: records the failure in the same report file and logs a
-// warning, but never aborts. For checks whose metric is known to be unreliable as a hard gate.
-def rnacentralQcWarn(String checkName, boolean pass, String message) {
-    if (params.rnacentral && !pass) {
-        def report = file("${params.outdir}/pipeline_info/rnacentral_qc_report.txt")
-        report.parent.mkdirs()
-        report << "[${new Date().format('yyyy-MM-dd HH:mm:ss')}] WARNING — ${checkName}: ${message}\n"
-        log.warn("[--rnacentral QC warning] ${checkName}: ${message}")
-    }
 }
 
 def parseInferExperiment(txtFile) {
