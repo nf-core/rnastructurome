@@ -5,6 +5,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v1.0.1dev - [unreleased]
 
+### `Fixed`
+
+- `--rfnorm_norm_method 1` (2-8% normalisation) is accepted again; the launch guard and schema rejected it while `docs/usage.md` documented it.
+- The rf-fold flag letters quoted in the `nextflow_schema.json` descriptions of `rffold_unconstrained`, `rffold_vienna_no_lonely_pairs`, `rffold_vienna_constrained`, `rffold_vienna_max_bp_span`, `rffold_fold_constraint_file` and `rffold_dotplot` now match what the pipeline passes (`-i`, `-nlp`, `-hc`, `-md`, `-c`, `-dp`).
+- `rf-normfactor` no longer silently drops RC files whose sample name starts with a digit (e.g. `125ng_r1.rc`): `rf-rctools index` numifies such a bare filename into an argument index, so the file is now passed with a directory prefix.
+
+### `Removed`
+
+- `--rffold_vienna_bp_span` and `--rffold_unpaired_constraint_file`, which were declared but never used; rf-fold has no corresponding flags.
+
 ## v1.0.0 - [8 September 2026]
 
 First release of nf-core/rnastructurome, which analyses chemical high-throughput RNA structure-probing data and predicts RNA secondary structures from it. The pipeline covers **SHAPE** and **DMS** chemistries read out by either the **RT-stop** or **mutational profiling (MaP)** principle, and runs in two modes depending on the reference: a **genome** route aligned with STAR and a **transcriptome** route aligned with Bowtie/Bowtie2.

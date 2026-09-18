@@ -109,7 +109,7 @@
                     "python": "3.12.12"
                 },
                 "Workflow": {
-                    "nf-core/rnastructurome": "v1.0.0"
+                    "nf-core/rnastructurome": "v1.0.1dev"
                 }
             }
         ],
