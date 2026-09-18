@@ -3,6 +3,8 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.0.1dev - [unreleased]
+
 ## v1.0.0 - [8 September 2026]
 
 First release of nf-core/rnastructurome, which analyses chemical high-throughput RNA structure-probing data and predicts RNA secondary structures from it. The pipeline covers **SHAPE** and **DMS** chemistries read out by either the **RT-stop** or **mutational profiling (MaP)** principle, and runs in two modes depending on the reference: a **genome** route aligned with STAR and a **transcriptome** route aligned with Bowtie/Bowtie2.

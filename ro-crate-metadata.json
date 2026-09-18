@@ -21,8 +21,8 @@
         {
             "@id": "./",
             "@type": "Dataset",
-            "creativeWorkStatus": "Stable",
-            "datePublished": "2026-07-17T13:04:05+00:00",
+            "creativeWorkStatus": "InProgress",
+            "datePublished": "2026-09-18T10:00:21+00:00",
             "description": "<h1>\n  <picture>\n    <source media=\"(prefers-color-scheme: dark)\" srcset=\"docs/images/nf-core-rnastructurome_logo_dark.png\">\n    <img alt=\"nf-core/rnastructurome\" src=\"docs/images/nf-core-rnastructurome_logo_light.png\">\n  </picture>\n</h1>\n\n[![Open in GitHub Codespaces](https://img.shields.io/badge/Open_In_GitHub_Codespaces-black?labelColor=grey&logo=github)](https://github.com/codespaces/new/nf-core/rnastructurome)\n[![GitHub Actions CI Status](https://github.com/nf-core/rnastructurome/actions/workflows/nf-test.yml/badge.svg)](https://github.com/nf-core/rnastructurome/actions/workflows/nf-test.yml)\n[![GitHub Actions Linting Status](https://github.com/nf-core/rnastructurome/actions/workflows/linting.yml/badge.svg)](https://github.com/nf-core/rnastructurome/actions/workflows/linting.yml)[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/rnastructurome/results)\n[![nf-test](https://img.shields.io/badge/unit_tests-nf--test-337ab7.svg)](https://www.nf-test.com)\n\n[![Nextflow](https://img.shields.io/badge/version-%E2%89%A525.10.4-green?style=flat&logo=nextflow&logoColor=white&color=%230DC09D&link=https%3A%2F%2Fnextflow.io)](https://www.nextflow.io/)\n[![nf-core template version](https://img.shields.io/badge/nf--core_template-4.1.0-green?style=flat&logo=nfcore&logoColor=white&color=%2324B064&link=https%3A%2F%2Fnf-co.re)](https://github.com/nf-core/tools/releases/tag/4.1.0)\n[![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)\n[![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)\n[![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)\n[![Launch on Seqera Platform](https://img.shields.io/badge/Launch%20%F0%9F%9A%80-Seqera%20Platform-%234256e7)](https://cloud.seqera.io/launch?pipeline=https://github.com/nf-core/rnastructurome)\n\n[![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23rnastructurome-4A154B?labelColor=000000&logo=slack)](https://nfcore.slack.com/channels/rnastructurome)[![Follow on Bluesky](https://img.shields.io/badge/bluesky-%40nf__core-1185fe?labelColor=000000&logo=bluesky)](https://bsky.app/profile/nf-co.re)[![Follow on Mastodon](https://img.shields.io/badge/mastodon-nf__core-6364ff?labelColor=FFFFFF&logo=mastodon)](https://mstdn.science/@nf_core)[![Watch on YouTube](http://img.shields.io/badge/youtube-nf--core-FF0000?labelColor=000000&logo=youtube)](https://www.youtube.com/c/nf-core)\n\n## Introduction\n\n**nf-core/rnastructurome** is a bioinformatics pipeline for analysing chemical high-throughput RNA structure-probing data. It takes a samplesheet and FASTQ files from **SHAPE** or **DMS** experiments (read out by either the **RT-stop** or **mutational profiling (MaP)** principle) then performs quality control, trimming and alignment, quantifies per-base reactivity, and predicts RNA secondary structures. Outputs include normalised reactivity, Shannon entropy and base-pair arc tracks, 2D structure diagrams, RMDB-compatible RDAT files, and an aggregated QC report. References can be supplied locally or fetched automatically from Ensembl or NCBI, so the pipeline works across a wide range of organisms, including viruses and bacteria.\n\n<p align=\"center\">\n    <picture>\n        <source media=\"(prefers-reduced-motion: reduce)\" srcset=\"docs/images/nf-metro-light.svg\">\n        <img src=\"docs/images/nf-metro-light-animated.svg\" alt=\"nf-core/rnastructurome metro map\" width=\"100%\">\n    </picture>\n</p>\n\nPipeline steps:\n\n1. Merge re-sequenced FASTQ files (`cat/fastq`)\n2. Raw read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))\n3. Optional UMI extraction ([`UMI-tools extract`](https://umi-tools.readthedocs.io/)) when `umi_pattern` is supplied\n4. Adapter and quality trimming ([`Cutadapt`](https://cutadapt.readthedocs.io/)) with principle-aware settings, followed by post-trim FastQC\n5. Reference resolution: use local FASTA/GTF inputs, download genome FASTA and GTF from Ensembl, or fall back to NCBI for organisms not captured by Ensembl such as bacteria and viruses\n6. Reference indexing: [`STAR`](https://github.com/alexdobin/STAR) genome index by default; optional [`Bowtie`](http://bowtie-bio.sourceforge.net/) / [`Bowtie2`](http://bowtie-bio.sourceforge.net/bowtie2/) transcriptome indexes with `--transcriptome`\n7. Alignment: STAR for the default genome route; Bowtie for RT-stop and Bowtie2 for MaP on the optional transcriptome route\n8. BAM sorting, indexing, and alignment QC ([`SAMtools`](https://www.htslib.org/))\n9. Duplicate handling: UMI-aware deduplication ([`UMI-tools dedup`](https://umi-tools.readthedocs.io/)) for libraries with a `umi_pattern`. Position-based duplicate removal ([`SAMtools markdup`](https://www.htslib.org/)) is **disabled by default** (`skip_markdup = true`) and is not recommended for chemical-probing data without UMIs, where reads sharing a 5' start are independent molecules rather than PCR duplicates; enable it with `--skip_markdup false` only if you have a specific reason\n10. Per-base reactivity counting: by default, [`rf-count`](https://rnaframework-docs.readthedocs.io/en/latest/rf-count/) tallies mutations (MaP) or RT-stops (RT-stop) directly on transcript-coordinate alignments - the genome route runs it on STAR's `--quantMode TranscriptomeSAM` output, the transcriptome route on the transcript BAM. Alternatively, on the genome route with `--count_genome`, [`rf-count-genome`](https://rnaframework-docs.readthedocs.io/en/latest/rf-count-genome/) counts against genome coordinates - with strandedness resolved first (GTF-to-BED conversion via [`BEDOPS`](https://bedops.readthedocs.io/) and, for MaP libraries, strand inference via [`RSeQC infer_experiment`](https://rseqc.sourceforge.net/)) - followed by [`rf-rctools extract`](https://rnaframework-docs.readthedocs.io/en/latest/rf-rctools/) to pull per-transcript reactivity\n11. Reactivity normalisation with automatic control pairing and scoring-method selection ([`rf-norm`](https://rnaframework-docs.readthedocs.io/en/latest/rf-norm/))\n12. Reactivity track generation from rf-norm outputs, including transcript-coordinate and genome-coordinate WIG/BigWig files ([`rf-wiggle`](https://rnaframework-docs.readthedocs.io/en/latest/rf-wiggle/))\n13. Replicate reproducibility QC: pairwise Pearson and Spearman correlation of per-`sample_group` reactivity profiles ([`rf-correlate`](https://rnaframework-docs.readthedocs.io/en/latest/rf-correlate/)), summarised in the MultiQC report\n14. Optional normalisation calibration against reference structures ([`rf-jackknife`](https://rnaframework-docs.readthedocs.io/en/latest/rf-jackknife/)) when `--jackknife_reference` is provided; with `--stop_after_jackknife` the pipeline ends here, emitting the FMI (Fowlkes-Mallows Index) calibration table as its final output\n15. RNA secondary structure prediction across grouped replicates ([`rf-fold`](https://rnaframework-docs.readthedocs.io/en/latest/rf-fold/))\n16. Base-pair and Shannon entropy track generation from rf-fold outputs, including transcript-coordinate and genome-coordinate files where possible\n17. 2D structure diagram drawing: every structure is drawn with [`ViennaRNA`](https://www.tbi.univie.ac.at/RNA/) RNAplot; when a model for a determined RNA type exists, [`R2DT`](https://github.com/RNAcentral/R2DT) template-matched diagrams are drawn in parallel for side-by-side comparison (`structures/viennarna/` vs `structures/r2dt/`). R2DT is container-only, so conda/mamba runs draw with ViennaRNA alone\n18. RDAT export combining per-transcript reactivity and structure ([`rnaframework_to_rdat`](bin/rnaframework_to_rdat.py))\n19. Optional downstream analysis of the folded structures: structural-element extraction of high-confidence, low-reactivity/low-Shannon motifs ([`rf-structextract`](https://rnaframework-docs.readthedocs.io/en/latest/rf-structextract/), enabled with `--structextract`) and structure-accuracy evaluation against known structures ([`rf-eval`](https://rnaframework-docs.readthedocs.io/en/latest/rf-eval/), enabled by `--rfeval_reference`)\n20. Aggregated QC report ([`MultiQC`](http://multiqc.info/))\n\n## Usage\n\n> [!NOTE]\n> If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/get_started/environment_setup/overview) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/get_started/run-your-first-pipeline) with `-profile test` before running the workflow on actual data.\n\nThe pipeline supports two chemical probing chemistries and two readout principles. These drive automatic parameter selection throughout the pipeline and should be set per sample in the samplesheet or globally via `--method` and `--principle`. Both are case-insensitive.\n\nFirst, prepare a samplesheet with your input data:\n\n`samplesheet.csv`:\n\n```csv\nsample,sample_id,fastq_1,fastq_2,method,principle,chemical,RT_enzyme,sample_group,condition,replicate,organism,pH,adapter_3p,adapter_5p,umi_pattern\nHEK293T_treated_r1,GSM000001,/data/treated_r1.fastq.gz,,SHAPE,RT-stop,NAI,M-MLV,HEK293T,treated,1,Homo sapiens,7.5,,,\nHEK293T_untreated_r1,GSM000002,/data/untreated_r1.fastq.gz,,SHAPE,RT-stop,NAI,M-MLV,HEK293T,untreated,1,Homo sapiens,7.5,,,\n```\n\nEach row is one sample. The columns `sample`, `fastq_1`, `sample_group`, `condition`, and `replicate` are always required (`sample_group`, `condition`, and `replicate` pair treated/untreated/denatured controls for `rf-norm`; supported `condition` values are `treated`, `untreated`, `denatured`). `method`, `principle`, and `organism` are required information but may instead be given globally via `--method`, `--principle`, and `--organism` when they are uniform across samples. Every other column (`sample_id`, `fastq_2`, `chemical`, `RT_enzyme`, `pH`, `adapter_3p`, `adapter_5p`, `umi_pattern`) is optional and falls back to its global `--<param>` value or a sensible default when left blank. See the [usage documentation](https://nf-co.re/rnastructurome/usage) for the full column reference.\n\nRows with the same sample identifier are considered technical replicates and merged automatically. Samples are grouped by `sample_group` and replicate so that treated, untreated, and denatured controls are paired correctly for normalisation.\n\nNow run the pipeline. By default no reference is supplied, so the pipeline downloads the genome FASTA and GTF for each sample's `organism` from Ensembl (or NCBI for bacteria/viruses) and aligns with STAR (genome route):\n\n```bash\nnextflow run nf-core/rnastructurome \\\n   -profile <docker/singularity/.../institute> \\\n   --input samplesheet.csv \\\n   --outdir <OUTDIR>\n```\n\nAlternatively, provide your own reference. Supplying `--fasta` (with `--gtf` for the genome route) takes priority over any `organism` download:\n\n```bash\nnextflow run nf-core/rnastructurome \\\n   -profile <docker/singularity/.../institute> \\\n   --input samplesheet.csv \\\n   --fasta genome.fa \\\n   --gtf annotation.gtf.gz \\\n   --outdir <OUTDIR>\n```\n\nTo align against a transcript-level FASTA with Bowtie/Bowtie2 instead of a genome, add `--transcriptome true` and pass the transcript FASTA as `--fasta` (the GTF is optional on this route):\n\n```bash\nnextflow run nf-core/rnastructurome \\\n   -profile <docker/singularity/.../institute> \\\n   --input samplesheet.csv \\\n   --fasta transcripts.fa \\\n   --transcriptome true \\\n   --outdir <OUTDIR>\n```\n\n> [!WARNING]\n> Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_; see [docs](https://nf-co.re/docs/running/run-pipelines#using-parameter-files).\n\nFor more details and further functionality, please refer to the [usage documentation](https://nf-co.re/rnastructurome/usage) and the [parameter documentation](https://nf-co.re/rnastructurome/parameters).\n\n## Pipeline output\n\nTo see the results of an example test run with a full size dataset refer to the [results](https://nf-co.re/rnastructurome/results) tab on the nf-core website pipeline page.\nFor more details about the output files and reports, please refer to the\n[output documentation](https://nf-co.re/rnastructurome/output).\n\nThis pipeline quantifies per-base reactivity and predicts secondary structures for the transcripts in your reference, grouping replicates and pairing treated/untreated controls for normalisation. It does not statistically compare conditions or samples. The per-nucleotide reactivity tracks, Shannon-entropy and base-pair-arc tracks, 2D structure diagrams, and RMDB-compatible RDAT files are intended for genome-browser visualisation, structural analysis, and deposition, and can be taken into downstream tools for cross-condition comparison.\n\n## Credits\n\nnf-core/rnastructurome was originally written by Victoria Begley (@Vicbeg) and Pedro Madrigal (@pmb59) from RNAcentral (EBI-EMBL).\n\nWe thank the following people for their extensive assistance in the development of this pipeline:\n\n- Danny Incarnato\n- Yiliang Ding\n\n## Contributions and Support\n\nIf you would like to contribute to this pipeline, please see the [contributing guidelines](docs/CONTRIBUTING.md).\n\nFor further information or help, don't hesitate to get in touch on the [Slack `#rnastructurome` channel](https://nfcore.slack.com/channels/rnastructurome) (you can join with [this invite](https://nf-co.re/join/slack)).\n\n## Citations\n\nAn extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.\n\nYou can cite the `nf-core` publication as follows:\n\n> **The nf-core framework for community-curated bioinformatics pipelines.**\n>\n> Philip Ewels, Alexander Peltzer, Sven Fillinger, Harshil Patel, Johannes Alneberg, Andreas Wilm, Maxime Ulysse Garcia, Paolo Di Tommaso & Sven Nahnsen.\n>\n> _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).\n",
             "hasPart": [
                 {
@@ -105,7 +105,7 @@
             },
             "mentions": [
                 {
-                    "@id": "#3a4f4b41-8030-466b-8756-d5b93454a75c"
+                    "@id": "#9c31c79e-7ae7-4963-9424-f190e932683f"
                 }
             ],
             "name": "nf-core/rnastructurome"
@@ -141,11 +141,18 @@
                 }
             ],
             "dateCreated": "",
-            "dateModified": "2026-07-17T14:04:05Z",
+            "dateModified": "2026-09-18T11:00:21Z",
             "dct:conformsTo": "https://bioschemas.org/profiles/ComputationalWorkflow/1.0-RELEASE/",
             "keywords": [
                 "nf-core",
-                "nextflow"
+                "nextflow",
+                "dms",
+                "map",
+                "rna-structure",
+                "rnacentral",
+                "rnaframework",
+                "rt-stop",
+                "shape"
             ],
             "license": [
                 "MIT"
@@ -161,10 +168,10 @@
             },
             "url": [
                 "https://github.com/nf-core/rnastructurome",
-                "https://nf-co.re/rnastructurome/1.0.0/"
+                "https://nf-co.re/rnastructurome/dev/"
             ],
             "version": [
-                "1.0.0"
+                "1.0.1dev"
             ]
         },
         {
@@ -180,11 +187,11 @@
             "version": "!>=25.10.4"
         },
         {
-            "@id": "#3a4f4b41-8030-466b-8756-d5b93454a75c",
+            "@id": "#9c31c79e-7ae7-4963-9424-f190e932683f",
             "@type": "TestSuite",
             "instance": [
                 {
-                    "@id": "#58e41308-e758-43ba-bb0c-513a04983716"
+                    "@id": "#c2bd68b1-2925-4e29-93b1-12bc90d268ea"
                 }
             ],
             "mainEntity": {
@@ -193,7 +200,7 @@
             "name": "Test suite for nf-core/rnastructurome"
         },
         {
-            "@id": "#58e41308-e758-43ba-bb0c-513a04983716",
+            "@id": "#c2bd68b1-2925-4e29-93b1-12bc90d268ea",
             "@type": "TestInstance",
             "name": "GitHub Actions workflow for testing nf-core/rnastructurome",
             "resource": "repos/nf-core/rnastructurome/actions/workflows/nf-test.yml",
@@ -337,7 +344,7 @@
             "affiliation": "EMBL-EBI",
             "email": "begley@ebi.ac.uk",
             "name": "Victoria Begley",
-            "url": "https://github.com/github.com/Vicbeg"
+            "url": "https://github.com/Vicbeg"
         },
         {
             "@id": "https://orcid.org/0000-0003-1959-8199",
@@ -345,7 +352,7 @@
             "affiliation": "EMBL-EBI",
             "email": "pmadrigal@ebi.ac.uk",
             "name": "Pedro Madrigal",
-            "url": "https://github.com/github.com/pmb59"
+            "url": "https://github.com/pmb59"
         }
     ]
 }
