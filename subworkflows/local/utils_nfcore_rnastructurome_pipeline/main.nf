@@ -844,8 +844,8 @@ def resolveRfNormNormMethod(scoringMethod) {
     }
 
     def requestedMethod = params.rfnorm_norm_method as Integer
-    if (!(requestedMethod in [2, 3, 4])) {
-        error("Unsupported rf-norm normalization method '${params.rfnorm_norm_method}'. Expected one of: 2, 3, 4.")
+    if (!(requestedMethod in [1, 2, 3, 4])) {
+        error("Unsupported rf-norm normalization method '${params.rfnorm_norm_method}'. Expected one of: 1, 2, 3, 4.")
     }
 
     requestedMethod

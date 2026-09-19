@@ -36,7 +36,7 @@ template:
   name: rnastructurome
   description: This pipeline analyses chemical-based high-throughput RNA structure probing data
   author: RNAcentral
-  version: 1.0.0
+  version: 1.0.1dev
   force: true
   outdir: .
   is_nfcore: true

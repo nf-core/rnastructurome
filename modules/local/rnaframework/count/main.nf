@@ -30,7 +30,12 @@ process RNAFRAMEWORK_RFCOUNT {
     // which rf-count table layout to expect (MaP has a Mutated-alignments column; RT-stop does not).
     def is_map = ((meta.principle ?: '').toLowerCase() == 'map') ? '1' : '0'
     """
-    FASTA_PATH="${fasta}"
+    # rf-count runs one samtools view per FASTA transcript into <outdir>/tmp/, so a whole
+    # transcriptome (~250k for human) is ~250k invocations per sample and never finishes on
+    # shared storage. Restrict it to the references that actually have alignments.
+    samtools idxstats "${bam}" | awk '\$3 > 0 { print \$1 }' > covered_refs.txt
+    awk 'NR == FNR { keep[\$1]; next } /^>/ { p = (substr(\$1, 2) in keep) } p' covered_refs.txt "${fasta}" > covered.fa
+    FASTA_PATH="covered.fa"
 
     export TERM="\${TERM:-xterm}"
 

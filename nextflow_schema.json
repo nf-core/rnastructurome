@@ -519,8 +519,8 @@
                 },
                 "rfnorm_norm_method": {
                     "type": "integer",
-                    "enum": [2, 3, 4],
-                    "description": "Override rf-norm normalization method (`-nm`). 2=90% Winsorizing, 3=Box-plot, 4=Mitchell (MaP only)."
+                    "enum": [1, 2, 3, 4],
+                    "description": "Override rf-norm normalization method (`-nm`). 1=2-8%, 2=90% Winsorizing, 3=Box-plot, 4=Mitchell (MaP only)."
                 },
                 "rfnorm_raw": {
                     "type": "boolean",
@@ -844,29 +844,24 @@
                 },
                 "rffold_unconstrained": {
                     "type": "boolean",
-                    "description": "Fold without reactivity constraints in rf-fold (`-u`).",
+                    "description": "Fold without reactivity constraints in rf-fold (`-i`).",
                     "default": false
                 },
                 "rffold_vienna_no_lonely_pairs": {
                     "type": "boolean",
-                    "description": "Pass ViennaRNA no-lonely-pairs mode to rf-fold (`-vnlp`).",
+                    "description": "Pass ViennaRNA no-lonely-pairs mode to rf-fold (`-nlp`).",
                     "default": false
                 },
                 "rffold_vienna_constrained": {
                     "type": "boolean",
-                    "description": "Use ViennaRNA hard constraints with rf-fold (`-vc`).",
+                    "description": "Use ViennaRNA hard constraints with rf-fold (`-hc`).",
                     "default": false
                 },
                 "rffold_vienna_max_bp_span": {
                     "default": 600,
                     "type": "integer",
                     "minimum": 1,
-                    "description": "Maximal base-pair span for ViennaRNA in rf-fold (`-vmd`)."
-                },
-                "rffold_vienna_bp_span": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "description": "Minimal base-pair span for ViennaRNA in rf-fold (`-vms`)."
+                    "description": "Maximal base-pair span for ViennaRNA in rf-fold (`-md`)."
                 },
                 "rffold_only_common": {
                     "type": "integer",
@@ -877,17 +872,11 @@
                     "type": "string",
                     "format": "file-path",
                     "exists": true,
-                    "description": "Constraint file for allowed base-pairing positions (`-fc`)."
-                },
-                "rffold_unpaired_constraint_file": {
-                    "type": "string",
-                    "format": "file-path",
-                    "exists": true,
-                    "description": "Constraint file for required unpaired positions (`-uc`)."
+                    "description": "Constraint file for allowed base-pairing positions (`-c`)."
                 },
                 "rffold_dotplot": {
                     "type": "boolean",
-                    "description": "Generate dot plots from rf-fold (`-d`).",
+                    "description": "Generate dot plots from rf-fold (`-dp`).",
                     "default": true
                 },
                 "rffold_shannon_entropy": {

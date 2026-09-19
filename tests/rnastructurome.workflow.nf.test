@@ -336,6 +336,43 @@ nextflow_workflow {
         }
     }
 
+    test("Allows 2-8% rf-norm normalization override") {
+
+        options "-stub"
+
+        when {
+            params {
+                outdir             = "$outputDir"
+                fasta              = "$projectDir/tests/data/Homo_sapiens.GRCh38.ENST00000389680.fa"
+                rfnorm_norm_method = 1
+            }
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id:'hek_treated_rep1', sample_id:'hek_treated_rep1', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'hek293T', replicate:'rep1', condition:'treated' ],
+                        [ file("\${projectDir}/tests/data/GSM4333255.R1.HEK293T_untreated_r1.trim.top1.fastq.gz", checkIfExists: true) ]
+                    ],
+                    [
+                        [ id:'hek_untreated_rep1', sample_id:'hek_untreated_rep1', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'hek293T', replicate:'rep1', condition:'untreated' ],
+                        [ file("\${projectDir}/tests/data/GSM4333255.R1.HEK293T_untreated_r1.trim.top1.fastq.gz", checkIfExists: true) ]
+                    ]
+                )
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert workflow.out.normalized_xml.size() == 1 },
+                { assert workflow.out.normalized_xml[0][0].rfnorm_scoring_method == 1 },
+                { assert workflow.out.normalized_xml[0][0].rfnorm_norm_method == 1 }
+            )
+        }
+    }
+
     test("Fails on unsupported rf-norm normalization override") {
 
         options "-stub"
