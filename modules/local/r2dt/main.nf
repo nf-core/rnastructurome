@@ -37,27 +37,27 @@ process R2DT {
         --out      r2dt_input.fa \\
         2>&1 | tee ${prefix}_r2dt.log
 
-    if [[ ! -s r2dt_input.fa ]]; then
-        echo "[R2DT] No sequences extracted — skipping." | tee -a ${prefix}_r2dt.log
-        touch r2dt_drawn_ids.txt
-        exit 0
-    fi
-
     # ── 2. Run R2DT template-based layout ──────────────────────────────────────
     # Keep R2DT's FULL output + exit status: r2dt_status below is the authoritative
     # success/failure signal (see step 3) — the log itself is for diagnostics only.
+    # No early exit: it skips Nextflow's appended .command.env capture and fails the task.
     mkdir -p r2dt_raw
-    set +e
-    r2dt.py draw \\
-        --skip_ribovore_filters \\
-        $args \\
-        r2dt_input.fa \\
-        r2dt_raw \\
-        > r2dt_draw.out 2>&1
-    r2dt_status=\$?
-    set -e
-    grep -E '^(Analysing|Elapsed time|Visualising|Traveler crashed|Failed cmalign|Traceback|OSError|Errno|[Ee]rror|usage:)' \\
-        r2dt_draw.out | tee -a ${prefix}_r2dt.log || true
+    r2dt_status=0
+    if [[ ! -s r2dt_input.fa ]]; then
+        echo "[R2DT] No sequences extracted — skipping." | tee -a ${prefix}_r2dt.log
+    else
+        set +e
+        r2dt.py draw \\
+            --skip_ribovore_filters \\
+            $args \\
+            r2dt_input.fa \\
+            r2dt_raw \\
+            > r2dt_draw.out 2>&1
+        r2dt_status=\$?
+        set -e
+        grep -E '^(Analysing|Elapsed time|Visualising|Traveler crashed|Failed cmalign|Traceback|OSError|Errno|[Ee]rror|usage:)' \\
+            r2dt_draw.out | tee -a ${prefix}_r2dt.log || true
+    fi
 
     # ── 3. Overlay reactivities onto SVGs ──────────────────────────────────────
     # R2DT logs Tracebacks/"error" text to stderr for individual sequences that briefly

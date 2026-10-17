@@ -10,6 +10,61 @@ nextflow_process {
     tag "rnaframework/normfactor"
     config "./nextflow.config"
 
+    test("rfnormfactor - RC file names starting with a digit") {
+
+        setup {
+            run("RNAFRAMEWORK_RFCOUNT") {
+                script "../../count/main.nf"
+                process {
+                    """
+                    input[0] = Channel.of(
+                        [
+                            [ id:'125ng_treated', principle:'RT-stop', single_end:false ],
+                            file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam', checkIfExists: true),
+                            file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam.bai', checkIfExists: true)
+                        ],
+                        [
+                            [ id:'125ng_untreated', principle:'RT-stop', single_end:true ],
+                            file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.single_end.sorted.bam', checkIfExists: true),
+                            file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.single_end.sorted.bam.bai', checkIfExists: true)
+                        ]
+                    )
+                    input[1] = Channel.value([
+                        [ id:'ref' ],
+                        file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
+                    ])
+                    """
+                }
+            }
+        }
+
+        when {
+            params {
+                module_args = '-mc 1'
+            }
+            process {
+                """
+                input[0] = RNAFRAMEWORK_RFCOUNT.out.rc
+                    .collect { _meta, rc -> rc }
+                    .map { rcs -> [
+                        [ id:'sarscov2', principle:'RT-stop' ],
+                        rcs.find { rc -> rc.name == '125ng_treated.rc' },
+                        rcs.find { rc -> rc.name == '125ng_untreated.rc' },
+                        [],
+                        []
+                    ] }
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.factors.size() == 1 }
+            )
+        }
+    }
+
     test("rfnormfactor - stub") {
 
         options "-stub"

@@ -14,7 +14,7 @@ nextflow_workflow {
         when {
             params {
                 outdir       = "$outputDir"
-                fasta        = "$projectDir/tests/data/Homo_sapiens.GRCh38.ENST00000389680.fa"
+                fasta        = "https://raw.githubusercontent.com/nf-core/test-datasets/rnastructurome/testdata/test_transcriptome/Homo_sapiens.GRCh38.ENST00000389680.fa"
                 count_genome = false
             }
             workflow {
@@ -22,7 +22,7 @@ nextflow_workflow {
                 input[0] = Channel.of(
                     [
                         [ id:'workflow_rtstop', sample_id:'workflow_rtstop', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'workflow_line', replicate:'rep1', condition:'treated' ],
-                        [ file("\${projectDir}/tests/data/GSM4333255.R1.HEK293T_untreated_r1.trim.top1.fastq.gz", checkIfExists: true) ]
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
                     ]
                 )
                 input[1] = true
@@ -57,7 +57,7 @@ nextflow_workflow {
         when {
             params {
                 outdir       = "$outputDir"
-                fasta        = "$projectDir/tests/data/Homo_sapiens.GRCh38.ENST00000389680.fa"
+                fasta        = "https://raw.githubusercontent.com/nf-core/test-datasets/rnastructurome/testdata/test_transcriptome/Homo_sapiens.GRCh38.ENST00000389680.fa"
                 count_genome = true
             }
             workflow {
@@ -65,7 +65,7 @@ nextflow_workflow {
                 input[0] = Channel.of(
                     [
                         [ id:'workflow_rtstop', sample_id:'workflow_rtstop', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'workflow_line', replicate:'rep1', condition:'treated' ],
-                        [ file("\${projectDir}/tests/data/GSM4333255.R1.HEK293T_untreated_r1.trim.top1.fastq.gz", checkIfExists: true) ]
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
                     ]
                 )
                 input[1] = false

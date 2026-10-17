@@ -54,6 +54,10 @@
 
   > Incarnato D, Morandi E, Simon LM, Oliviero S. RNA Framework: an all-in-one toolkit for the analysis of RNA structures and post-transcriptional modifications. Nucleic Acids Res. 2018 Sep 19;46(16):e97. doi: 10.1093/nar/gky486. PubMed PMID: 29893890; PubMed Central PMCID: PMC6144828.
 
+- [Four-base DMS analysis](https://pubmed.ncbi.nlm.nih.gov/37334863/)
+
+  > Mitchell D, Cotter J, Saleem I, Mustoe AM. Mutation signature filtering enables high-fidelity RNA structure probing at all four nucleobases with DMS. Nucleic Acids Res. 2023 Sep;51(16):8744-8757. doi: 10.1093/nar/gkad522. PubMed PMID: 37334863; PubMed Central PMCID: PMC10484685.
+
 - [UCSC wigToBigWig](https://pubmed.ncbi.nlm.nih.gov/20639541/)
 
   > Kent WJ, Zweig AS, Barber G, Hinrichs AS, Karolchik D. BigWig and BigBed: enabling browsing of large distributed datasets. Bioinformatics. 2010 Sep 1;26(17):2204-7. doi: 10.1093/bioinformatics/btq351. PubMed PMID: 20639541; PubMed Central PMCID: PMC2922891.
@@ -65,6 +69,10 @@
 - [ViennaRNA](https://pubmed.ncbi.nlm.nih.gov/22115189/)
 
   > Lorenz R, Bernhart SH, Höner zu Siederdissen C, Tafer H, Flamm C, Stadler PF, Hofacker IL. ViennaRNA Package 2.0. Algorithms Mol Biol. 2011 Nov 26;6:26. doi: 10.1186/1748-7188-6-26. PubMed PMID: 22115189; PubMed Central PMCID: PMC3319429.
+
+- [RNAalifold](https://pubmed.ncbi.nlm.nih.gov/19014431/)
+
+  > Bernhart SH, Hofacker IL, Will S, Gruber AR, Stadler PF. RNAalifold: improved consensus structure prediction for RNA alignments. BMC Bioinformatics. 2008 Nov;9:474. doi: 10.1186/1471-2105-9-474. PubMed PMID: 19014431; PubMed Central PMCID: PMC2621365.
 
 - [MultiQC](https://pubmed.ncbi.nlm.nih.gov/27312411/)
 

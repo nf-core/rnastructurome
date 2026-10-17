@@ -194,7 +194,7 @@ def main() -> int:
                 continue
             for red, green, blue, label in COLOR_BINS:
                 writer.write(f"color:\t{red}\t{green}\t{blue}\t{label}\n")
-            converted_any = False
+            arcs = []
             for raw_line in reader:
                 line = raw_line.strip()
                 if not line:
@@ -231,10 +231,13 @@ def main() -> int:
                     if ucsc_chr:
                         seqname = to_ucsc_common_chrom_name(seqname)
 
-                writer.write(f"{seqname}\t{start}\t{start}\t{end}\t{end}\t{color_index}\n")
-                converted_any = True
+                arcs.append((seqname, start, end, color_index))
 
-        if converted_any:
+            # rf-fold writes dot-plot pairs in no fixed order; sort so reruns give identical files.
+            for seqname, start, end, color_index in sorted(arcs):
+                writer.write(f"{seqname}\t{start}\t{start}\t{end}\t{end}\t{color_index}\n")
+
+        if arcs:
             bp_count += 1
         else:
             output_path.unlink(missing_ok=True)

@@ -4,8 +4,8 @@ process RNAFRAMEWORK_RFCOUNT {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
-        'oras://community.wave.seqera.io/library/rnaframework_findutils:affb2f7a4bac9a7a' :
-        'community.wave.seqera.io/library/rnaframework_findutils:3db7cd7277dc8f08' }"
+        'oras://community.wave.seqera.io/library/rnaframework_findutils:a2ed531525463ed6' :
+        'community.wave.seqera.io/library/rnaframework_findutils:70fa3c51935922d9' }"
 
     input:
     tuple val(meta), path(bam), path(bai)
@@ -30,7 +30,10 @@ process RNAFRAMEWORK_RFCOUNT {
     // which rf-count table layout to expect (MaP has a Mutated-alignments column; RT-stop does not).
     def is_map = ((meta.principle ?: '').toLowerCase() == 'map') ? '1' : '0'
     """
-    FASTA_PATH="${fasta}"
+    # rf-count runs samtools once per FASTA entry, so keep only references with reads.
+    samtools idxstats "${bam}" | awk '\$3 > 0 { print \$1 }' > covered_refs.txt
+    awk 'NR == FNR { keep[\$1]; next } /^>/ { p = (substr(\$1, 2) in keep) } p' covered_refs.txt "${fasta}" > covered.fa
+    FASTA_PATH="covered.fa"
 
     export TERM="\${TERM:-xterm}"
 

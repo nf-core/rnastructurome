@@ -1,0 +1,259 @@
+{
+    "-profile test_transcriptome": {
+        "content": [
+            {
+                "BOWTIE_ALIGN": {
+                    "bowtie": "1.3.1",
+                    "gzip": 1.12,
+                    "samtools": 1.21
+                },
+                "BOWTIE_BUILD": {
+                    "bowtie": "1.3.1"
+                },
+                "CAT_FASTQ": {
+                    "cat": 9.5
+                },
+                "CUTADAPT_RTSTOP": {
+                    "cutadapt": 5.2
+                },
+                "FASTA_SORT_LOCAL": {
+                    "seqkit": "2.9.0"
+                },
+                "FASTQC_POST": {
+                    "fastqc": "0.12.1"
+                },
+                "FASTQC_PRE": {
+                    "fastqc": "0.12.1"
+                },
+                "MERGE_BP": {
+                    "python": "3.12.12"
+                },
+                "MERGE_BP_TRANSCRIPT": {
+                    "python": "3.12.12"
+                },
+                "MERGE_SHANNON_WIG": {
+                    "cat": 9.11
+                },
+                "MERGE_WIG": {
+                    "cat": 9.11
+                },
+                "RNAFRAMEWORK_DOTPLOT2BP": {
+                    "python": "3.12.12"
+                },
+                "RNAFRAMEWORK_DOTPLOT2BP_TRANSCRIPT": {
+                    "python": "3.12.12"
+                },
+                "RNAFRAMEWORK_RFCOUNT": {
+                    "rnaframework": "2.9.8"
+                },
+                "RNAFRAMEWORK_RFFOLD": {
+                    "rnaframework": "2.9.8"
+                },
+                "RNAFRAMEWORK_RFNORM": {
+                    "rnaframework": "2.9.8"
+                },
+                "RNAFRAMEWORK_RFSTRUCTEXTRACT": {
+                    "rnaframework": "2.9.8"
+                },
+                "RNAFRAMEWORK_RFWIGGLE": {
+                    "rnaframework": "2.9.8"
+                },
+                "RNAFRAMEWORK_TORDAT": {
+                    "python": "3.12.12"
+                },
+                "SAMTOOLS_FLAGSTAT": {
+                    "samtools": "1.23.1"
+                },
+                "SAMTOOLS_IDXSTATS": {
+                    "samtools": "1.23.1"
+                },
+                "SAMTOOLS_INDEX_FINAL": {
+                    "samtools": "1.23.1"
+                },
+                "SAMTOOLS_INDEX_SORT": {
+                    "samtools": "1.23.1"
+                },
+                "SAMTOOLS_SORT": {
+                    "samtools": "1.23.1"
+                },
+                "SAMTOOLS_STATS": {
+                    "samtools": "1.23.1"
+                },
+                "UCSC_WIGTOBIGWIG_REACTIVITY": {
+                    "ucsc": 482
+                },
+                "UCSC_WIGTOBIGWIG_SHANNON": {
+                    "ucsc": 482
+                },
+                "UCSC_WIGTOBIGWIG_TRANSCRIPT_REACTIVITY": {
+                    "ucsc": 482
+                },
+                "UCSC_WIGTOBIGWIG_TRANSCRIPT_SHANNON": {
+                    "ucsc": 482
+                },
+                "VIENNARNA": {
+                    "viennarna": "2.7.2"
+                },
+                "WIG_CHROM_SIZES_REACTIVITY": {
+                    "python": "3.12.12"
+                },
+                "WIG_CHROM_SIZES_SHANNON": {
+                    "python": "3.12.12"
+                },
+                "WIG_TO_GENOME_REACTIVITY": {
+                    "python": "3.12.12"
+                },
+                "WIG_TO_GENOME_SHANNON": {
+                    "python": "3.12.12"
+                },
+                "Workflow": {
+                    "nf-core/rnastructurome": "v1.1.0"
+                }
+            },
+            [
+                "bowtie",
+                "bowtie/HEK293T_treated_r1.bam",
+                "bowtie/HEK293T_treated_r1.out",
+                "bowtie/HEK293T_untreated_r1.bam",
+                "bowtie/HEK293T_untreated_r1.out",
+                "bowtie/bowtie",
+                "bowtie/bowtie/homo_sapiens.1.ebwt",
+                "bowtie/bowtie/homo_sapiens.2.ebwt",
+                "bowtie/bowtie/homo_sapiens.3.ebwt",
+                "bowtie/bowtie/homo_sapiens.4.ebwt",
+                "bowtie/bowtie/homo_sapiens.rev.1.ebwt",
+                "bowtie/bowtie/homo_sapiens.rev.2.ebwt",
+                "cat",
+                "cat/HEK293T_treated_r1.merged.fastq.gz",
+                "cat/HEK293T_untreated_r1.merged.fastq.gz",
+                "count",
+                "count/HEK293T_treated_r1",
+                "count/HEK293T_treated_r1/HEK293T_treated_r1.rc",
+                "count/HEK293T_treated_r1/HEK293T_treated_r1.rfcount.log",
+                "count/HEK293T_treated_r1/index.rci",
+                "count/HEK293T_untreated_r1",
+                "count/HEK293T_untreated_r1/HEK293T_untreated_r1.rc",
+                "count/HEK293T_untreated_r1/HEK293T_untreated_r1.rfcount.log",
+                "count/HEK293T_untreated_r1/index.rci",
+                "count/rfcount_summary_all_samples.tsv",
+                "cutadapt",
+                "cutadapt/HEK293T_treated_r1.cutadapt.log",
+                "cutadapt/HEK293T_treated_r1.trim.fastq.gz",
+                "cutadapt/HEK293T_untreated_r1.cutadapt.log",
+                "cutadapt/HEK293T_untreated_r1.trim.fastq.gz",
+                "fastqc",
+                "fastqc/HEK293T_treated_r1_fastqc.html",
+                "fastqc/HEK293T_treated_r1_fastqc.zip",
+                "fastqc/HEK293T_treated_r1_trimmed_trimmed_fastqc.html",
+                "fastqc/HEK293T_treated_r1_trimmed_trimmed_fastqc.zip",
+                "fastqc/HEK293T_untreated_r1_fastqc.html",
+                "fastqc/HEK293T_untreated_r1_fastqc.zip",
+                "fastqc/HEK293T_untreated_r1_trimmed_trimmed_fastqc.html",
+                "fastqc/HEK293T_untreated_r1_trimmed_trimmed_fastqc.zip",
+                "fold",
+                "fold/HEK293T",
+                "fold/HEK293T/HEK293T.rfstructextract.log",
+                "fold/HEK293T/bp",
+                "fold/HEK293T/bp/ENST00000389680.2.bp",
+                "fold/HEK293T/extracted_structures",
+                "fold/HEK293T/extracted_structures/dotbracket",
+                "fold/HEK293T/extracted_structures/dotbracket/ENST00000389680.2.db",
+                "fold/HEK293T/extracted_structures/images",
+                "fold/HEK293T/extracted_structures/images/ENST00000389680.2_3-459_ss.svg",
+                "fold/HEK293T/extracted_structures/images/ENST00000389680.2_463-482_ss.svg",
+                "fold/HEK293T/extracted_structures/images/ENST00000389680.2_484-951_ss.svg",
+                "fold/HEK293T/rdat",
+                "fold/HEK293T/rdat/ENST00000389680.2.rdat",
+                "fold/HEK293T/rffold.log",
+                "fold/HEK293T/shannon",
+                "fold/HEK293T/shannon/ENST00000389680.2.wig",
+                "fold/HEK293T/structures",
+                "fold/genome_bp",
+                "fold/genome_bp/HEK293T_genome.bp",
+                "fold/shannon_genome_bw",
+                "fold/shannon_genome_bw/HEK293T_shannon_genome.bw",
+                "fold/shannon_transcript_bw",
+                "fold/shannon_transcript_bw/HEK293T_shannon_transcript.bw",
+                "fold/transcript_bp",
+                "fold/transcript_bp/HEK293T_transcript.bp",
+                "multiqc",
+                "multiqc/multiqc_report.html",
+                "norm",
+                "norm/HEK293T_1",
+                "norm/HEK293T_1/rfnorm.log",
+                "norm/HEK293T_1/wiggle",
+                "norm/HEK293T_1/wiggle/HEK293T_1.wig",
+                "norm/HEK293T_1/xml",
+                "norm/HEK293T_1/xml/ENST00000389680.2.xml",
+                "norm/genome_bw",
+                "norm/genome_bw/HEK293T_reactivity_genome.bw",
+                "norm/transcript_bw",
+                "norm/transcript_bw/HEK293T_reactivity_transcript.bw",
+                "pipeline_info",
+                "pipeline_info/nf_core_rnastructurome_software_mqc_versions.yml",
+                "samtools",
+                "samtools/HEK293T_treated_r1.flagstat",
+                "samtools/HEK293T_treated_r1.idxstats",
+                "samtools/HEK293T_treated_r1.sorted.bam",
+                "samtools/HEK293T_treated_r1.sorted.bam.bai",
+                "samtools/HEK293T_treated_r1.stats",
+                "samtools/HEK293T_untreated_r1.flagstat",
+                "samtools/HEK293T_untreated_r1.idxstats",
+                "samtools/HEK293T_untreated_r1.sorted.bam",
+                "samtools/HEK293T_untreated_r1.sorted.bam.bai",
+                "samtools/HEK293T_untreated_r1.stats"
+            ],
+            [
+                "HEK293T_treated_r1.out:md5,ba07e1b9382b9f7afe6a64a16d343aaa",
+                "HEK293T_untreated_r1.out:md5,47aaf12a86cc30808d0a433cb7069c27",
+                "homo_sapiens.1.ebwt:md5,c149afb093580aaab1dbfdaf7eaa87bd",
+                "homo_sapiens.2.ebwt:md5,025f956886f1aea6d032e67dd706076f",
+                "homo_sapiens.3.ebwt:md5,ec18e17fccbf367b96e0abfe4339ea0d",
+                "homo_sapiens.4.ebwt:md5,667e022e269d1c68faf056914f3f36ef",
+                "homo_sapiens.rev.1.ebwt:md5,f74e42a4031a9647c5c0694615b10286",
+                "homo_sapiens.rev.2.ebwt:md5,3efccb0307aa91fe4fbe200614cfd5de",
+                "HEK293T_treated_r1.merged.fastq.gz:md5,55840ed9897fd284f8fdc0d149ec5a05",
+                "HEK293T_untreated_r1.merged.fastq.gz:md5,1a479e6226243d8db026f00404eae88d",
+                "HEK293T_treated_r1.rc:md5,37f84e8b8fa553ee9f613fa50f32732c",
+                "HEK293T_treated_r1.rfcount.log:md5,e09ddf2b69d655ad6157fed0816284a2",
+                "index.rci:md5,460e0705d1cd68aae19734d33b9afaba",
+                "HEK293T_untreated_r1.rc:md5,cf5448ba4be106252a74c0f87b2a2131",
+                "HEK293T_untreated_r1.rfcount.log:md5,461d7de8890db72f9470d7aeb3fe4f97",
+                "index.rci:md5,460e0705d1cd68aae19734d33b9afaba",
+                "rfcount_summary_all_samples.tsv:md5,1f9b24d677843af9af977126a8c3d2b3",
+                "HEK293T_treated_r1.cutadapt.log:md5,e7e435aaadc95e2785163577052c92d2",
+                "HEK293T_treated_r1.trim.fastq.gz:md5,4ddfcb89ab2a4d3f23444a42cabdd77f",
+                "HEK293T_untreated_r1.cutadapt.log:md5,4856eb413f38d6d5e1fefad1eef7896f",
+                "HEK293T_untreated_r1.trim.fastq.gz:md5,fe65d456b2621d98fb8f4e81a2cb4e90",
+                "HEK293T.rfstructextract.log:md5,235da3a9ff9d935968ea0c4e7ebe5740",
+                "ENST00000389680.2.bp:md5,1a95f077fc5b0646e51ba9b0d43400d7",
+                "ENST00000389680.2.db:md5,c0e789261e160b219df5a0b3edee26c6",
+                "ENST00000389680.2_3-459_ss.svg:md5,b1a0c2bfa1cfa8357fa2f80a78fadca2",
+                "ENST00000389680.2_463-482_ss.svg:md5,21f54ed0269eeb5c2d7d83ee9ac183f1",
+                "ENST00000389680.2_484-951_ss.svg:md5,7c52a30f614a9db52290e1965023f0ee",
+                "rffold.log:md5,0aaa33c23d2c3bc29c01833d51704c98",
+                "ENST00000389680.2.wig:md5,8576f2714c6d63f03ead920fd4b6c5d5",
+                "HEK293T_genome.bp:md5,c25975e4ec67317bb88c0774f56666c2",
+                "HEK293T_shannon_genome.bw:md5,a7043be1f485d89e6639cb0d3b7562aa",
+                "HEK293T_shannon_transcript.bw:md5,741e0bbb0ab35ed933071fd087a8a3de",
+                "HEK293T_transcript.bp:md5,1a95f077fc5b0646e51ba9b0d43400d7",
+                "rfnorm.log:md5,d20f65f28667e5ac44d38db9b40e3581",
+                "HEK293T_1.wig:md5,46beeb1d5f23503426369819988a56fa",
+                "ENST00000389680.2.xml:md5,2d658aca89e108ae438d0c5e97de050a",
+                "HEK293T_reactivity_genome.bw:md5,64e6892cb319b73d984eea2068239af5",
+                "HEK293T_reactivity_transcript.bw:md5,b2485481e2a71ce8ba85d08aeed76695",
+                "HEK293T_treated_r1.flagstat:md5,dde964b625e668271a6435c73e7a3b0a",
+                "HEK293T_treated_r1.idxstats:md5,a2347c862450eab5f59f843f79f715d3",
+                "HEK293T_treated_r1.stats:md5,4d584d3e15077f884a9dec1980c2b0ae",
+                "HEK293T_untreated_r1.flagstat:md5,15109df4fd1140928d3af5aa225218e7",
+                "HEK293T_untreated_r1.idxstats:md5,0b2b84c48f9b0cf7cb014eca98ddd2e6",
+                "HEK293T_untreated_r1.stats:md5,cb0bd4e06f296b34f9b871a6c39c4072"
+            ]
+        ],
+        "timestamp": "2026-10-13T10:35:58.460052",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "26.04.3"
+        }
+    }
+}

@@ -8,6 +8,7 @@ include { RNAFRAMEWORK_RFCOUNT_GENOME    } from '../../../modules/local/rnaframe
 include { RNAFRAMEWORK_RFRCTOOLS_EXTRACT } from '../../../modules/local/rnaframework/rctools/extract/main'
 
 include { collectToMap        } from '../utils_nfcore_rnastructurome_pipeline/main'
+include { isFourBaseDms       } from '../utils_nfcore_rnastructurome_pipeline/main'
 include { resolveReferenceKey } from '../utils_nfcore_rnastructurome_pipeline/main'
 
 workflow QUANTIFY_REACTIVITY {
@@ -54,7 +55,7 @@ workflow QUANTIFY_REACTIVITY {
                 def ref_key = resolveReferenceKey(meta)
                 def fasta_t = ref_map[ref_key]
                 if (!fasta_t) error("No genome FASTA resolved for reference '${ref_key}' for rf-count-genome.")
-                [ [meta, bam, bai], fasta_t ]
+                [ [meta + [four_base_dms: isFourBaseDms(meta)], bam, bai], fasta_t ]
             }
         def ch_rg_split = ch_rfcount_genome_inputs.multiMap { entry ->
             bam:   entry[0]
@@ -114,7 +115,7 @@ workflow QUANTIFY_REACTIVITY {
                 def ref_key = resolveReferenceKey(meta)
                 def fasta_t = ref_map[ref_key]
                 if (!fasta_t) error("No transcript FASTA resolved for reference '${ref_key}' for rf-count.")
-                [ [meta, bam, bai], fasta_t ]
+                [ [meta + [four_base_dms: isFourBaseDms(meta)], bam, bai], fasta_t ]
             }
         def ch_rd_split = ch_rfcount_direct_inputs.multiMap { entry ->
             bam:   entry[0]
@@ -136,7 +137,7 @@ workflow QUANTIFY_REACTIVITY {
                 def ref_key = resolveReferenceKey(meta)
                 def fasta_t = ref_map[ref_key]
                 if (!fasta_t) error("No transcript FASTA resolved for reference '${ref_key}' for rf-count.")
-                [ [meta, bam, bai], fasta_t ]
+                [ [meta + [four_base_dms: isFourBaseDms(meta)], bam, bai], fasta_t ]
             }
         def ch_rc_split = ch_rfcount_inputs.multiMap { entry ->
             bam:   entry[0]

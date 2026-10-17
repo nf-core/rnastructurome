@@ -16,7 +16,7 @@ nextflow_workflow {
             }
             workflow {
                 """
-                def fastq = new File("\${projectDir}/tests/data/GSM4333255.R1.HEK293T_untreated_r1.trim.top1.fastq.gz").absolutePath
+                def fastq = params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz'
                 def samplesheet = new File("$outputDir/samplesheet_init.csv")
                 samplesheet.text = '''sample,sample_id,fastq_1,fastq_2,method,principle,sample_group,condition,replicate,organism,adapter_3p,adapter_5p,umi_pattern
 init_sample,init_sample,''' + fastq + ''',,SHAPE,RT-stop,initline,treated,1,Homo sapiens,,,
@@ -42,6 +42,110 @@ init_sample,init_sample,''' + fastq + ''',,SHAPE,RT-stop,initline,treated,1,Homo
                 { assert workflow.out.samplesheet[0][0].sample_group == 'initline' },
                 { assert workflow.out.samplesheet[0][0].pH.toString() == '8.2' },
                 { assert workflow.out.samplesheet.every { it[0].single_end } }
+            )
+        }
+    }
+
+    test("Fails when --cutadapt_discard_untrimmed is combined with --cutadapt_quality_only") {
+
+        when {
+            params {
+                cutadapt_quality_only      = true
+                cutadapt_discard_untrimmed = true
+            }
+            workflow {
+                """
+                def fastq = params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz'
+                def samplesheet = new File("$outputDir/samplesheet_init.csv")
+                samplesheet.text = '''sample,sample_id,fastq_1,fastq_2,method,principle,sample_group,condition,replicate,organism,adapter_3p,adapter_5p,umi_pattern
+init_sample,init_sample,''' + fastq + ''',,SHAPE,RT-stop,initline,treated,1,Homo sapiens,,,
+'''
+                input[0] = false
+                input[1] = false
+                input[2] = true
+                input[3] = []
+                input[4] = "$outputDir"
+                input[5] = samplesheet.toString()
+                input[6] = false
+                input[7] = false
+                input[8] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert !workflow.success },
+                { assert workflow.stdout.any { it.contains("--cutadapt_discard_untrimmed needs adapter trimming") } }
+            )
+        }
+    }
+
+    test("Rejects Ding scoring for a DMS-MaP sample at pH 8.5 in the samplesheet") {
+
+        when {
+            params {
+                rfnorm_score_method = 1
+            }
+            workflow {
+                """
+                def fastq = params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz'
+                def samplesheet = new File("$outputDir/samplesheet_init.csv")
+                samplesheet.text = '''sample,sample_id,fastq_1,fastq_2,method,principle,sample_group,condition,replicate,organism,pH,adapter_3p,adapter_5p,umi_pattern
+init_sample,init_sample,''' + fastq + ''',,DMS,MaP,initline,treated,1,Homo sapiens,8.5,,,
+'''
+                input[0] = false
+                input[1] = false
+                input[2] = true
+                input[3] = []
+                input[4] = "$outputDir"
+                input[5] = samplesheet.toString()
+                input[6] = false
+                input[7] = false
+                input[8] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert !workflow.success },
+                { assert workflow.stdout.any { it.contains("--rfnorm_score_method 1 cannot be used with four-base DMS") } }
+            )
+        }
+    }
+
+    test("Rejects Ding scoring for a DMS-MaP sample at pH 8.5 from --pH") {
+
+        when {
+            params {
+                rfnorm_score_method = 1
+                pH                  = 8.5
+            }
+            workflow {
+                """
+                def fastq = params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz'
+                def samplesheet = new File("$outputDir/samplesheet_init.csv")
+                samplesheet.text = '''sample,sample_id,fastq_1,fastq_2,method,principle,sample_group,condition,replicate,organism,pH,adapter_3p,adapter_5p,umi_pattern
+init_sample,init_sample,''' + fastq + ''',,DMS,MaP,initline,treated,1,Homo sapiens,,,,
+'''
+                input[0] = false
+                input[1] = false
+                input[2] = true
+                input[3] = []
+                input[4] = "$outputDir"
+                input[5] = samplesheet.toString()
+                input[6] = false
+                input[7] = false
+                input[8] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert !workflow.success },
+                { assert workflow.stdout.any { it.contains("--rfnorm_score_method 1 cannot be used with four-base DMS") } }
             )
         }
     }

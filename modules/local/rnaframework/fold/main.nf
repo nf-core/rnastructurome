@@ -4,8 +4,8 @@ process RNAFRAMEWORK_RFFOLD {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
-        'oras://community.wave.seqera.io/library/rnaframework_findutils:affb2f7a4bac9a7a' :
-        'community.wave.seqera.io/library/rnaframework_findutils:3db7cd7277dc8f08' }"
+        'oras://community.wave.seqera.io/library/rnaframework_findutils:a2ed531525463ed6' :
+        'community.wave.seqera.io/library/rnaframework_findutils:70fa3c51935922d9' }"
 
     input:
     tuple val(meta), path(xml, stageAs: "input*/*")
@@ -117,17 +117,10 @@ process RNAFRAMEWORK_RFFOLD {
     mv "\${cleaned_log}" ${prefix}_fold/rffold.log
     rm -f "\${log_tmp}"
 
-    if [[ -s ${prefix}_fold/error.out ]]; then
-        exception_count=\$(grep -Fc "[!] Exception" ${prefix}_fold/error.out || true)
-        rnaplot_count=\$(grep -Fc "Unable to open RNAplot" ${prefix}_fold/error.out || true)
-        if [[ \$exception_count -gt 0 && \$exception_count -ne \$rnaplot_count ]]; then
-            echo "[RNAFRAMEWORK_RFFOLD] rf-fold reported errors:" >&2
-            cat ${prefix}_fold/error.out >&2
-            exit 1
-        elif [[ \$exception_count -gt 0 ]]; then
-            echo "[RNAFRAMEWORK_RFFOLD] rf-fold reported RNAplot warnings (non-fatal):" >&2
-            cat ${prefix}_fold/error.out >&2
-        fi
+    if [[ -s ${prefix}_fold/error.out ]] && grep -Fq "[!] Exception" ${prefix}_fold/error.out; then
+        echo "[RNAFRAMEWORK_RFFOLD] rf-fold reported errors:" >&2
+        cat ${prefix}_fold/error.out >&2
+        exit 1
     fi
 
     if [[ ! -d ${prefix}_fold/structures ]] || ! find ${prefix}_fold/structures -type f -print -quit | grep -q .; then
@@ -146,8 +139,10 @@ process RNAFRAMEWORK_RFFOLD {
     """
 
     stub:
+    def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${meta.id}"
     """
+    echo "${args}"
     mkdir -p ${prefix}_fold/dotbracket ${prefix}_fold/structures ${prefix}_fold/summaries ${prefix}_fold/shannon
     touch ${prefix}_fold/rffold.log ${prefix}_fold/dotbracket/example.db ${prefix}_fold/shannon/example.wig
 

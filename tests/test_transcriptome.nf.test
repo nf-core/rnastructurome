@@ -1,0 +1,32 @@
+nextflow_pipeline {
+
+    name "Test pipeline"
+    script "../main.nf"
+    tag "pipeline"
+    profile "test_transcriptome"
+
+    test("-profile test_transcriptome") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+        }
+
+        then {
+            // conda runs without R2DT (container-only), so ViennaRNA draws every structure there:
+            // the structures/ trees and the R2DT version entry differ by engine and are left out.
+            def stable_path = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}', 'fold/*/structures/**'])
+            def stable_content = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
+            assert workflow.success
+            assertAll(
+                { assert snapshot(
+                    removeNextflowVersion("$outputDir/pipeline_info/nf_core_rnastructurome_software_mqc_versions.yml")
+                        .findAll { process, _v -> process != 'R2DT' },
+                    stable_path,
+                    stable_content
+                ).match() }
+            )
+        }
+    }
+}

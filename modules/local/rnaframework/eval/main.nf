@@ -4,8 +4,8 @@ process RNAFRAMEWORK_RFEVAL {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
-        'oras://community.wave.seqera.io/library/rnaframework_findutils:affb2f7a4bac9a7a' :
-        'community.wave.seqera.io/library/rnaframework_findutils:3db7cd7277dc8f08' }"
+        'oras://community.wave.seqera.io/library/rnaframework_findutils:a2ed531525463ed6' :
+        'community.wave.seqera.io/library/rnaframework_findutils:70fa3c51935922d9' }"
 
     input:
     tuple val(meta), path(xml, stageAs: "xml_input*/*")

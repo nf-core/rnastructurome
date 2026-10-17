@@ -4,8 +4,8 @@ process RNAFRAMEWORK_RFNORMFACTOR {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
-        'oras://community.wave.seqera.io/library/rnaframework_findutils:affb2f7a4bac9a7a' :
-        'community.wave.seqera.io/library/rnaframework_findutils:3db7cd7277dc8f08' }"
+        'oras://community.wave.seqera.io/library/rnaframework_findutils:a2ed531525463ed6' :
+        'community.wave.seqera.io/library/rnaframework_findutils:70fa3c51935922d9' }"
 
     input:
     tuple val(meta), path(treated), path(untreated), path(denatured), path(rci_files)
@@ -82,8 +82,10 @@ process RNAFRAMEWORK_RFNORMFACTOR {
     """
 
     stub:
+    def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${meta.id}"
     """
+    echo "${args}"
     touch ${prefix}.norm_factors.txt
     touch ${prefix}.rfnormfactor.log
     """

@@ -148,7 +148,7 @@
                 "fuzzy_untreated_pairing": {
                     "type": "boolean",
                     "default": true,
-                    "description": "When true (default), a treated group with no exact `sample_group`+`replicate` untreated match falls back to the untreated sample sharing the same sample_group base token (portion before the first `_`) at the same replicate — e.g. `MDA-MB-231_untreated_r1` can serve as control for `MDA-MB-231_MTX_treated_r1`. If a treated group still has no untreated after that, and exactly one untreated control exists anywhere else in the same reference, that single control is reused for it (with a warning) — e.g. one shared untreated backing several treated replicates. Set false to require exact matches; unmatched treated groups then proceed without an untreated control (scoring method 2 or 4)."
+                    "description": "When true (default), a treated group with no exact `sample_group`+`replicate` untreated match falls back to the untreated whose `sample_group` shares the longest leading token prefix with it — e.g. `HFF_infected_HCMV_05hpi` prefers `HFF_infected_HCMV_72hpi` (3 shared tokens) over `HFF_uninfected` (1), while `MDA-MB-231_untreated_r1` still serves `MDA-MB-231_MTX_treated_r1`. Among equally close candidates the same replicate wins; if none matches the replicate but the closest arm has exactly one untreated, that control is reused across replicates. Genuine ties error. Denatured controls resolve the same way, except that a group only inherits one if it already has an untreated. A control is never borrowed from a group sharing no leading token, so unrelated samples are not paired and such a treated group is left without a control. Set false to require exact matches; unmatched treated groups then proceed without an untreated control (scoring method 2 or 4)."
                 }
             }
         },
@@ -197,6 +197,15 @@
                     "type": "boolean",
                     "description": "Trim terminal N bases.",
                     "default": true
+                },
+                "cutadapt_nextseq_trim": {
+                    "type": "integer",
+                    "description": "Enable cutadapt `--nextseq-trim` with this 3' quality cutoff, trimming high-quality poly-G tails left by 2-colour (NextSeq/NovaSeq) chemistry. Off by default."
+                },
+                "cutadapt_discard_untrimmed": {
+                    "type": "boolean",
+                    "description": "Discard reads in which no adapter was found. For short-insert libraries (e.g. tRNA, miRNA) where every genuine read runs into the adapter.",
+                    "default": false
                 }
             }
         },
@@ -436,6 +445,12 @@
                     "description": "Discard reads with excessive 5' or 3' end clipping in rf-count / rf-count-genome (`--discard-clipped-reads`).",
                     "default": false
                 },
+                "rfcount_map_max_coverage": {
+                    "type": "integer",
+                    "minimum": 1000,
+                    "description": "In mutation mode (`-m`), downsample each transcript above this coverage in rf-count (`--max-coverage`). Unset means off. Ignored with `--count_genome true`.",
+                    "help_text": "rf-count counts one transcript at a time, so a transcript at extreme depth (mitochondrial transcripts, or a viral genome at ~10^6x) can take days. Only transcripts above the cap are downsampled. 20000 is recommended. When set, rf-count also skips reads that start within one read length of each transcript's 3' end."
+                },
                 "rfcount_paired_only": {
                     "type": "boolean",
                     "description": "For paired-end samples, use only reads with both mates mapped (`--paired-only`).",
@@ -503,6 +518,12 @@
                     "description": "Normalize each reactive base independently (`--norm-independent`).",
                     "default": false
                 },
+                "four_base_dms": {
+                    "type": "boolean",
+                    "description": "Four-base DMS analysis (Mitchell et al., 2023) for DMS-MaP samples at pH >= 8: rf-count keeps only G->C/G->T mutations on G and drops indels (`-om H2N,G2Y -ncl`), and rf-norm normalises each base separately over the whole transcript (`-4d`).",
+                    "help_text": "Applies only to samples with `method` DMS, `principle` MaP and `pH` 8 or above. On by default, so these samples get different reactivities than in previous releases; set to `false` for the previous analysis.",
+                    "default": true
+                },
                 "rfnorm_use_normfactor": {
                     "type": "boolean",
                     "description": "Cross-experiment normalization via rf-normfactor (one factor set per reference, fed to rf-norm via `-nf`), putting reactivities on a common scale. Leave unset for auto (enabled only for a reference with more than one treated sample to cross-normalise); set `true` to force on, `false` to force off (per-sample box-plot)."
@@ -519,8 +540,8 @@
                 },
                 "rfnorm_norm_method": {
                     "type": "integer",
-                    "enum": [2, 3, 4],
-                    "description": "Override rf-norm normalization method (`-nm`). 2=90% Winsorizing, 3=Box-plot, 4=Mitchell (MaP only)."
+                    "enum": [1, 2, 3, 4],
+                    "description": "Override rf-norm normalization method (`-nm`). 1=2-8%, 2=90% Winsorizing, 3=Box-plot, 4=Mitchell (MaP only)."
                 },
                 "rfnorm_raw": {
                     "type": "boolean",
@@ -555,7 +576,7 @@
                 "rfnorm_prefilter_min_coverage": {
                     "type": "integer",
                     "minimum": 0,
-                    "description": "Genome route only: after rf-rctools extract, keep transcripts with at least one position at this coverage or higher before rf-norm. Set to 0 to keep the full annotation RC.",
+                    "description": "`--count_genome true` only: after rf-rctools extract, keep transcripts with at least one position at this coverage or higher before rf-norm. Set to 0 to keep the full annotation RC.",
                     "default": 1
                 },
                 "rfnorm_img": {
@@ -844,50 +865,44 @@
                 },
                 "rffold_unconstrained": {
                     "type": "boolean",
-                    "description": "Fold without reactivity constraints in rf-fold (`-u`).",
+                    "description": "Fold without reactivity constraints in rf-fold (`-i`).",
                     "default": false
                 },
                 "rffold_vienna_no_lonely_pairs": {
                     "type": "boolean",
-                    "description": "Pass ViennaRNA no-lonely-pairs mode to rf-fold (`-vnlp`).",
+                    "description": "Pass ViennaRNA no-lonely-pairs mode to rf-fold (`-nlp`).",
                     "default": false
                 },
                 "rffold_vienna_constrained": {
                     "type": "boolean",
-                    "description": "Use ViennaRNA hard constraints with rf-fold (`-vc`).",
+                    "description": "Use ViennaRNA hard constraints with rf-fold (`-hc`).",
                     "default": false
                 },
                 "rffold_vienna_max_bp_span": {
                     "default": 600,
                     "type": "integer",
                     "minimum": 1,
-                    "description": "Maximal base-pair span for ViennaRNA in rf-fold (`-vmd`)."
-                },
-                "rffold_vienna_bp_span": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "description": "Minimal base-pair span for ViennaRNA in rf-fold (`-vms`)."
+                    "description": "Maximal base-pair span for ViennaRNA in rf-fold (`-md`)."
                 },
                 "rffold_only_common": {
                     "type": "integer",
                     "minimum": 1,
                     "description": "Only fold transcripts covered in at least this number of XML experiments (`-oc`)."
                 },
+                "rffold_use_alifold": {
+                    "type": "boolean",
+                    "description": "Fold a group's replicates together with RNAalifold, constrained by all their reactivity profiles at once, instead of folding each with RNAfold and aggregating base pairs (`-ua`). Applies only to groups with more than one replicate.",
+                    "default": true
+                },
                 "rffold_fold_constraint_file": {
                     "type": "string",
                     "format": "file-path",
                     "exists": true,
-                    "description": "Constraint file for allowed base-pairing positions (`-fc`)."
-                },
-                "rffold_unpaired_constraint_file": {
-                    "type": "string",
-                    "format": "file-path",
-                    "exists": true,
-                    "description": "Constraint file for required unpaired positions (`-uc`)."
+                    "description": "Constraint file for allowed base-pairing positions (`-c`)."
                 },
                 "rffold_dotplot": {
                     "type": "boolean",
-                    "description": "Generate dot plots from rf-fold (`-d`).",
+                    "description": "Generate dot plots from rf-fold (`-dp`).",
                     "default": true
                 },
                 "rffold_shannon_entropy": {
@@ -905,7 +920,7 @@
                 },
                 "rffold_vienna_rnaplot": {
                     "type": "string",
-                    "description": "Path to ViennaRNA `RNAplot` binary for SVG structure plots in rf-fold (`-vrp`).",
+                    "description": "Path to ViennaRNA `RNAplot` binary for the ViennaRNA and rf-structextract SVG structure plots.",
                     "default": "RNAplot"
                 },
                 "r2dt": {

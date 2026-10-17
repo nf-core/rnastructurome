@@ -4,8 +4,8 @@ process RNAFRAMEWORK_RFCOUNT_GENOME {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
-        'oras://community.wave.seqera.io/library/rnaframework_findutils:affb2f7a4bac9a7a' :
-        'community.wave.seqera.io/library/rnaframework_findutils:3db7cd7277dc8f08' }"
+        'oras://community.wave.seqera.io/library/rnaframework_findutils:a2ed531525463ed6' :
+        'community.wave.seqera.io/library/rnaframework_findutils:70fa3c51935922d9' }"
 
     input:
     tuple val(meta), path(bam), path(bai)
@@ -100,9 +100,11 @@ process RNAFRAMEWORK_RFCOUNT_GENOME {
     """
 
     stub:
+    def args   = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     def outdir = "${prefix}_rfcount_genome"
     """
+    echo "${args}"
     mkdir -p ${outdir}
     touch ${outdir}/${prefix}.plus.rc
     touch ${outdir}/${prefix}.plus.rc.rci

@@ -40,8 +40,11 @@ nextflow_process {
                         'color:\t120\t182\t220\t40-70% probability',
                         'color:\t126\t198\t143\t70-100% probability'
                     ]
-                    assert arcLines.contains('chr1\t101\t101\t202\t202\t3')
-                    assert arcLines.contains('chr1\t102\t102\t201\t201\t1')
+                    // TXPLUS.dp lists the pairs out of order; arcs must come out sorted by position.
+                    assert arcLines == [
+                        'chr1\t101\t101\t202\t202\t3',
+                        'chr1\t102\t102\t201\t201\t1'
+                    ]
                 },
                 {
                     def bpFiles = process.out.bp[0][1]

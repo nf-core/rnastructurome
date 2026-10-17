@@ -54,19 +54,19 @@
                     "python": "3.12.12"
                 },
                 "RNAFRAMEWORK_RFCOUNT_GENOME": {
-                    "rnaframework": "2.9.7"
+                    "rnaframework": "2.9.8"
                 },
                 "RNAFRAMEWORK_RFFOLD": {
-                    "rnaframework": "2.9.7"
+                    "rnaframework": "2.9.8"
                 },
                 "RNAFRAMEWORK_RFNORM": {
-                    "rnaframework": "2.9.7"
+                    "rnaframework": "2.9.8"
                 },
                 "RNAFRAMEWORK_RFRCTOOLS_EXTRACT": {
-                    "rnaframework": "2.9.7"
+                    "rnaframework": "2.9.8"
                 },
                 "RNAFRAMEWORK_RFWIGGLE": {
-                    "rnaframework": "2.9.7"
+                    "rnaframework": "2.9.8"
                 },
                 "RNAFRAMEWORK_TORDAT": {
                     "python": "3.12.12"
@@ -124,11 +124,11 @@
                     "python": "3.12.12"
                 },
                 "Workflow": {
-                    "nf-core/rnastructurome": "v1.0.0"
+                    "nf-core/rnastructurome": "v1.1.0"
                 }
             }
         ],
-        "timestamp": "2026-09-07T11:08:18.683376",
+        "timestamp": "2026-10-11T15:03:26.425185",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "26.04.3"
@@ -194,16 +194,16 @@
                     "python": "3.12.12"
                 },
                 "RNAFRAMEWORK_RFCOUNT": {
-                    "rnaframework": "2.9.7"
+                    "rnaframework": "2.9.8"
                 },
                 "RNAFRAMEWORK_RFFOLD": {
-                    "rnaframework": "2.9.7"
+                    "rnaframework": "2.9.8"
                 },
                 "RNAFRAMEWORK_RFNORM": {
-                    "rnaframework": "2.9.7"
+                    "rnaframework": "2.9.8"
                 },
                 "RNAFRAMEWORK_RFWIGGLE": {
-                    "rnaframework": "2.9.7"
+                    "rnaframework": "2.9.8"
                 },
                 "RNAFRAMEWORK_TORDAT": {
                     "python": "3.12.12"
@@ -248,11 +248,11 @@
                     "python": "3.12.12"
                 },
                 "Workflow": {
-                    "nf-core/rnastructurome": "v1.0.0"
+                    "nf-core/rnastructurome": "v1.1.0"
                 }
             }
         ],
-        "timestamp": "2026-09-07T11:07:30.795406",
+        "timestamp": "2026-10-11T14:45:16.037857",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "26.04.3"

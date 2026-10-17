@@ -119,6 +119,7 @@ workflow RNASTRUCTUROME {
             name: 'rfcount_summary_all_samples.tsv',
             keepHeader: true,
             skip: 1,
+            sort: { tsv -> tsv.name },
             storeDir: "${params.outdir}/count"
         )
 

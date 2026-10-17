@@ -8,23 +8,23 @@ nextflow_pipeline {
 
         when {
             params {
-                def untreated_fastq = new File("${projectDir}/tests/data/GSM4333255.R1.HEK293T_untreated_r1.trim.top1.fastq.gz").absolutePath
-                def treated_fastq = new File("${projectDir}/tests/data/GSM4333256.R1.HEK293T_treated_r1.trim.top1.fastq.gz").absolutePath
-                def samplesheet = new File("$outputDir/rnastruct00001_samplesheet.first2.trim_subset_top3.csv")
-                samplesheet.text = '''sample,sample_id,fastq_1,fastq_2,method,principle,sample_group,condition,replicate,organism,adapter_3p,adapter_5p,umi_pattern
-HEK293T_untreated_r1,GSM4333255,''' + untreated_fastq + ''',,SHAPE,RT-stop,HEK293T,untreated,1,Homo sapiens,,,
-HEK293T_treated_r1,GSM4333256,''' + treated_fastq + ''',,SHAPE,RT-stop,HEK293T,treated,1,Homo sapiens,,,
-'''
                 outdir = "$outputDir"
-                input = samplesheet.toString()
             }
         }
 
         then {
+            // conda runs without R2DT (container-only), so ViennaRNA draws every structure there:
+            // the structures/ trees and the R2DT version entry differ by engine and are left out.
+            def stable_path = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}', 'fold/*/structures/**'])
+            def stable_content = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
+            assert workflow.success
             assertAll(
-                { assert workflow.success },
-                { assert path("$outputDir/pipeline_info/nf_core_rnastructurome_software_mqc_versions.yml").exists() },
-                { assert path("$outputDir/multiqc/multiqc_report.html").exists() }
+                { assert snapshot(
+                    removeNextflowVersion("$outputDir/pipeline_info/nf_core_rnastructurome_software_mqc_versions.yml")
+                        .findAll { process, _v -> process != 'R2DT' },
+                    stable_path,
+                    stable_content
+                ).match() }
             )
         }
     }

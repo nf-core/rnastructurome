@@ -18,7 +18,7 @@ nextflow_workflow {
                 input[2] = false
                 input[3] = "$outputDir"
                 input[4] = true
-                input[5] = Channel.of(file("\${projectDir}/tests/data/Homo_sapiens.GRCh38.ENST00000389680.fa", checkIfExists: true))
+                input[5] = Channel.of(file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/test_transcriptome/Homo_sapiens.GRCh38.ENST00000389680.fa', checkIfExists: true))
                 """
             }
         }

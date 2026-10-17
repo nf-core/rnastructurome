@@ -21,7 +21,7 @@ HEK293T_untreated_r1,GSM000002,/data/untreated_r1.fastq.gz,,SHAPE,RT-stop,NAI,M-
 An [example samplesheet](../assets/samplesheet.csv) is provided.
 
 However, you can also provide a more minimal version if for example you don't need to specify some of the options, like in the example above you could decide to not provide the columns with information about the adapters or umi pattern if you are happy to use the default options.
-You can also provide a very minimal samplesheet with just the information required about each invidivual sample and pass the uniform values across all samples as parameters. For example:
+You can also provide a very minimal samplesheet with just the information required about each individual sample and pass the uniform values across all samples as parameters. For example:
 
 ```csv title="minimal_samplesheet.csv"
 sample,fastq_1,sample_group,condition,replicate
@@ -95,6 +95,10 @@ Adapter precedence: per-sample columns (`adapter_5p`, `adapter_3p`) → global f
 
 Set `--cutadapt_quality_only` to skip adapter trimming and perform quality/length filtering only.
 
+On 2-colour runs (NextSeq/NovaSeq), lost signal reads as high-quality G, which quality trimming misses. If post-trim FastQC fails Adapter Content on PolyG, set `--cutadapt_nextseq_trim 20`.
+
+In short-insert libraries (e.g. tRNA, miRNA) every genuine read runs into the 3' adapter, so a read with no adapter found is read-through junk. Set `--cutadapt_discard_untrimmed` to drop those reads. It relies on adapter trimming, so the pipeline stops if it is combined with `--cutadapt_quality_only`.
+
 ### Deduplication and UMI handling (optional)
 
 By default the pipeline does **not** deduplicate reads (`--skip_markdup true`). Position-based deduplication is not valid for chemical-probing data without UMIs; reads that start at the same coordinate are independent molecules, not PCR duplicates. Set `--skip_markdup false` to enable SAMtools markdup if you know position-based dedup is appropriate for your library.
@@ -147,7 +151,7 @@ Set `--bowtie_all false` if you want more restrictive reporting. For RT-stop/Bow
 
 `rf-count` quantifies chemical probing signal from the aligned transcript-coordinate BAM files produced either by the transcriptome route or by STAR `--quantMode TranscriptomeSAM` on the default genome route. If `--count_genome true` is set, the genome route instead uses `rf-count-genome` followed by `rf-rctools extract`. What exactly is counted depends on the principle: for RT-stop experiments it tallies read 3′ ends that accumulate at modified bases; for MaP it measures per-position mutation rates.
 
-When `--count_genome true` is used, strandedness is handled automatically for `rf-count-genome`: RT-stop libraries are always treated as second-strand (this is fixed by experimental design), while for MaP the pipeline infers strandedness per sample using `RSeQC infer_experiment`. If inference is ambiguous you can override it with `--rfcount_strandedness first|second|unstranded`. After genome-coordinate counting, `rf-rctools extract` converts the genome-coordinate RC files to transcript-level RC files using the GTF before passing to `rf-norm`.
+When `--count_genome true` is used, strandedness is handled automatically for `rf-count-genome`: RT-stop libraries are always treated as second-strand (this is fixed by experimental design), while for MaP the pipeline infers strandedness per sample using `RSeQC infer_experiment`. A sample is called stranded when more than 70% of reads support one orientation, otherwise unstranded. `--rfcount_strandedness first|second|unstranded` is only a fallback for samples where inference cannot run (references without a usable annotation, e.g. many viruses and bacteria); it does not override an inferred value. After genome-coordinate counting, `rf-rctools extract` converts the genome-coordinate RC files to transcript-level RC files using the GTF before passing to `rf-norm`.
 
 For MaP samples, `RT_enzyme` controls several mutation-cleanup defaults. Set it per sample with the `RT_enzyme` samplesheet column, or globally with `--RT_enzyme` when the same enzyme was used for all rows. The pipeline currently distinguishes Group II Intron RTs, including TGIRT, from all other or unset enzymes; non-Group-II values use M-MLV-like defaults.
 
@@ -162,6 +166,8 @@ Other parameters worth knowing about:
 `--rfcount_mask_file` accepts a BED file of regions to exclude from counting entirely; handy for masking rRNA or other highly-expressed contaminating transcripts that would otherwise dominate the output.
 
 `--rfcount_primary_only` restricts counting to alignments marked as primary. This is most relevant when the aligner emits multiple records per read, such as STAR multimappers or Bowtie2 `--bowtie_all`/`-k` output; otherwise a read can contribute to more than one locus or transcript. For Bowtie v1 `--bowtie_all`, use `--bowtie_all false` and `--bowtie_k` if you need stricter one-alignment-per-read reporting.
+
+`--rfcount_map_max_coverage` caps the coverage of each transcript in MaP samples which is helpful when transcripts are sequenced to extreme depths. Only transcripts above the cap are downsampled; `20000` is recommended, with a minimum of `1000` allowed. It is ignored with `--count_genome true`, because `rf-count-genome` has no such option.
 
 For the full list of available options see the [rf-count documentation](https://rnaframework-docs.readthedocs.io/en/latest/rf-count/). Any flag not exposed as a pipeline parameter can be passed directly via `ext.args` in a custom config.
 
@@ -183,13 +189,15 @@ Similarly, you can override the normalisation method with `--rfnorm_norm_method`
 - `3` is box-plot normalisation (removes outliers beyond 1.5× IQR then divides by the mean of the next top 10%), which is the default for most conditions
 - `4` is Mitchell normalisation (MaP only, uses the higher of the mean 90th-95th percentile reactivity or the 75th percentile of non-zero reactivities as the scaling factor)
 
-Treated samples are usually paired with untreated by matching `sample_group + replicate` exactly. However, in cases where the authors did not create an exact matching untreated sample for some specific treatments but have one for other samples in the same dataset, the pipeline falls back to an untreated sample sharing the same `sample_group` base token and replicate; for example, `MDA-MB-231_DMSO_treated_r1` will match exactly to `MDA-MB-231_DMSO_untreated_r1`, but `MDA-MB-231_MTX_treated_r1` will also pair with `MDA-MB-231_DMSO_untreated_r1` if no exact matching untreated sample exists. A warning is emitted when a fallback is used; if more than one candidate matches, the pipeline errors.
+Treated samples are usually paired with untreated/denatured by matching `sample_group + replicate` exactly. Where the authors did not create a matching untreated for every treatment, the pipeline falls back to the untreated or denatured sample whose `sample_group` shares the longest leading token prefix with the treated group; for example, `MDA-MB-231_DMSO_treated_r1` will match exactly to `MDA-MB-231_DMSO_untreated_r1`, but `MDA-MB-231_MTX_treated_r1` will also pair with `MDA-MB-231_DMSO_untreated_r1` if no exact matching untreated sample exists. In another example, `HFF_uninfected_treated_r1/_r2` will match with `HFF_uninfected_untreated_r1` and `HFF_uninfected_denatured_r1`, and `HFF_infected_HCMV_5hr_treated_r1` (and the `_24hr` and `_72hr` equivalents) will match with `HFF_infected_HCMV_72hr_untreated_r1` and `HFF_infected_HCMV_72hr_denatured_r1`. The longest leading token prefix is what correctly matches the uninfected controls to their uninfected treated samples and the infected ones to the infected samples. Among candidates that are equally close, the one at the same replicate wins; if none is at the same replicate but the closest arm holds exactly one control, that control is reused across the arm's replicates - which is how `HFF_uninfected_untreated_r1` covers both `_r1` and `_r2` above. A warning is emitted whenever a fallback is used, and if two candidates are equally close at the same replicate the pipeline errors.
 
-If a treated group still has no untreated after that (e.g. a dataset with only one untreated control shared across several differently-named treated replicates) and exactly one untreated control exists anywhere else for the same reference, the pipeline reuses that single control for it, again with a warning. This only fires when the choice is unambiguous: if two or more distinct untreated controls exist for the reference and some treated groups remain unmatched, the pipeline leaves them without a control (or errors downstream if `rf-normfactor` requires one; see below).
+A control is only ever borrowed from a group it shares leading tokens with, so a treated group whose `sample_group` has nothing in common with any untreated is left without one (and errors downstream if `rf-normfactor` requires one; see below) rather than being paired with an unrelated sample.
 
-Disable both fallbacks with `--fuzzy_untreated_pairing false`, in which case unmatched groups proceed without a negative control.
+Disable the fallback with `--fuzzy_untreated_pairing false`, in which case only exact `sample_group + replicate` matches are used and unmatched groups proceed without a negative control.
 
-For DMS experiments, a few defaults change automatically. `--rfnorm_reactive_bases` is set to `AC` (or `ACGU` when `pH ≥ 8`). `--rfnorm_dynamic_window` turns on when `pH < 8`, and `--rfnorm_norm_window` defaults to `50` for DMS or RT-stop samples; it controls the size of the sliding window used to compute local normalisation factors along the transcript. `--rfnorm_nan` (minimum reads at a position before reactivity is reported as NaN) defaults to `1000` for MaP or `50` for RT-stop. These can all be overridden explicitly if needed.
+For DMS experiments, a few defaults change automatically. `--rfnorm_reactive_bases` is set to `AC` (or `ACGU` when `pH ≥ 8`). `--rfnorm_dynamic_window` turns on when `pH < 8`, and `--rfnorm_norm_window` defaults to `50` for RT-stop samples and for DMS samples without four-base DMS; it controls the size of the sliding window used to compute local normalisation factors along the transcript. DMS-MaP samples at `pH ≥ 8` get four-base DMS analysis by default: reactivities at all four bases, each normalised separately over the whole transcript; see `--four_base_dms`.
+
+`--rfnorm_nan` (minimum reads at a position before reactivity is reported as NaN) defaults to `1000` for MaP or `50` for RT-stop. All of these defaults can be overridden explicitly if needed.
 
 Other parameters worth knowing about:
 
@@ -197,7 +205,7 @@ Other parameters worth knowing about:
 
 `--rfnorm_mean_coverage` and `--rfnorm_median_coverage` discard transcripts whose mean or median coverage falls below the given threshold (both default `0`, i.e. no filtering).
 
-`--rfnorm_prefilter_min_coverage` (genome route only) shrinks the full-annotation RC before rf-norm by keeping only transcripts with at least one covered base (default `1`; set `0` to keep the full annotation). This is what keeps the genome-route RC transcriptome-sized.
+`--rfnorm_prefilter_min_coverage` (`--count_genome true` only) shrinks the full-annotation RC produced by `rf-rctools extract` before rf-norm by keeping only transcripts with at least one base at or above this coverage (default `1`; set `0` to keep the full annotation). This is what keeps the `rf-count-genome` RC transcriptome-sized.
 
 For the full list of available options see the [rf-norm documentation](https://rnaframework-docs.readthedocs.io/en/latest/rf-norm/). Any flag not exposed as a pipeline parameter can be passed directly via `ext.args` in a custom config.
 
@@ -225,7 +233,7 @@ For the full list of available options see the [rf-correlate documentation](http
 
 For long transcripts, rf-fold can fold in a sliding window rather than the whole sequence at once. `--rffold_window` (default `1000`) sets the MFE folding window size and enables windowed folding; unset it (`null`) to fold the whole transcript. `--rffold_partition_window` (default `1000`) sets the partition-function window used for the Shannon entropy and dot-plot calculation, independently of MFE windowing, and `--rffold_vienna_max_bp_span` (default `600`) caps the maximum distance ViennaRNA allows between paired bases.
 
-`--rffold_shannon_entropy` (default `true`) computes per-position Shannon entropy alongside the predicted structure, giving a measure of folding confidence. `--rffold_only_common` keeps only transcripts covered in at least N XML experiments; when not set explicitly, the pipeline enables it automatically for fold groups with more than one replicate, setting N to the group's replicate count so only transcripts present in every replicate are retained.
+`--rffold_shannon_entropy` (default `true`) computes per-position Shannon entropy alongside the predicted structure, giving a measure of folding confidence. `--rffold_only_common` keeps only transcripts covered in at least N XML experiments; when not set explicitly, the pipeline enables it automatically for fold groups with more than one replicate, setting N to the group's replicate count so only transcripts present in every replicate are retained. `--rffold_use_alifold` (default `true`) folds such a group's replicates together with RNAalifold, constrained by all their reactivity profiles at once, giving one consensus structure per transcript; set it to `false` to fold each replicate with RNAfold and aggregate the base pairs instead.
 
 Once structures are folded, the pipeline draws reactivity-coloured 2D structure diagrams using [R2DT](https://github.com/RNAcentral/R2DT) where a template exists (rRNA, snRNA, tRNA, and other well-characterised RNA families). All folded RNAs will also be folded with ViennaRNA's `RNAplot`. R2DT is only available under a container profile (`docker`, `singularity`, `apptainer`); under `conda` or `mamba` all diagrams fall back to `RNAplot`.
 
