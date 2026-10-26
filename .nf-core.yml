@@ -22,7 +22,7 @@ lint:
     - bin/r2dt_colour_svg.py
     - bin/viennarna_colour_svg.py
     - modules/local/r2dt/tests/test_r2dt_colour_svg.py
-nf_core_version: 4.1.0
+nf_core_version: 4.2.1
 repository_type: pipeline
 template:
   author: RNAcentral
@@ -33,4 +33,4 @@ template:
   name: rnastructurome
   org: nf-core
   outdir: .
-  version: 1.0.0
+  version: 1.1.0
