@@ -67,6 +67,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--gtf", default=None, help="GTF annotation file used for coordinate mapping"
     )
+    parser.add_argument(
+        "--dotplot-dir",
+        default=None,
+        help="Directory containing rf-fold .dp files; writes <id>.bpp.tsv beside each RDAT",
+    )
     return parser.parse_args()
 
 
@@ -122,6 +127,39 @@ def parse_db(db_path: Path) -> tuple[str, str]:
     dot_bracket = re.split(r"\s", lines[2].strip())[0]
 
     return rna_sequence, dot_bracket
+
+
+def parse_dotplot(dp_path: Path) -> dict[tuple[int, int], float]:
+    """Return {(i, j): probability} from an rf-fold .dp file (1-based, -log10 probabilities)."""
+    probabilities: dict[tuple[int, int], float] = {}
+    for line in dp_path.read_text(encoding="utf-8").splitlines()[2:]:
+        fields = line.split()
+        if len(fields) == 3:
+            probabilities[(int(fields[0]), int(fields[1]))] = 10 ** -float(fields[2])
+    return probabilities
+
+
+def structure_pairs(dot_bracket: str) -> list[tuple[int, int]]:
+    """Return the 1-based (i, j) base pairs of a dot-bracket string, pseudoknot brackets included."""
+    closers = {")": "(", "]": "[", "}": "{", ">": "<"}
+    stacks: dict[str, list[int]] = {opener: [] for opener in closers.values()}
+    pairs: list[tuple[int, int]] = []
+    for pos, char in enumerate(dot_bracket, start=1):
+        if char in stacks:
+            stacks[char].append(pos)
+        elif char in closers:
+            pairs.append((stacks[closers[char]].pop(), pos))
+    return sorted(pairs)
+
+
+def write_bpp(out_path: Path, dot_bracket: str, probabilities: dict[tuple[int, int], float]) -> None:
+    """Write one row per structure base pair with its rf-fold pairing probability."""
+    with out_path.open("wt", encoding="utf-8") as fh:
+        fh.write("i\tj\tprobability\n")
+        for i, j in structure_pairs(dot_bracket):
+            # rf-fold leaves very unlikely pairs out of the dot plot, so their probability is unknown.
+            probability = probabilities.get((i, j))
+            fh.write(f"{i}\t{j}\t{'NaN' if probability is None else f'{probability:.6g}'}\n")
 
 
 def resolve_db_path(
@@ -286,6 +324,14 @@ def main() -> int:
         except Exception as exc:  # noqa: BLE001
             print(f"WARNING: Could not write RDAT for {transcript_id}: {exc}", file=sys.stderr)
             skipped += 1
+            continue
+
+        dp_path = Path(args.dotplot_dir) / f"{db_path.stem}.dp" if args.dotplot_dir else None
+        if dp_path is not None and dp_path.exists():
+            try:
+                write_bpp(out_dir / f"{transcript_id}.bpp.tsv", dot_bracket, parse_dotplot(dp_path))
+            except Exception as exc:  # noqa: BLE001
+                print(f"WARNING: Could not write base-pair probabilities for {transcript_id}: {exc}", file=sys.stderr)
 
     print(f"Wrote {written} RDAT file(s), skipped {skipped}.", file=sys.stderr)
 

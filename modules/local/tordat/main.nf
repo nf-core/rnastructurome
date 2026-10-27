@@ -12,6 +12,7 @@ process RNAFRAMEWORK_TORDAT {
 
     output:
     tuple val(meta), path("${prefix}_rdat/*.rdat"), emit: rdat, optional: true
+    tuple val(meta), path("${prefix}_rdat/*.bpp.tsv"), emit: bpp, optional: true
     tuple val("${task.process}"), val('python'), eval("python --version 2>&1 | sed 's/^Python //'"), topic: versions, emit: versions_python
 
     script:
@@ -27,6 +28,7 @@ process RNAFRAMEWORK_TORDAT {
     rnaframework_to_rdat.py \\
         --xml-dir xml_inputs \\
         --structures-dir fold_dir/dotbracket \\
+        --dotplot-dir fold_dir/dotplot \\
         --prefix "${prefix}" \\
         --fasta "${fasta_str}" \\
         ${gtf_arg} \\

@@ -31,6 +31,14 @@ output:
           type: file
           description: RDAT files with per-transcript reactivity and structure data (absent if no transcripts passed coverage filters)
           pattern: "*.rdat"
+  bpp:
+    - - meta:
+          type: map
+          description: Groovy Map containing group metadata
+      - "${prefix}_rdat/*.bpp.tsv":
+          type: file
+          description: Per-transcript pairing probability of each base pair in the RDAT structure (absent without rf-fold dot plots)
+          pattern: "*.bpp.tsv"
   versions:
     - "versions.yml":
         type: file
