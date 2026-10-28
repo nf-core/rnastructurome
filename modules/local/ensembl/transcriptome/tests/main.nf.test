@@ -1,0 +1,86 @@
+nextflow_process {
+
+    name "Test Process ENSEMBL_TRANSCRIPTOME"
+    script "../main.nf"
+    process "ENSEMBL_TRANSCRIPTOME"
+
+    tag "modules"
+    tag "modules_local"
+    tag "ensembl"
+    tag "ensembl/transcriptome"
+    config "./nextflow.config"
+
+    test("normalizes Latin binomial and downloads transcript FASTA from local Ensembl fixture") {
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'human_fixture', organism:'Homo sapiens' ],
+                    'Homo sapiens'
+                ])
+                input[1] = [
+                    ensembl_release : 'current',
+                    ensembl_base_url: "file://${projectDir}/modules/local/ensembl/transcriptome/tests/fixtures/ensembl/pub"
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.fasta.size() == 1 },
+                {
+                    def fastaText = new java.util.zip.GZIPInputStream(new java.io.FileInputStream(process.out.fasta[0][1])).getText('UTF-8')
+                    assert fastaText.contains('>ENSTCDNA1 cdna')
+                    assert fastaText.contains('>ENSTNCRNA1 ncrna')
+                },
+                { assert path(process.out.source_urls[0][1]).text.contains('/homo_sapiens/cdna/Homo_sapiens.test.cdna.all.fa.gz') },
+                { assert path(process.out.source_urls[0][1]).text.contains('/homo_sapiens/ncrna/Homo_sapiens.test.ncrna.fa.gz') },
+                { assert process.out.versions_ensembl[0][1] == 'ensembl' && process.out.versions_ensembl[0][2] == 'current' }
+            )
+        }
+    }
+
+    test("continues with cdna only and warns when ncrna is absent") {
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'worm_fixture', organism:'Caenorhabditis elegans' ],
+                    'Caenorhabditis elegans'
+                ])
+                input[1] = [
+                    ensembl_release : 'current',
+                    ensembl_base_url: "file://${projectDir}/modules/local/ensembl/transcriptome/tests/fixtures/ensembl/pub"
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.fasta.size() == 1 },
+                {
+                    def fastaText = new java.util.zip.GZIPInputStream(new java.io.FileInputStream(process.out.fasta[0][1])).getText('UTF-8')
+                    assert fastaText.contains('>CELEGCDNA1 cdna_only')
+                    assert !fastaText.contains('ncrna')
+                },
+                {
+                    def urls = path(process.out.source_urls[0][1]).text.readLines().findAll { it }
+                    assert urls.size() == 1
+                    assert urls[0].contains('/caenorhabditis_elegans/cdna/Caenorhabditis_elegans.test.cdna.all.fa.gz')
+                },
+                {
+                    def warningText = path(process.out.warnings[0]).text
+                    assert warningText.contains("Warning: no ncrna FASTA found for species 'caenorhabditis_elegans'")
+                    assert warningText.contains('/caenorhabditis_elegans/ncrna/')
+                },
+                { assert process.out.versions_ensembl[0][1] == 'ensembl' && process.out.versions_ensembl[0][2] == 'current' }
+            )
+        }
+    }
+}

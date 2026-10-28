@@ -1,0 +1,141 @@
+nextflow_process {
+
+    name "Test Process MERGE_BP"
+    script "../main.nf"
+    process "MERGE_BP"
+
+    tag "modules"
+    tag "modules_local"
+    tag "merge_bp"
+    config "./nextflow.config"
+
+    test("merges multiple bp files into one file with color headers written exactly once") {
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'test_group' ],
+                    [
+                        file("${projectDir}/modules/local/merge_bp/tests/fixtures/chr1_arcs.bp", checkIfExists: true),
+                        file("${projectDir}/modules/local/merge_bp/tests/fixtures/chr2_arcs.bp", checkIfExists: true)
+                    ]
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.bp.size() == 1 },
+                {
+                    def lines = path(process.out.bp[0][1]).text.readLines()
+                    def colorLines = lines.findAll { it.startsWith('color') }
+                    def arcLines  = lines.findAll { !it.startsWith('color') }
+                    assert colorLines.size() == 4
+                    assert colorLines == [
+                        'color:\t189\t189\t189\t0-10% probability',
+                        'color:\t242\t204\t84\t10-40% probability',
+                        'color:\t120\t182\t220\t40-70% probability',
+                        'color:\t126\t198\t143\t70-100% probability'
+                    ]
+                    assert arcLines.size() == 4
+                    assert arcLines.contains('chr1\t100\t100\t200\t200\t0')
+                    assert arcLines.contains('chr1\t150\t150\t250\t250\t3')
+                    assert arcLines.contains('chr2\t300\t300\t400\t400\t1')
+                    assert arcLines.contains('chr2\t350\t350\t450\t450\t2')
+                },
+                { assert process.out.versions_python[0][1] == 'python' && process.out.versions_python[0][2] }
+            )
+        }
+    }
+
+    test("single bp file passes through with color headers and data lines intact") {
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'single_group' ],
+                    file("${projectDir}/modules/local/merge_bp/tests/fixtures/chr1_arcs.bp", checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.bp.size() == 1 },
+                {
+                    def lines = path(process.out.bp[0][1]).text.readLines()
+                    def colorLines = lines.findAll { it.startsWith('color') }
+                    def arcLines  = lines.findAll { !it.startsWith('color') }
+                    assert colorLines.size() == 4
+                    assert arcLines.size() == 2
+                    assert arcLines.contains('chr1\t100\t100\t200\t200\t0')
+                    assert arcLines.contains('chr1\t150\t150\t250\t250\t3')
+                },
+                { assert process.out.versions_python[0][1] == 'python' && process.out.versions_python[0][2] }
+            )
+        }
+    }
+
+    test("drops lines with empty or null fields and retains valid data lines") {
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'malformed_group' ],
+                    file("${projectDir}/modules/local/merge_bp/tests/fixtures/chr3_malformed.bp", checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.bp.size() == 1 },
+                {
+                    def lines = path(process.out.bp[0][1]).text.readLines()
+                    def arcLines = lines.findAll { !it.startsWith('color') }
+                    // The two valid lines must be present
+                    assert arcLines.contains('chr3\t500\t500\t600\t600\t0')
+                    assert arcLines.contains('chr3\t800\t800\t900\t900\t1')
+                    // The malformed lines (empty seqname, None fields) must be absent
+                    assert !arcLines.any { it.startsWith('\t') }
+                    assert !arcLines.any { it.contains('None') }
+                    assert arcLines.size() == 2
+                },
+                { assert process.out.versions_python[0][1] == 'python' && process.out.versions_python[0][2] }
+            )
+        }
+    }
+
+    test("merge_bp - stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'stub_group' ],
+                    file("${projectDir}/modules/local/merge_bp/tests/fixtures/chr1_arcs.bp", checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.bp.size() == 1 },
+                { assert process.out.versions_python[0][1] == 'python' && process.out.versions_python[0][2] }
+            )
+        }
+    }
+}

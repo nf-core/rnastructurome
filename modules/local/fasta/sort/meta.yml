@@ -1,0 +1,47 @@
+name: fasta_sort
+description: Sort FASTA records lexicographically by sequence identifier
+keywords:
+  - fasta
+  - reference
+  - sorting
+tools:
+  - seqkit:
+      description: A cross-platform and efficient toolkit for FASTA/Q file manipulation
+      homepage: https://bioinf.shenwei.me/seqkit/
+      documentation: https://bioinf.shenwei.me/seqkit/usage/
+      tool_dev_url: https://github.com/shenwei356/seqkit
+      licence: ["MIT"]
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing reference information
+          e.g. [ id:'homo_sapiens', organism:'homo_sapiens' ]
+    - fasta:
+        type: file
+        description: Reference FASTA file, optionally gzip-compressed
+        pattern: "*.{fa,fasta,fa.gz,fasta.gz}"
+        ontologies: []
+output:
+  fasta:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing reference information
+            e.g. [ id:'homo_sapiens', organism:'homo_sapiens' ]
+      - "*.sorted.fa":
+          type: file
+          description: FASTA records sorted lexicographically by sequence identifier, always
+            decompressed regardless of input compression
+          pattern: "*.{sorted.fa}"
+          ontologies: []
+  versions:
+    - "versions.yml":
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies: []
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"

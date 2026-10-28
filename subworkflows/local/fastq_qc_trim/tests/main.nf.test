@@ -1,0 +1,67 @@
+nextflow_workflow {
+
+    name "Test Workflow FASTQ_QC_TRIM"
+    script "../main.nf"
+    config "${new File('tests/nextflow.config').absolutePath}"
+    workflow "FASTQ_QC_TRIM"
+    tag "subworkflows"
+    tag "fastq_qc_trim"
+    autoSort false
+
+    test("--cutadapt_nextseq_trim removes high-quality poly-G tails") {
+
+        when {
+            params {
+                outdir                = "$outputDir"
+                cutadapt_quality_only = true
+                cutadapt_nextseq_trim = 20
+            }
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id:'ecoli', principle:'MaP', single_end:true ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/test_prokaryote/E_coli_DH5a_treated.16S_rRNA.fastq.gz', checkIfExists: true) ]
+                    ]
+                )
+                """
+            }
+        }
+
+        then {
+            def seqs = path(workflow.out.map_trimmed[0][1]).linesGzip.collate(4).collect { record -> record[1] }
+            assertAll(
+                { assert workflow.success },
+                { assert !seqs.any { seq -> seq.endsWith('GGGGGGGGGG') } }
+            )
+        }
+    }
+
+    test("--cutadapt_discard_untrimmed drops reads with no adapter") {
+
+        when {
+            params {
+                outdir                     = "$outputDir"
+                cutadapt_discard_untrimmed = true
+            }
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id:'ecoli', principle:'MaP', single_end:true ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/test_prokaryote/E_coli_DH5a_treated.16S_rRNA.fastq.gz', checkIfExists: true) ]
+                    ]
+                )
+                """
+            }
+        }
+
+        then {
+            def seqs = path(workflow.out.map_trimmed[0][1]).linesGzip.collate(4).collect { record -> record[1] }
+            assertAll(
+                { assert workflow.success },
+                { assert seqs.size() == 2945 }
+            )
+        }
+    }
+}

@@ -1,0 +1,6 @@
+color:	189	189	189	0-10% probability
+color:	242	204	84	10-40% probability
+color:	120	182	220	40-70% probability
+color:	126	198	143	70-100% probability
+chr2	300	300	400	400	1
+chr2	350	350	450	450	2

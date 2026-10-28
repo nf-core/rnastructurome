@@ -1,0 +1,10 @@
+track type=wiggle_0
+fixedStep chrom=TXPLUS start=1 step=1
+1
+3
+variableStep chrom=TXMINUS
+1 10
+2 20
+4 40
+variableStep chrom=TXOVER
+1 5

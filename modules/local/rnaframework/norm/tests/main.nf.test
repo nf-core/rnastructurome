@@ -1,0 +1,44 @@
+nextflow_process {
+
+    name "Test Process RNAFRAMEWORK_RFNORM"
+    script "../main.nf"
+    process "RNAFRAMEWORK_RFNORM"
+
+    tag "modules"
+    tag "modules_local"
+    tag "rnaframework"
+    tag "rnaframework/norm"
+    config "./nextflow.config"
+
+    test("rfnorm - stub") {
+
+        options "-stub"
+
+        when {
+            params {
+                module_args = ''
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group1', principle:'RT-stop' ],
+                    file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam', checkIfExists: true),
+                    [],
+                    [],
+                    [],
+                    []
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.xml.size() == 1 },
+                { assert process.out.log.size() == 1 },
+                { assert process.out.plots.size() == 1 }
+            )
+        }
+    }
+}

@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "FASTQ_QC_TRIM"
+description: Concatenate multi-lane FASTQs, run FastQC, extract UMIs (when supplied), and adapter/quality-trim reads with Cutadapt, branching RT-stop and mutational-profiling reads for alignment.
+keywords:
+  - fastq
+  - qc
+  - trimming
+  - cutadapt
+  - umi
+  - rnastructurome
+components:
+  - cat/fastq
+  - cutadapt
+  - cutadaptadaptersmultiqc
+  - fastqc
+  - parsecutadaptcommandarg
+  - umitools/extract
+input:
+  - ch_samplesheet:
+      type: channel
+      description: |
+        Input reads per sample. Structure: [ val(meta), [ reads ] ]
+output:
+  - reads_branched:
+      type: channel
+      description: |
+        Reads after lane concatenation, before alignment branching. Structure: [ val(meta), [ reads ] ]
+  - rtstop_trimmed:
+      type: channel
+      description: |
+        Trimmed RT-stop reads ready for alignment. Structure: [ val(meta), [ reads ] ]
+  - map_trimmed:
+      type: channel
+      description: |
+        Trimmed mutational-profiling reads ready for alignment. Structure: [ val(meta), [ reads ] ]
+  - multiqc_files:
+      type: channel
+      description: |
+        QC files collected for MultiQC.
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"

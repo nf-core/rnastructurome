@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="1243" height="670" viewBox="420 0 1243 670">
+<defs>
+</defs>
+<rect x="0" y="0" width="1663" height="670" fill="#ffffff" />
+<rect x="462" y="58.0" width="640.5" height="180.0" rx="8" ry="8" fill="#e0e0e0" stroke="#aaaaaa" stroke-width="1.0" />
+<circle cx="473" cy="43.0" r="11" fill="#222222" class="nf-metro-section-num-circle" />
+<text x="473" y="43.0" font-size="12" fill="#ffffff" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dy="0.3em">1</text>
+<text x="489" y="43.0" font-size="16.0" fill="#555555" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" dy="0.3em" class="nf-metro-section-label">pre-processing/alignment</text>
+<rect x="1165.5" y="58.2" width="416.0" height="164.39999999999998" rx="8" ry="8" fill="#e0e0e0" stroke="#aaaaaa" stroke-width="1.0" />
+<circle cx="1176.5" cy="43.2" r="11" fill="#222222" class="nf-metro-section-num-circle" />
+<text x="1176.5" y="43.2" font-size="12" fill="#ffffff" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dy="0.3em">2</text>
+<text x="1192.5" y="43.2" font-size="16.0" fill="#555555" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" dy="0.3em" class="nf-metro-section-label">post-processing</text>
+<rect x="697.5" y="297.4" width="875.0" height="242.0" rx="8" ry="8" fill="#e0e0e0" stroke="#aaaaaa" stroke-width="1.0" />
+<circle cx="708.5" cy="282.4" r="11" fill="#222222" class="nf-metro-section-num-circle" />
+<text x="708.5" y="282.4" font-size="12" fill="#ffffff" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dy="0.3em">3</text>
+<text x="724.5" y="282.4" font-size="16.0" fill="#555555" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" dy="0.3em" class="nf-metro-section-label">RNA Framework</text>
+<rect x="494.5" y="347.4" width="168.0" height="70.0" rx="8" ry="8" fill="#e0e0e0" stroke="#aaaaaa" stroke-width="1.0" />
+<circle cx="505.5" cy="332.4" r="11" fill="#222222" class="nf-metro-section-num-circle" />
+<text x="505.5" y="332.4" font-size="12" fill="#ffffff" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dy="0.3em">4</text>
+<text x="521.5" y="332.4" font-size="16.0" fill="#555555" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" dy="0.3em" class="nf-metro-section-label">reporting</text>
+<path d="M1197,463.4L1157,463.4Q1147,463.4 1137,453.4L1117,433.4Q1109,425.4 1099,425.4L1072,425.4" stroke="#2f80ed" stroke-width="3.0" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M1197,344.4L1157,344.4Q1147,344.4 1137,354.4L1117,374.4Q1109,382.4 1099,382.4L1072,382.4" stroke="#eb5757" stroke-width="3.0" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M1310.5,425.4L1295,425.4Q1287,425.4 1277,435.4L1257,455.4Q1249,463.4 1239,463.4L1197,463.4" stroke="#2f80ed" stroke-width="3.0" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M1222,425.4L1092,425.4" stroke="#2f80ed" stroke-width="3.0" stroke-linecap="round" />
+<path d="M1072,425.4Q1064,425.4 1058,417.4L1042,393.4Q1036,385.4 1031.5,385.4" stroke="#2f80ed" stroke-width="3.0" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M1519.5,425.4L1490,425.4" stroke="#2f80ed" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M1519.5,425.4L1495,425.4Q1488,425.4 1483,430.4L1455,458.4Q1450,463.4 1443,463.4L1367,463.4Q1360,463.4 1355,458.4L1327,430.4Q1322,425.4 1315,425.4L1222,425.4" stroke="#2f80ed" stroke-width="3.0" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M1519.5,425.4L1222,425.4" stroke="#2f80ed" stroke-width="3.0" stroke-linecap="round" />
+
+<path d="M1031.5,385.4L956.5,385.4" stroke="#2f80ed" stroke-width="3.0" stroke-linecap="round" />
+<path d="M956.5,385.4L791.5,385.4" stroke="#2f80ed" stroke-width="3.0" stroke-linecap="round" />
+<path d="M612.5,385.4L552.5,385.4" stroke="#2f80ed" stroke-width="3.0" stroke-linecap="round" />
+<path d="M791.5,385.4L1031.5,385.4" stroke="#2f80ed" stroke-width="3.0" stroke-linecap="round" />
+<path d="M662.5,385.4L612.5,385.4" stroke="#2f80ed" stroke-width="3.0" stroke-linecap="round" />
+<path d="M1031.5,385.4L662.5,385.4" stroke="#2f80ed" stroke-width="3.0" stroke-linecap="round" />
+<path d="M1519.5,382.4L1495,382.4Q1488,382.4 1483,377.4L1455,349.4Q1450,344.4 1443,344.4L1367,344.4Q1360,344.4 1355,349.4L1327,377.4Q1322,382.4 1315,382.4L1222,382.4" stroke="#eb5757" stroke-width="3.0" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M1519.5,382.4L1222,382.4" stroke="#eb5757" stroke-width="3.0" stroke-linecap="round" />
+<path d="M1310.5,382.4L1295,382.4Q1287,382.4 1277,372.4L1257,352.4Q1249,344.4 1239,344.4L1197,344.4" stroke="#eb5757" stroke-width="3.0" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M1222,382.4L1092,382.4" stroke="#eb5757" stroke-width="3.0" stroke-linecap="round" />
+<path d="M1092,382.4L1031.5,382.4" stroke="#eb5757" stroke-width="3.0" stroke-linecap="round" />
+<path d="M1031.5,382.4L956.5,382.4" stroke="#eb5757" stroke-width="3.0" stroke-linecap="round" />
+<path d="M956.5,382.4L881.5,382.4" stroke="#eb5757" stroke-width="3.0" stroke-linecap="round" />
+<path d="M881.5,382.4L791.5,382.4" stroke="#eb5757" stroke-width="3.0" stroke-linecap="round" />
+<path d="M612.5,382.4L552.5,382.4" stroke="#eb5757" stroke-width="3.0" stroke-linecap="round" />
+<path d="M791.5,382.4L1222,382.4" stroke="#eb5757" stroke-width="3.0" stroke-linecap="round" />
+<path d="M662.5,382.4L612.5,382.4" stroke="#eb5757" stroke-width="3.0" stroke-linecap="round" />
+<path d="M1222,382.4L662.5,382.4" stroke="#eb5757" stroke-width="3.0" stroke-linecap="round" />
+
+
+<path d="M836.5,160L896.5,160" stroke="#2f80ed" stroke-width="3.0" stroke-linecap="round" />
+<path d="M896.5,160L956.5,160" stroke="#2f80ed" stroke-width="3.0" stroke-linecap="round" />
+<path d="M956.5,160L985.5,160Q995.5,160 1001.5,152L1019.5,131Q1025.5,123 1035.5,123L1052.5,123" stroke="#2f80ed" stroke-width="3.0" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M520,123L580,123" stroke="#2f80ed" stroke-width="3.0" stroke-linecap="round" />
+<path d="M580,123L640,123" stroke="#2f80ed" stroke-width="3.0" stroke-linecap="round" />
+<path d="M640,123L700,123" stroke="#2f80ed" stroke-width="3.0" stroke-linecap="round" />
+<path d="M700,123L766.5,123Q776.5,123 782.5,131L800.5,152Q806.5,160 816.5,160L836.5,160" stroke="#2f80ed" stroke-width="3.0" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M1250.5,123L1391.5,123" stroke="#2f80ed" stroke-width="3.0" stroke-linecap="round" />
+<path d="M1250.5,126L1391.5,126" stroke="#27ae60" stroke-width="3.0" stroke-linecap="round" />
+<path d="M1250.5,123L1290.6,123Q1300.6,123 1306.6,133L1326.6,173.8Q1332.6,183.8 1342.6,183.8L1391.5,183.8" stroke="#2f80ed" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M1391.5,123L1514.5,123" stroke="#2f80ed" stroke-width="3.0" stroke-linecap="round" />
+<path d="M1052.5,123L1102.5,123" stroke="#2f80ed" stroke-width="3.0" stroke-linecap="round" />
+<path d="M1165.5,123L1250.5,123" stroke="#2f80ed" stroke-width="3.0" stroke-linecap="round" />
+<path d="M1514.5,123L1533.5,123Q1543.5,123 1543.5,133L1543.5,405.4Q1543.5,425.4 1523.5,425.4L1519.5,425.4" stroke="#2f80ed" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M1102.5,123L1165.5,123" stroke="#2f80ed" stroke-width="3.0" stroke-linecap="round" />
+<path d="M520,120L580,120" stroke="#eb5757" stroke-width="3.0" stroke-linecap="round" />
+<path d="M580,120L640,120" stroke="#eb5757" stroke-width="3.0" stroke-linecap="round" />
+<path d="M640,120L700,120" stroke="#eb5757" stroke-width="3.0" stroke-linecap="round" />
+<path d="M700,120L836.5,120" stroke="#eb5757" stroke-width="3.0" stroke-linecap="round" />
+<path d="M836.5,120L896.5,120" stroke="#eb5757" stroke-width="3.0" stroke-linecap="round" />
+<path d="M896.5,120L956.5,120" stroke="#eb5757" stroke-width="3.0" stroke-linecap="round" />
+<path d="M956.5,120L1052.5,120" stroke="#eb5757" stroke-width="3.0" stroke-linecap="round" />
+<path d="M1250.5,120L1391.5,120" stroke="#eb5757" stroke-width="3.0" stroke-linecap="round" />
+<path d="M1250.5,120L1292.4,120Q1302.4,120 1308.4,130L1328.4,170.8Q1334.4,180.8 1344.4,180.8L1391.5,180.8" stroke="#eb5757" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M1391.5,120L1514.5,120" stroke="#eb5757" stroke-width="3.0" stroke-linecap="round" />
+<path d="M1052.5,120L1102.5,120" stroke="#eb5757" stroke-width="3.0" stroke-linecap="round" />
+<path d="M1165.5,120L1250.5,120" stroke="#eb5757" stroke-width="3.0" stroke-linecap="round" />
+<path d="M1514.5,120L1530.5,120Q1540.5,120 1540.5,130L1540.5,365.4Q1540.5,382.4 1523.5,382.4L1519.5,382.4" stroke="#eb5757" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M1102.5,120L1165.5,120" stroke="#eb5757" stroke-width="3.0" stroke-linecap="round" />
+<!-- 4-line bundle from Input; RT-stop = orange (#f2994a) above red, MaP = green (#27ae60) below blue; branch after UMI -->
+<path d="M520,117L856,117Q866,117 872,109L890,88Q896,80 906,80L944.5,80" stroke="#f2994a" stroke-width="3.0" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M944.5,80L985.5,80Q995.5,80 1001.5,88L1019.5,109Q1025.5,117 1035.5,117L1052.5,117" stroke="#f2994a" stroke-width="3.0" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M520,126L766.5,126Q776.5,126 782.5,134L800.5,155Q806.5,163 816.5,163L856,163Q866,163 872,171L890,192Q896,200 906,200L944.5,200" stroke="#27ae60" stroke-width="3.0" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M944.5,200L953,200Q963,200 969,192L1019.5,134Q1025.5,126 1035.5,126L1052.5,126" stroke="#27ae60" stroke-width="3.0" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<!-- orange section 2: above red (y=117) -->
+<path d="M1052.5,117L1102.5,117" stroke="#f2994a" stroke-width="3.0" stroke-linecap="round" />
+<path d="M1102.5,117L1165.5,117" stroke="#f2994a" stroke-width="3.0" stroke-linecap="round" />
+<path d="M1165.5,117L1250.5,117" stroke="#f2994a" stroke-width="3.0" stroke-linecap="round" />
+<path d="M1250.5,117L1391.5,117" stroke="#f2994a" stroke-width="3.0" stroke-linecap="round" />
+<path d="M1250.5,117L1294.3,117Q1304.3,117 1310.3,127L1330.3,167.8Q1336.3,177.8 1346.3,177.8L1391.5,177.8" stroke="#f2994a" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M1391.5,117L1514.5,117" stroke="#f2994a" stroke-width="3.0" stroke-linecap="round" />
+<!-- green section 2: below blue (y=126) -->
+<path d="M1052.5,126L1102.5,126" stroke="#27ae60" stroke-width="3.0" stroke-linecap="round" />
+<path d="M1102.5,126L1165.5,126" stroke="#27ae60" stroke-width="3.0" stroke-linecap="round" />
+<path d="M1165.5,126L1250.5,126" stroke="#27ae60" stroke-width="3.0" stroke-linecap="round" />
+<path d="M1250.5,126L1288.7,126Q1298.7,126 1304.7,136L1324.7,176.8Q1330.7,186.8 1340.7,186.8L1391.5,186.8" stroke="#27ae60" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M1391.5,126L1514.5,126" stroke="#27ae60" stroke-width="3.0" stroke-linecap="round" />
+<!-- orange: up-branch from dedup (y=177.8) back to stats (y=117), then big arm down to section 3 -->
+<path d="M1391.5,177.8L1428.7,177.8Q1438.7,177.8 1444.7,167.8L1464.7,127Q1470.7,117 1480.7,117L1514.5,117" stroke="#f2994a" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M1514.5,117L1527.5,117Q1537.5,117 1537.5,127L1537.5,365.4Q1537.5,379.4 1523.5,379.4L1501.5,379.4" stroke="#f2994a" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<!-- green: up-branch from dedup (y=186.8) back to stats (y=126), then big arm down to section 3 -->
+<path d="M1391.5,186.8L1434.3,186.8Q1444.3,186.8 1450.3,176.8L1470.3,136Q1476.3,126 1486.3,126L1514.5,126" stroke="#27ae60" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<!-- blue/red up-branches moved here so they sit on top of the straight markdup->stats lines -->
+<path d="M1391.5,183.8L1432.4,183.8Q1442.4,183.8 1448.4,173.8L1468.4,133Q1474.4,123 1484.4,123L1514.5,123" stroke="#2f80ed" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M1391.5,180.8L1430.6,180.8Q1440.6,180.8 1446.6,170.8L1466.6,130Q1472.6,120 1482.6,120L1514.5,120" stroke="#eb5757" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M1514.5,126L1536.5,126Q1546.5,126 1546.5,136L1546.5,408.4Q1546.5,428.4 1523.5,428.4L1519.5,428.4" stroke="#27ae60" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<!-- green descent into section 3 MaP track (lands directly at band level, mirrors red/orange) -->
+<path d="M1519.5,428.4L1501.5,428.4" stroke="#27ae60" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<rect x="939.5" y="75.0" width="10.0" height="10.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<rect x="939.5" y="195.0" width="10.0" height="10.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<text x="944.5" y="86.0" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="hanging">Bowtie</text>
+<text x="944.5" y="210.0" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="hanging">Bowtie2</text>
+<rect x="515" y="115.0" width="10.0" height="13.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<path d="M483,105.5L501,105.5L509,113.5L509,135.5Q509,137.5 507,137.5L483,137.5Q481,137.5 481,135.5L481,107.5Q481,105.5 483,105.5Z" fill="#ffffff" stroke="#888888" stroke-width="1.5" stroke-linejoin="round" />
+<path d="M501,105.5L501,113.5L509,113.5Z" fill="#888888" opacity="0.15" stroke="none" />
+<path d="M501,105.5L501,113.5L509,113.5" fill="none" stroke="#888888" stroke-width="0.8999999999999999" />
+<text x="495" y="122.7" font-size="7.5" fill="#000000" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dy="0.3em">FASTQ</text>
+<rect x="575" y="115.0" width="10.0" height="13.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<rect x="635" y="115.0" width="10.0" height="13.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<rect x="695" y="115.0" width="10.0" height="13.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<rect x="831.5" y="115.0" width="10.0" height="10.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<rect x="831.5" y="155.0" width="10.0" height="10.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<rect x="939.5" y="115.0" width="10.0" height="10.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<rect x="939.5" y="155.0" width="10.0" height="10.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<rect x="1047.5" y="115.0" width="10.0" height="13.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<rect x="1245.5" y="115.0" width="10.0" height="13.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<rect x="1386.5" y="115.0" width="10.0" height="13.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<rect x="1386.5" y="175.8" width="10.0" height="13.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<rect x="1509.5" y="115.0" width="10.0" height="13.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<rect x="1365" y="339.4" width="10.0" height="10.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<rect x="1365" y="458.4" width="10.0" height="10.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<text x="537.6" y="134.0" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="hanging">Input</text>
+<text x="1250.5" y="90.4" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="auto"><tspan x="1250.5" dy="0em">SAMtools:</tspan><tspan x="1250.5" dy="1.2em">sort, index</tspan></text>
+<text x="612.5" y="396.4" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="hanging">MultiQC</text>
+<text x="580" y="106.0" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="auto">cat FASTQ</text>
+<text x="1391.5" y="134.0" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="hanging"><tspan x="1391.5" dy="0em">SAMtools markdup</tspan><tspan x="1391.5" dy="1.2em" font-weight="normal" font-style="italic">(not recommended)</tspan></text>
+<text x="1391.5" y="195.8" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="hanging">UMI-tools Dedup</text>
+<text x="640" y="134.0" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="hanging">FastQC</text>
+<text x="1514.5" y="106.0" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="auto">SAMtools stats</text>
+<text x="1360" y="331.4" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="auto">rctools</text>
+<text x="1360" y="475.4" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="hanging">rctools</text>
+<text x="700" y="106.0" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="auto">UMI-tools Extract</text>
+<text x="1197" y="369.4" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="auto">score with control</text>
+<text x="1196.4" y="438.4" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="hanging">score with control</text>
+<text x="1197" y="331.4" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="auto">score without control</text>
+<text x="1197" y="474.4" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="hanging">score without control</text>
+<text x="836.5" y="131.0" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="hanging">Cutadapt</text>
+<text x="836.5" y="171.0" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="hanging">Cutadapt MaP</text>
+<text x="1041.5" y="368.4" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="auto">normalise</text>
+<text x="944.5" y="131.0" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="hanging">STAR</text>
+<text x="956.5" y="368.4" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="auto">correlate</text>
+<text x="944.5" y="170.0" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="hanging">STAR</text>
+<text x="1052.5" y="106.0" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="auto">FastQC</text>
+<text x="881.5" y="368.4" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="auto">fold</text>
+<text x="791.5" y="365.4" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="auto">output</text>
+<rect x="462" y="572.6330338" width="460.0" height="72.0" rx="6" ry="6" fill="rgba(180, 180, 180, 0.3)" />
+<path d="M474,596.633L498,596.633" stroke="#eb5757" stroke-width="3.0" stroke-linecap="round" />
+<text x="510" y="596.6330338" font-size="14.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" dy="0.3em">genome RT-stop</text>
+<path d="M474,620.633L498,620.633" stroke="#2f80ed" stroke-width="3.0" stroke-linecap="round" />
+<text x="510" y="620.6330338" font-size="14.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" dy="0.3em">genome MaP</text>
+<path d="M642,596.633L666,596.633" stroke="#f2994a" stroke-width="3.0" stroke-linecap="round" />
+<text x="678" y="596.6330338" font-size="14.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" dy="0.3em">transcriptome RT-stop</text>
+<path d="M642,620.633L666,620.633" stroke="#27ae60" stroke-width="3.0" stroke-linecap="round" />
+<text x="678" y="620.6330338" font-size="14.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" dy="0.3em">transcriptome MaP</text>
+<!-- .bw, .svg, .rdat file icons — row below .db icon (centred under it) -->
+<path d="M722.0,407 L740.0,407 L748.0,415 L748.0,437 Q748.0,439,746.0,439 L722.0,439 Q720.0,439,720.0,437 L720.0,409 Q720.0,407,722.0,407 Z" fill="#ffffff" stroke="#888888" stroke-width="1.5" stroke-linejoin="round" />
+<path d="M740.0,407 L740.0,415 L748.0,415 Z" fill="#888888" opacity="0.15" stroke="none" />
+<path d="M740.0,407 L740.0,415 L748.0,415" fill="none" stroke="#888888" stroke-width="0.9" />
+<text x="734.0" y="423" font-size="7.5" fill="#000000" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dy="0.3em">.bw</text>
+<path d="M755.0,407 L773.0,407 L781.0,415 L781.0,437 Q781.0,439,779.0,439 L755.0,439 Q753.0,439,753.0,437 L753.0,409 Q753.0,407,755.0,407 Z" fill="#ffffff" stroke="#888888" stroke-width="1.5" stroke-linejoin="round" />
+<path d="M773.0,407 L773.0,415 L781.0,415 Z" fill="#888888" opacity="0.15" stroke="none" />
+<path d="M773.0,407 L773.0,415 L781.0,415" fill="none" stroke="#888888" stroke-width="0.9" />
+<text x="767.0" y="423" font-size="7.5" fill="#000000" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dy="0.3em">.svg</text>
+<path d="M788.0,407 L806.0,407 L814.0,415 L814.0,437 Q814.0,439,812.0,439 L788.0,439 Q786.0,439,786.0,437 L786.0,409 Q786.0,407,788.0,407 Z" fill="#ffffff" stroke="#888888" stroke-width="1.5" stroke-linejoin="round" />
+<path d="M806.0,407 L806.0,415 L814.0,415 Z" fill="#888888" opacity="0.15" stroke="none" />
+<path d="M806.0,407 L806.0,415 L814.0,415" fill="none" stroke="#888888" stroke-width="0.9" />
+<text x="800.0" y="423" font-size="7.5" fill="#000000" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dy="0.3em">.db</text>
+<text x="1633" y="660" font-size="8" fill="rgba(100, 100, 100, 0.6)" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" text-anchor="end">created with nf-metro v0.5.4</text>
+<!-- count region: genome count-genome -> rf-rctools (red/blue) + transcriptome rf-count taps (orange/green) -->
+<path d="M1501.5,379.4L1304.5,379.4" stroke="#f2994a" stroke-width="3.0" stroke-linecap="round" />
+<path d="M1501.5,428.4L1304.5,428.4" stroke="#27ae60" stroke-width="3.0" stroke-linecap="round" />
+<!-- orange: extend transcriptome RT-stop above red through score-with-control (inline) + score-without (arc) to normalise -->
+<path d="M1304.5,379.4L1031.5,379.4" stroke="#f2994a" stroke-width="3.0" stroke-linecap="round" />
+<path d="M1304.5,379.4L1295,379.4Q1287,379.4 1277,369.4L1257,349.4Q1249,341.4 1239,341.4L1197,341.4" stroke="#f2994a" stroke-width="3.0" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M1197,341.4L1157,341.4Q1147,341.4 1137,351.4L1117,371.4Q1109,379.4 1099,379.4L1072,379.4" stroke="#f2994a" stroke-width="3.0" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<!-- green: extend transcriptome MaP below blue through score-with-control (inline) + score-without (arc) to normalise -->
+<path d="M1304.5,428.4L1072,428.4Q1064,428.4 1058,420.4L1042,396.4Q1036,388.4 1031.5,388.4" stroke="#27ae60" stroke-width="3.0" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M1304.5,428.4L1295,428.4Q1287,428.4 1277,438.4L1257,458.4Q1249,466.4 1239,466.4L1197,466.4" stroke="#27ae60" stroke-width="3.0" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M1197,466.4L1157,466.4Q1147,466.4 1137,456.4L1117,436.4Q1109,428.4 1099,428.4L1072,428.4" stroke="#27ae60" stroke-width="3.0" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<!-- orange/green: continue transcriptome tracks from normalise through combine, fold, output to MultiQC/HTML -->
+<path d="M1031.5,379.4L552.5,379.4" stroke="#f2994a" stroke-width="3.0" stroke-linecap="round" />
+<path d="M1031.5,388.4L552.5,388.4" stroke="#27ae60" stroke-width="3.0" stroke-linecap="round" />
+<!-- orange/green: jackknife spur (mirrors red/blue, offset ±3) -->
+<path d="M1031.5,379.4C1012,379.4 977,437 956.5,437C936,437 896,379.4 881.5,379.4" stroke="#f2994a" stroke-width="3.0" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M1031.5,388.4C1012,388.4 977,446 956.5,446C936,446 896,388.4 881.5,388.4" stroke="#27ae60" stroke-width="3.0" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<!-- orange/green: eval spur — tight parallel bundle (slight overlap, no white gaps), capped by the eval node -->
+<path d="M877.7,383.2L844.2,437.6" stroke="#f2994a" stroke-width="3.0" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M885.3,384.8L851.8,439.2" stroke="#27ae60" stroke-width="3.0" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<rect x="1435" y="339.4" width="10.0" height="10.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<rect x="1435" y="458.4" width="10.0" height="10.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<rect x="1405" y="374.4" width="10.0" height="10.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<rect x="1405" y="423.4" width="10.0" height="10.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<text x="1450" y="331.4" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="auto">count-genome</text>
+<text x="1450" y="475.4" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="hanging">count-genome</text>
+<text x="1410" y="369.4" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="auto">count</text>
+<text x="1410" y="438.4" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="hanging">count</text>
+<!-- rf-jackknife: optional alternative branch from normalise to fold (all routes) -->
+<path d="M1031.5,382.4C1012,382.4 977,440 956.5,440C936,440 896,382.4 881.5,382.4" stroke="#eb5757" stroke-width="3.0" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M1031.5,385.4C1012,385.4 977,443 956.5,443C936,443 896,385.4 881.5,385.4" stroke="#2f80ed" stroke-width="3.0" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<rect x="951.5" y="435.0" width="10.0" height="13.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<text x="956.5" y="452.0" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="hanging">jackknife</text>
+<!-- stop_after_jackknife: terminal stub + end-cap ("stop") + results file (FMI table/log) -->
+<path d="M956.5,466L956.5,492" stroke="#888888" stroke-width="2.5" fill="none" stroke-linecap="round" />
+<path d="M950.5,492L962.5,492" stroke="#888888" stroke-width="2.5" fill="none" stroke-linecap="round" />
+<path d="M944.5,497L962.5,497L970.5,505L970.5,527Q970.5,529 968.5,529L944.5,529Q942.5,529 942.5,527L942.5,499Q942.5,497 944.5,497Z" fill="#ffffff" stroke="#888888" stroke-width="1.5" stroke-linejoin="round" />
+<path d="M962.5,497L962.5,505L970.5,505Z" fill="#888888" opacity="0.15" stroke="none" />
+<path d="M962.5,497L962.5,505L970.5,505" fill="none" stroke="#888888" stroke-width="0.8999999999999999" />
+<text x="956.5" y="514.2" font-size="7.5" fill="#000000" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dy="0.3em">FMI</text>
+<!-- rf-eval: evaluation spur (straight) down from fold -->
+<path d="M880.2,383.7L846.7,438.1" stroke="#eb5757" stroke-width="3.0" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M882.8,384.3L849.3,438.7" stroke="#2f80ed" stroke-width="3.0" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+<rect x="842" y="433.4" width="12.0" height="10.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<text x="848" y="446.0" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="hanging">eval</text>
+<!-- rf-structextract: structural-element extraction spur (straight) down from fold -->
+<path d="M878,391L878,461.4" stroke="#f2994a" stroke-width="3.0" fill="none" stroke-linecap="round" />
+<path d="M880,391L880,461.4" stroke="#eb5757" stroke-width="3.0" fill="none" stroke-linecap="round" />
+<path d="M882,391L882,461.4" stroke="#2f80ed" stroke-width="3.0" fill="none" stroke-linecap="round" />
+<path d="M884,391L884,461.4" stroke="#27ae60" stroke-width="3.0" fill="none" stroke-linecap="round" />
+<rect x="876" y="461.4" width="12.0" height="10.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<text x="882" y="474.0" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="hanging">structextract</text>
+<!-- subworkflow zones: dashed outlines group the stations owned by one local subworkflow -->
+<g fill="none" stroke="#8c8c8c" stroke-width="1.2" stroke-dasharray="5 4" stroke-linejoin="round" class="nf-metro-subworkflow-zone">
+<rect x="1317" y="315" width="188" height="185" rx="6" ry="6" />
+<rect x="1008" y="315" width="292" height="185" rx="6" ry="6" />
+<path d="M824,315L926,315L926,398L992,398L992,482L926,482L926,500L824,500Z" />
+</g>
+<text x="1411" y="513" font-size="10.0" fill="#555555" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle">QUANTIFY REACTIVITY</text>
+<text x="1154" y="513" font-size="10.0" fill="#555555" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle">NORMALISE REACTIVITIES</text>
+<text x="875" y="513" font-size="10.0" fill="#555555" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle">FOLD STRUCTURES</text>
+<!-- score/normalise/fold station nodes drawn last so they sit on top of all track lines -->
+<rect x="1192" y="374.4" width="10.0" height="10.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<rect x="1192" y="339.4" width="10.0" height="10.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<rect x="1192" y="423.4" width="10.0" height="10.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<rect x="1192" y="458.4" width="10.0" height="10.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<rect x="1027.5" y="376.4" width="11.0" height="11.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<rect x="1029.5" y="378.4" width="11.0" height="11.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<rect x="1031.5" y="380.4" width="11.0" height="11.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<rect x="876.5" y="377.4" width="10.0" height="13.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<rect x="951.5" y="377.4" width="10.0" height="13.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<rect x="786.5" y="377.4" width="10.0" height="13.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<!-- output .rdat file, MultiQC node, HTML output — drawn last to sit on top of the track lines -->
+<path d="M754.5,367.9L772.5,367.9L780.5,375.9L780.5,397.9Q780.5,399.9 778.5,399.9L754.5,399.9Q752.5,399.9 752.5,397.9L752.5,369.9Q752.5,367.9 754.5,367.9Z" fill="#ffffff" stroke="#888888" stroke-width="1.5" stroke-linejoin="round" />
+<path d="M772.5,367.9L772.5,375.9L780.5,375.9Z" fill="#888888" opacity="0.15" stroke="none" />
+<path d="M772.5,367.9L772.5,375.9L780.5,375.9" fill="none" stroke="#888888" stroke-width="0.8999999999999999" />
+<text x="766.5" y="385.1" font-size="7.5" fill="#000000" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dy="0.3em">.rdat</text>
+<rect x="607.5" y="377.4" width="10.0" height="13.0" rx="5.0" ry="5.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<rect x="547.5" y="377.4" width="10.0" height="13.0" fill="#ffffff" stroke="#888888" stroke-width="1.5" />
+<path d="M515.5,367.9L533.5,367.9L541.5,375.9L541.5,397.9Q541.5,399.9 539.5,399.9L515.5,399.9Q513.5,399.9 513.5,397.9L513.5,369.9Q513.5,367.9 515.5,367.9Z" fill="#ffffff" stroke="#888888" stroke-width="1.5" stroke-linejoin="round" />
+<path d="M533.5,367.9L533.5,375.9L541.5,375.9Z" fill="#888888" opacity="0.15" stroke="none" />
+<path d="M533.5,367.9L533.5,375.9L541.5,375.9" fill="none" stroke="#888888" stroke-width="0.8999999999999999" />
+<text x="527.5" y="385.1" font-size="7.5" fill="#000000" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" text-anchor="middle" dy="0.3em">HTML</text>
+<!-- node status dots: a filled dot marks an optional/conditional step (transcriptome route, UMI handling, markdup, jackknife/eval, HTML); undotted nodes always run on the default path -->
+<g>
+<circle cx="700" cy="121.5" r="2.2" fill="#333333" />
+<circle cx="944.5" cy="80.0" r="2.2" fill="#333333" />
+<circle cx="944.5" cy="200.0" r="2.2" fill="#333333" />
+<circle cx="1391.5" cy="121.5" r="2.2" fill="#333333" />
+<circle cx="1391.5" cy="182.3" r="2.2" fill="#333333" />
+<circle cx="1440" cy="344.4" r="2.2" fill="#333333" />
+<circle cx="1440" cy="463.4" r="2.2" fill="#333333" />
+<circle cx="1370" cy="344.4" r="2.2" fill="#333333" />
+<circle cx="1370" cy="463.4" r="2.2" fill="#333333" />
+<circle cx="956.5" cy="441.5" r="2.2" fill="#333333" />
+<circle cx="848" cy="438.4" r="2.2" fill="#333333" />
+<circle cx="882" cy="466.4" r="2.2" fill="#333333" />
+<circle cx="845" cy="596.6330338" r="3.4" fill="#333333" />
+<text font-size="14.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" dy="0.3em"><tspan x="855" y="596.6330338">optional</tspan><tspan x="855" y="620.6330338">step</tspan></text>
+</g>
+<!-- legend: what the two rf-norm scoring branches mean -->
+<text x="967.5" y="590" font-size="13.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="bold" dy="0.3em">reactivity scoring <tspan font-weight="normal" font-style="italic">(automatic method selection)</tspan></text>
+<text x="967.5" y="610" font-size="12.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="normal" dy="0.3em">- <tspan text-decoration="underline">score with control</tspan>: the sample group has an untreated control; rf-norm uses Ding (RT-stop) or Siegfried (MaP)</text>
+<text x="967.5" y="630" font-size="12.0" fill="#333333" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="normal" dy="0.3em">- <tspan text-decoration="underline">score without control</tspan>: no untreated control; rf-norm uses Rouskin (RT-stop) or Zubradt (MaP)</text>
+</svg>

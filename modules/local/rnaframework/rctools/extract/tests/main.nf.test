@@ -1,0 +1,118 @@
+nextflow_process {
+
+    name "Test Process RNAFRAMEWORK_RFRCTOOLS_EXTRACT"
+    script "../main.nf"
+    process "RNAFRAMEWORK_RFRCTOOLS_EXTRACT"
+
+    tag "modules"
+    tag "modules_local"
+    tag "rnaframework"
+    tag "rnaframework/rctools"
+    config "./nextflow.config"
+
+    test("rfrctools_extract - stub single rc file") {
+
+        options "-stub"
+
+        when {
+            params {
+                module_args = ''
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'test_sample' ],
+                    file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta', checkIfExists: true),
+                    file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta.fai', checkIfExists: true),
+                    file("${projectDir}/modules/local/rnaframework/rctools/extract/tests/fixtures/test_summary.tsv", checkIfExists: true)
+                ])
+                input[1] = Channel.of([
+                    [ id:'ref' ],
+                    file("${projectDir}/modules/local/rnaframework/rctools/extract/tests/fixtures/test.gtf", checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.rc.size() == 1 },
+                { assert process.out.rci.size() == 1 },
+                { assert path(process.out.rc[0][1]).exists() },
+                { assert path(process.out.rci[0][1]).exists() }
+            )
+        }
+    }
+
+    test("rfrctools_extract - stub multiple rc files (stranded)") {
+
+        options "-stub"
+
+        when {
+            params {
+                module_args = ''
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'test_stranded' ],
+                    [
+                        file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta', checkIfExists: true),
+                        file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta.fai', checkIfExists: true)
+                    ],
+                    [
+                        file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam.bai', checkIfExists: true)
+                    ],
+                    file("${projectDir}/modules/local/rnaframework/rctools/extract/tests/fixtures/test_summary.tsv", checkIfExists: true)
+                ])
+                input[1] = Channel.of([
+                    [ id:'ref' ],
+                    file("${projectDir}/modules/local/rnaframework/rctools/extract/tests/fixtures/test.gtf", checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.rc.size() == 1 },
+                { assert process.out.rci.size() == 1 }
+            )
+        }
+    }
+
+    test("rfrctools_extract - stub with gene_id attribute") {
+
+        options "-stub"
+
+        when {
+            params {
+                module_args = '-b gene_id'
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'test_gene_id' ],
+                    file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta', checkIfExists: true),
+                    file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta.fai', checkIfExists: true),
+                    file("${projectDir}/modules/local/rnaframework/rctools/extract/tests/fixtures/test_summary.tsv", checkIfExists: true)
+                ])
+                input[1] = Channel.of([
+                    [ id:'ref' ],
+                    file("${projectDir}/modules/local/rnaframework/rctools/extract/tests/fixtures/test.gtf", checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.rc.size() == 1 },
+                { assert process.out.rci.size() == 1 }
+            )
+        }
+    }
+}

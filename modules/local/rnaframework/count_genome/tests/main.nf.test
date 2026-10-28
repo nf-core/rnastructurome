@@ -1,0 +1,116 @@
+nextflow_process {
+
+    name "Test Process RNAFRAMEWORK_RFCOUNT_GENOME"
+    script "../main.nf"
+    process "RNAFRAMEWORK_RFCOUNT_GENOME"
+
+    tag "modules"
+    tag "modules_local"
+    tag "rnaframework"
+    tag "rnaframework/count_genome"
+    config "./nextflow.config"
+
+    test("rfcount_genome - stub RT-stop") {
+
+        options "-stub"
+
+        when {
+            params {
+                module_args = '--library-strandedness unstranded'
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'test_rtstop', principle:'RT-stop', single_end:true, strandedness:'unstranded' ],
+                    file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam', checkIfExists: true),
+                    file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam.bai', checkIfExists: true)
+                ])
+                input[1] = Channel.of([
+                    [ id:'ref' ],
+                    file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.rc.size() == 1 },
+                { assert process.out.rci.size() == 1 },
+                { assert process.out.index_rci.size() == 1 },
+                { assert process.out.error_log.size() == 1 },
+                { assert process.out.samtools_log.size() == 1 },
+                { assert process.out.summary.size() == 1 },
+                { assert path(process.out.summary[0][1]).text.contains('covered') }
+            )
+        }
+    }
+
+    test("rfcount_genome - stub MaP") {
+
+        options "-stub"
+
+        when {
+            params {
+                module_args = '-m --library-strandedness unstranded'
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'test_map', principle:'MaP', single_end:false, strandedness:'unstranded' ],
+                    file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam', checkIfExists: true),
+                    file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam.bai', checkIfExists: true)
+                ])
+                input[1] = Channel.of([
+                    [ id:'ref' ],
+                    file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.rc.size() == 1 },
+                { assert process.out.rci.size() == 1 },
+                { assert process.out.index_rci.size() == 1 },
+                { assert process.out.summary.size() == 1 },
+                { assert path(process.out.summary[0][1]).text.contains('covered') }
+            )
+        }
+    }
+
+    test("rfcount_genome - stub stranded") {
+
+        options "-stub"
+
+        when {
+            params {
+                module_args = '--library-strandedness first'
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'test_stranded', principle:'RT-stop', single_end:true, strandedness:'first' ],
+                    file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam', checkIfExists: true),
+                    file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam.bai', checkIfExists: true)
+                ])
+                input[1] = Channel.of([
+                    [ id:'ref' ],
+                    file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.rc.size() == 1 },
+                { assert process.out.summary.size() == 1 }
+            )
+        }
+    }
+}

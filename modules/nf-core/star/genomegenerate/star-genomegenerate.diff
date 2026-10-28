@@ -1,0 +1,51 @@
+Changes in component 'nf-core/star/genomegenerate'
+'modules/nf-core/star/genomegenerate/environment.yml' is unchanged
+'modules/nf-core/star/genomegenerate/meta.yml' is unchanged
+Changes in 'star/genomegenerate/main.nf':
+--- modules/nf-core/star/genomegenerate/main.nf
++++ modules/nf-core/star/genomegenerate/main.nf
+@@ -15,16 +15,16 @@
+     tuple val(meta), path("star")  , emit: index
+     tuple val("${task.process}"), val('star'), eval('STAR --version | sed -e "s/STAR_//g"'), emit: versions_star, topic: versions
+     tuple val("${task.process}"), val('samtools'), eval("samtools --version | sed -n '1s/samtools //p'"), emit: versions_samtools, topic: versions
+-    tuple val("${task.process}"), val('gawk'), eval("gawk --version | sed -n '1{s/GNU Awk //;s/,.*//;p}'"), emit: versions_gawk, topic: versions
++    tuple val("${task.process}"), val('gawk'), eval("gawk --version | sed -n '1s/GNU Awk \\([0-9.]*\\).*/\\1/p'"), emit: versions_gawk, topic: versions
+ 
+     when:
+     task.ext.when == null || task.ext.when
+ 
+     script:
+-    def args        = task.ext.args ?: ''
+-    def args_list   = args.tokenize()
+-    def memory      = task.memory ? "--limitGenomeGenerateRAM ${task.memory.toBytes() - 100000000}" : ''
+-    def include_gtf = gtf ? "--sjdbGTFfile $gtf" : ''
++    def args          = task.ext.args ?: ''
++    def args_list     = args.tokenize()
++    def memory        = task.memory ? "--limitGenomeGenerateRAM ${task.memory.toBytes() - 100000000}" : ''
++    def include_gtf   = gtf ? "--sjdbGTFfile ${gtf}" : ''
+     if (args_list.contains('--genomeSAindexNbases')) {
+         """
+         mkdir star
+@@ -41,6 +41,10 @@
+         """
+         samtools faidx $fasta
+         NUM_BASES=`gawk '{sum = sum + \$2}END{if ((log(sum)/log(2))/2 - 1 > 14) {printf "%.0f", 14} else {printf "%.0f", (log(sum)/log(2))/2 - 1}}' ${fasta}.fai`
++        # STAR's own recommendation for small/few-contig genomes (e.g. a single MT chromosome): scale
++        # down --genomeChrBinNbits too, or it stays at its default (18) and can corrupt downstream
++        # lookups quantMode TranscriptomeSAM depends on (geneInfo.tab/transcriptInfo.tab).
++        CHR_BIN_BITS=`gawk '{sum = sum + \$2; n++}END{v = (log(sum/n)/log(2)); if (v > 18) {printf "%.0f", 18} else {printf "%.0f", v}}' ${fasta}.fai`
+ 
+         mkdir star
+         STAR \\
+@@ -50,6 +54,7 @@
+             $include_gtf \\
+             --runThreadN $task.cpus \\
+             --genomeSAindexNbases \$NUM_BASES \\
++            --genomeChrBinNbits \$CHR_BIN_BITS \\
+             $memory \\
+             $args
+         """
+
+'modules/nf-core/star/genomegenerate/tests/main.nf.test.snap' is unchanged
+'modules/nf-core/star/genomegenerate/tests/main.nf.test' is unchanged
+************************************************************

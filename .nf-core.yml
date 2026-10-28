@@ -1,4 +1,8 @@
+repository_type: pipeline
+nf_core_version: 4.2.1
 lint:
+  # iGenomes support intentionally removed (Ensembl / NCBI / custom genome routes
+  # are used instead), so the igenomes config files do not exist.
   files_exist:
     - conf/igenomes.config
     - conf/igenomes_ignored.config
@@ -13,24 +17,26 @@ lint:
     - docs/images/nf-core-rnastructurome_logo_light.png
     - docs/images/nf-core-rnastructurome_logo_dark.png
     - .github/workflows/branch.yml
+  # bowtie_all: JSON false parses as Python False, Groovy false parses as string
+  # "false" — nf-core string-compares them and flags a mismatch for multi-type params.
   nextflow_config:
     - params.bowtie_all
     - config_defaults:
         - params.bowtie_all
+  # ensembl_species_map / ncbi_accessions_map have complex Groovy map defaults
+  # that nf-core's config parser cannot evaluate; the params are valid.
   schema_params: false
+  # ElementTree namespace syntax (triple-brace SVG NS) is falsely detected as Jinja.
   template_strings:
     - bin/r2dt_colour_svg.py
     - bin/viennarna_colour_svg.py
     - modules/local/r2dt/tests/test_r2dt_colour_svg.py
-nf_core_version: 4.2.1
-repository_type: pipeline
 template:
-  author: RNAcentral
-  description: This pipeline analyses chemical-based high-throughput RNA structure
-    probing data
-  force: false
-  is_nfcore: true
-  name: rnastructurome
   org: nf-core
-  outdir: .
+  name: rnastructurome
+  description: This pipeline analyses chemical-based high-throughput RNA structure probing data
+  author: RNAcentral
   version: 1.1.0
+  force: true
+  outdir: .
+  is_nfcore: true

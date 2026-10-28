@@ -1,0 +1,67 @@
+nextflow_process {
+
+    name "Test Process RNAFRAMEWORK_RFWIGGLE"
+    script "../main.nf"
+    process "RNAFRAMEWORK_RFWIGGLE"
+
+    tag "modules"
+    tag "modules_local"
+    tag "rnaframework"
+    tag "rnaframework/wiggle"
+    config "./nextflow.config"
+
+    test("rfwiggle - stub single xml") {
+
+        options "-stub"
+
+        when {
+            params {
+                module_args = ''
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group1' ],
+                    file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.wig.size() == 1 }
+            )
+        }
+    }
+
+    test("rfwiggle - stub multiple xmls") {
+
+        options "-stub"
+
+        when {
+            params {
+                module_args = ''
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group_multi' ],
+                    [
+                        file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta', checkIfExists: true),
+                        file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta.fai', checkIfExists: true)
+                    ]
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.wig.size() == 1 }
+            )
+        }
+    }
+}

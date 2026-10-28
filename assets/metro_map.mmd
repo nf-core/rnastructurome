@@ -1,0 +1,159 @@
+%%metro style: seqera
+%%metro line_order: definition
+%%metro legend: bl
+%%metro diamond_style: symmetric
+%%metro line_spread: centered | pre_processing_alignment, post_processing, rna_framework
+%%metro font_scale: 1.04
+%%metro x_spacing: 45
+
+%%metro file: input | FASTQ | Input
+%%metro file: rdat_out | .rdat
+%%metro file: bigwig_out | .bw
+%%metro file: svg_out | .svg
+%%metro file: db_out | .db
+%%metro file: fmi_out | FMI
+%%metro file: report_out | HTML
+
+%%metro line: transcriptome_rtstop | transcriptome RT-stop | #f2994a
+%%metro line: genome_rtstop | genome RT-stop | #eb5757
+%%metro line: genome_map | genome MaP | #2f80ed
+%%metro line: transcriptome_map | transcriptome MaP | #27ae60
+
+%%metro marker: umi_extract | circle, black
+%%metro marker: samtools_markdup | circle, black
+%%metro marker: umitools_dedup | circle, black
+%%metro marker: bowtie_align | circle, black
+%%metro marker: bowtie2_align | circle, black
+%%metro marker: rfcount_genome_rtstop | circle, black
+%%metro marker: rctools_rtstop | circle, black
+%%metro marker: rfcount_genome_map | circle, black
+%%metro marker: rctools_map | circle, black
+%%metro marker: jackknife | circle, black
+%%metro marker: eval | circle, black
+%%metro marker: structextract | circle, black
+%%metro marker_legend: circle, black | optional step
+%%metro marker_legend: square, open | score with control: rf-norm uses Ding (RT-stop) or Siegfried (MaP)
+%%metro marker_legend: square, solid | score without control: rf-norm uses Rouskin (RT-stop) or Zubradt (MaP)
+
+graph LR
+    %%metro grid: pre_processing_alignment | 0,0,1,2
+    %%metro grid: post_processing | 6,0
+    %%metro grid: reporting | 0,1
+    %%metro grid: rna_framework | 1,1,1,6
+
+    subgraph pre_processing_alignment [pre-processing/alignment]
+        input([ ])
+        cat_fastq([cat FASTQ])
+        fastqc_pre([FastQC])
+        umi_extract([UMI-tools Extract])
+        cutadapt_rtstop([Cutadapt])
+        cutadapt_map([Cutadapt MaP])
+        star_align_rtstop([STAR])
+        star_align_map([STAR])
+        bowtie_align([Bowtie])
+        bowtie2_align([Bowtie2])
+        fastqc_post([FastQC])
+
+        input -->|genome_rtstop,transcriptome_rtstop,genome_map,transcriptome_map| cat_fastq
+        cat_fastq -->|genome_rtstop,transcriptome_rtstop,genome_map,transcriptome_map| fastqc_pre
+        fastqc_pre -->|genome_rtstop,transcriptome_rtstop,genome_map,transcriptome_map| umi_extract
+        umi_extract -->|genome_rtstop,transcriptome_rtstop| cutadapt_rtstop
+        umi_extract -->|genome_map,transcriptome_map| cutadapt_map
+        cutadapt_rtstop -->|genome_rtstop| star_align_rtstop
+        cutadapt_rtstop -->|transcriptome_rtstop| bowtie_align
+        cutadapt_map -->|genome_map| star_align_map
+        cutadapt_map -->|transcriptome_map| bowtie2_align
+        star_align_rtstop -->|genome_rtstop| fastqc_post
+        bowtie_align -->|transcriptome_rtstop| fastqc_post
+        star_align_map -->|genome_map| fastqc_post
+        bowtie2_align -->|transcriptome_map| fastqc_post
+    end
+
+    subgraph post_processing [post-processing]
+        samtools_core([SAMtools:\nsort, index])
+        samtools_markdup([SAMtools Markdup (not recommended)])
+        umitools_dedup([UMI-tools Dedup])
+        samtools_stats([SAMtools Stats])
+
+        samtools_core -->|genome_rtstop,transcriptome_rtstop,genome_map,transcriptome_map| samtools_markdup
+        samtools_core -->|genome_rtstop,transcriptome_rtstop,genome_map,transcriptome_map| umitools_dedup
+        samtools_markdup -->|genome_rtstop,transcriptome_rtstop,genome_map,transcriptome_map| samtools_stats
+        umitools_dedup -->|genome_rtstop,transcriptome_rtstop,genome_map,transcriptome_map| samtools_stats
+    end
+
+    subgraph rna_framework [RNA Framework]
+        %%metro direction: RL
+        %%metro off_track: jackknife, fmi_out, eval, structextract
+        %%metro group: QUANTIFY REACTIVITY | rfcount_genome_rtstop, rfcount_rtstop, rctools_rtstop, rfcount_genome_map, rfcount_map, rctools_map | below
+        %%metro group: NORMALISE REACTIVITIES | score_with_control_rtstop, score_without_control_rtstop, score_with_control_map, score_without_control_map, rfnorm | below
+        %%metro group: FOLD STRUCTURES | correlate, rffold, jackknife, eval, structextract | below
+        rfcount_genome_rtstop([count-genome])
+        rfcount_rtstop([count])
+        rctools_rtstop([rctools])
+        _merge_rtstop
+        score_with_control_rtstop([score with control])
+        score_without_control_rtstop([score without control])
+        rfcount_genome_map([count-genome])
+        rfcount_map([count])
+        rctools_map([rctools])
+        _merge_map
+        score_with_control_map([score with control])
+        score_without_control_map([score without control])
+        rfnorm([normalise])
+        correlate([correlate])
+        rffold([fold])
+        jackknife([jackknife])
+        fmi_out([ ])
+        eval([eval])
+        structextract([structextract])
+        output([output])
+        rdat_out([ ])
+        bigwig_out([ ])
+        svg_out([ ])
+        db_out([ ])
+
+        rfcount_genome_rtstop -->|genome_rtstop| rctools_rtstop
+        rctools_rtstop -->|genome_rtstop| _merge_rtstop
+        rfcount_rtstop -->|transcriptome_rtstop| _merge_rtstop
+        _merge_rtstop -->|genome_rtstop,transcriptome_rtstop| score_with_control_rtstop
+        _merge_rtstop -->|genome_rtstop,transcriptome_rtstop| score_without_control_rtstop
+        score_with_control_rtstop -->|genome_rtstop,transcriptome_rtstop| rfnorm
+        score_without_control_rtstop -->|genome_rtstop,transcriptome_rtstop| rfnorm
+
+        rfcount_genome_map -->|genome_map| rctools_map
+        rctools_map -->|genome_map| _merge_map
+        rfcount_map -->|transcriptome_map| _merge_map
+        _merge_map -->|genome_map,transcriptome_map| score_with_control_map
+        _merge_map -->|genome_map,transcriptome_map| score_without_control_map
+        score_with_control_map -->|genome_map,transcriptome_map| rfnorm
+        score_without_control_map -->|genome_map,transcriptome_map| rfnorm
+
+        rfnorm -->|genome_rtstop,transcriptome_rtstop,genome_map,transcriptome_map| correlate
+        rfnorm -->|genome_rtstop,transcriptome_rtstop,genome_map,transcriptome_map| jackknife
+        jackknife -->|genome_rtstop,transcriptome_rtstop,genome_map,transcriptome_map| fmi_out
+        correlate -->|genome_rtstop,transcriptome_rtstop,genome_map,transcriptome_map| rffold
+        rffold -->|genome_rtstop,transcriptome_rtstop,genome_map,transcriptome_map| eval
+        rffold -->|genome_rtstop,transcriptome_rtstop,genome_map,transcriptome_map| structextract
+        rffold -->|genome_rtstop,transcriptome_rtstop,genome_map,transcriptome_map| output
+        output -->|genome_rtstop,transcriptome_rtstop,genome_map,transcriptome_map| rdat_out
+        rdat_out -->|genome_rtstop,transcriptome_rtstop,genome_map,transcriptome_map| bigwig_out
+        bigwig_out -->|genome_rtstop,transcriptome_rtstop,genome_map,transcriptome_map| svg_out
+        svg_out -->|genome_rtstop,transcriptome_rtstop,genome_map,transcriptome_map| db_out
+    end
+
+    subgraph reporting [reporting]
+        %%metro direction: RL
+        %%metro entry: right | genome_rtstop, transcriptome_rtstop, genome_map, transcriptome_map
+        multiqc([MultiQC])
+        report_out([ ])
+
+        multiqc -->|genome_rtstop,transcriptome_rtstop,genome_map,transcriptome_map| report_out
+    end
+
+    %% Inter-section edges
+    fastqc_post -->|genome_rtstop,transcriptome_rtstop,genome_map,transcriptome_map| samtools_core
+    samtools_stats -->|genome_rtstop| rfcount_genome_rtstop
+    samtools_stats -->|transcriptome_rtstop| rfcount_rtstop
+    samtools_stats -->|genome_map| rfcount_genome_map
+    samtools_stats -->|transcriptome_map| rfcount_map
+    output -->|genome_rtstop,transcriptome_rtstop,genome_map,transcriptome_map| multiqc

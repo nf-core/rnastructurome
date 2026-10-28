@@ -1,0 +1,73 @@
+name: "rnaframework_rfrctools_extract"
+description: Strand-aware extraction of per-transcript RC counts from genome-level RC data using rf-rctools and a GTF
+keywords:
+  - rnaframework
+  - rf-rctools
+  - rc
+  - extract
+  - transcript
+  - chemical probing
+tools:
+  - "rnaframework":
+      description: "RNA Framework — a suite for the analysis of RNA structure probing data; rf-rctools indexes and extracts RC count files."
+      homepage: "https://rnaframework-docs.readthedocs.io"
+      documentation: "https://rnaframework-docs.readthedocs.io"
+      tool_dev_url: "https://github.com/dincarnato/RNAFramework"
+      licence: ["GPL-3.0-or-later"]
+      identifier: ""
+
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. `[ id:'sample1' ]`
+    - rc:
+        type: file
+        description: Genome-level RC count file(s) (e.g. `Sample.plus.rc`, `Sample.minus.rc`)
+        pattern: "*.rc"
+    - rci:
+        type: file
+        description: RC index file(s) accompanying the RC files
+        pattern: "*.rc.rci"
+  - - meta_ref:
+        type: map
+        description: |
+          Groovy Map containing reference information
+          e.g. `[ id:'homo_sapiens' ]`
+    - gtf:
+        type: file
+        description: GTF annotation used for strand-aware transcript extraction
+        pattern: "*.{gtf,gtf.gz}"
+
+output:
+  - rc:
+      - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1' ]`
+      - "${prefix}_rctools_extract/${prefix}.rc":
+          type: file
+          description: Per-transcript extracted RC count file
+          pattern: "*_rctools_extract/*.rc"
+  - rci:
+      - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1' ]`
+      - "${prefix}_rctools_extract/${prefix}.rc.rci":
+          type: file
+          description: Index for the extracted RC count file
+          pattern: "*_rctools_extract/*.rc.rci"
+  - versions:
+      - "versions.yml":
+          type: file
+          description: File containing software versions
+          pattern: "versions.yml"
+
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"

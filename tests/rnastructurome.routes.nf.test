@@ -1,0 +1,95 @@
+nextflow_workflow {
+
+    name "Test Workflow RNASTRUCTUROME (route selection)"
+    script "../workflows/rnastructurome.nf"
+    config "${new File('tests/nextflow.config').absolutePath}"
+    workflow "RNASTRUCTUROME"
+    tag "workflows"
+    tag "rnastructurome"
+
+    test("Runs with a minimal RT-stop sample") {
+
+        options "-stub"
+
+        when {
+            params {
+                outdir       = "$outputDir"
+                fasta        = "https://raw.githubusercontent.com/nf-core/test-datasets/rnastructurome/testdata/test_transcriptome/Homo_sapiens.GRCh38.ENST00000389680.fa"
+                count_genome = false
+            }
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id:'workflow_rtstop', sample_id:'workflow_rtstop', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'workflow_line', replicate:'rep1', condition:'treated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ]
+                )
+                input[1] = true
+                """
+            }
+        }
+
+        then {
+            def versions = path("${outputDir}/pipeline_info/nf_core_rnastructurome_software_mqc_versions.yml").text
+            assertAll(
+                { assert workflow.success },
+                { assert workflow.out.mapped_bam.size() == 1 },
+                { assert workflow.out.mapped_bam[0][0].id == 'workflow_rtstop' },
+                // Transcriptome route: Bowtie against the transcript FASTA, then rf-count on it.
+                { assert versions.contains('BOWTIE_ALIGN') },
+                { assert versions.contains('RNAFRAMEWORK_RFCOUNT:') },
+                { assert snapshot(
+                    workflow.out.mapped_bam,
+                    // R2DT is container-only (custom CM image), so it emits no version entry under
+                    // -profile conda; drop it so the versions snapshot matches across all engines.
+                    removeNextflowVersion("${outputDir}/pipeline_info/nf_core_rnastructurome_software_mqc_versions.yml")
+                        .findAll { process, _v -> process != 'R2DT' }
+                ).match() }
+            )
+        }
+    }
+
+    test("Runs the legacy count_genome route") {
+
+        options "-stub"
+
+        when {
+            params {
+                outdir       = "$outputDir"
+                fasta        = "https://raw.githubusercontent.com/nf-core/test-datasets/rnastructurome/testdata/test_transcriptome/Homo_sapiens.GRCh38.ENST00000389680.fa"
+                count_genome = true
+            }
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id:'workflow_rtstop', sample_id:'workflow_rtstop', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'workflow_line', replicate:'rep1', condition:'treated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ]
+                )
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            def versions = path("${outputDir}/pipeline_info/nf_core_rnastructurome_software_mqc_versions.yml").text
+            assertAll(
+                { assert workflow.success },
+                { assert workflow.out.mapped_bam.size() == 1 },
+                { assert workflow.out.mapped_bam[0][0].id == 'workflow_rtstop' },
+                // Genome route with count_genome: rf-count-genome, then rf-rctools extract to transcripts.
+                { assert versions.contains('RNAFRAMEWORK_RFCOUNT_GENOME') },
+                { assert versions.contains('RNAFRAMEWORK_RFRCTOOLS_EXTRACT') },
+                { assert snapshot(
+                    workflow.out.mapped_bam,
+                    // R2DT is container-only (custom CM image), so it emits no version entry under
+                    // -profile conda; drop it so the versions snapshot matches across all engines.
+                    removeNextflowVersion("${outputDir}/pipeline_info/nf_core_rnastructurome_software_mqc_versions.yml")
+                        .findAll { process, _v -> process != 'R2DT' }
+                ).match() }
+            )
+        }
+    }
+}

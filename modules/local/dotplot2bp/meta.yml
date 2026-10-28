@@ -1,0 +1,58 @@
+name: rnaframework_dotplot2bp
+description: Convert RNAFramework dotplot .dp files to IGV .bp genomic arc files using transcript annotation
+keywords:
+  - rnaframework
+  - igv
+  - dotplot
+  - gtf
+tools:
+  - python:
+      description: Python runtime used to remap transcript-level base pairs onto genomic coordinates.
+      homepage: https://www.python.org/
+      documentation: https://docs.python.org/3/
+      licence: ["Python-2.0"]
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing group/sample information
+          e.g. [ id:'group1', organism:'Homo sapiens' ]
+    - fold_dir:
+        type: directory
+        description: RNAFramework fold output directory containing dotplot files
+        pattern: "*"
+    - gtf:
+        type: file
+        description: Transcript annotation GTF used to map transcript coordinates to genome coordinates
+        pattern: "*.{gtf,gtf.gz}"
+output:
+  bp:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing group/sample information
+      - "*.bp":
+          type: file
+          description: IGV .bp genomic arc file derived from a RNAFramework .dp dotplot
+          pattern: "*.bp"
+          ontologies: []
+  warnings:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing group/sample information
+      - "conversion_warnings.log":
+          type: file
+          description: Optional warning log for skipped dotplot conversions
+          pattern: "conversion_warnings.log"
+          ontologies: []
+  versions:
+    - "versions.yml":
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies: []
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"

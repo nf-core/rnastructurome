@@ -1,0 +1,45 @@
+nextflow_process {
+
+    name "Test Process NCBI_GTF"
+    script "../main.nf"
+    process "NCBI_GTF"
+
+    tag "modules"
+    tag "modules_local"
+    tag "ncbi"
+    tag "ncbi/gtf"
+    config "./nextflow.config"
+
+    test("generates synthetic single-exon GTF from gzipped FASTA fixture") {
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'test_virus', organism:'test virus' ],
+                    file("${projectDir}/modules/local/ncbi/gtf/tests/fixtures/test_virus.fa.gz", checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.gtf.size() == 1 },
+                {
+                    def gtfText = path(process.out.gtf[0][1]).text
+                    // Both sequences become transcript + exon records
+                    assert gtfText.count('\ttranscript\t') == 2
+                    assert gtfText.count('\texon\t') == 2
+                    assert gtfText.contains('NC_TEST1.1')
+                    assert gtfText.contains('NC_TEST2.1')
+                    assert gtfText.contains('transcript_id "NC_TEST1.1"')
+                    assert gtfText.contains('transcript_id "NC_TEST2.1"')
+                    assert gtfText.contains('gene_id "NC_TEST1.1"')
+                },
+                { assert process.out.versions_python[0][1] == 'python' && process.out.versions_python[0][2] }
+            )
+        }
+    }
+}

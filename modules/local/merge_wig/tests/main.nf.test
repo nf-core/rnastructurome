@@ -1,0 +1,93 @@
+nextflow_process {
+
+    name "Test Process MERGE_WIG"
+    script "../main.nf"
+    process "MERGE_WIG"
+
+    tag "modules"
+    tag "modules_local"
+    tag "merge_wig"
+    config "./nextflow.config"
+
+    test("merge wiggle files") {
+
+        when {
+            params {
+                module_prefix = 'group1'
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group1' ],
+                    [
+                        file("${projectDir}/modules/local/merge_wig/tests/fixtures/TX1.wig", checkIfExists: true),
+                        file("${projectDir}/modules/local/merge_wig/tests/fixtures/TX2.wig", checkIfExists: true)
+                    ]
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.merged_wig.size() == 1 },
+                {
+                    def mergedText = path(process.out.merged_wig[0][1]).text
+                    assert mergedText.readLines() == [
+                        'track type=wiggle_0',
+                        'fixedStep chrom=TX1 start=1 step=1',
+                        '1',
+                        '2',
+                        'variableStep chrom=TX2',
+                        '1 5'
+                    ]
+                }
+            )
+        }
+    }
+
+    test("fails when no WIG files are staged") {
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'empty' ],
+                    file("${projectDir}/modules/local/merge_wig/tests/fixtures/TX1.xml", checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert !process.success },
+                { assert process.exitStatus == 1 }
+            )
+        }
+    }
+
+    test("merge wiggle files - stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group1' ],
+                    file("${projectDir}/modules/local/merge_wig/tests/fixtures/TX1.wig", checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.merged_wig.size() == 1 }
+            )
+        }
+    }
+}

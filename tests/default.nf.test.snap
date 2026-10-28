@@ -1,0 +1,296 @@
+{
+    "-profile test": {
+        "content": [
+            {
+                "BEDOPS_GTF2BED": {
+                    "bedops": "2.4.42"
+                },
+                "CAT_FASTQ": {
+                    "cat": 9.5
+                },
+                "CUTADAPT_RTSTOP": {
+                    "cutadapt": 5.2
+                },
+                "FASTA_SORT_LOCAL": {
+                    "seqkit": "2.9.0"
+                },
+                "FASTQC_POST": {
+                    "fastqc": "0.12.1"
+                },
+                "FASTQC_PRE": {
+                    "fastqc": "0.12.1"
+                },
+                "MERGE_BP": {
+                    "python": "3.12.12"
+                },
+                "MERGE_BP_TRANSCRIPT": {
+                    "python": "3.12.12"
+                },
+                "MERGE_SHANNON_WIG": {
+                    "cat": 9.11
+                },
+                "MERGE_WIG": {
+                    "cat": 9.11
+                },
+                "RNAFRAMEWORK_DOTPLOT2BP": {
+                    "python": "3.12.12"
+                },
+                "RNAFRAMEWORK_DOTPLOT2BP_TRANSCRIPT": {
+                    "python": "3.12.12"
+                },
+                "RNAFRAMEWORK_RFCOUNT_GENOME": {
+                    "rnaframework": "2.9.8"
+                },
+                "RNAFRAMEWORK_RFFOLD": {
+                    "rnaframework": "2.9.8"
+                },
+                "RNAFRAMEWORK_RFNORM": {
+                    "rnaframework": "2.9.8"
+                },
+                "RNAFRAMEWORK_RFRCTOOLS_EXTRACT": {
+                    "rnaframework": "2.9.8"
+                },
+                "RNAFRAMEWORK_RFWIGGLE": {
+                    "rnaframework": "2.9.8"
+                },
+                "RNAFRAMEWORK_TORDAT": {
+                    "python": "3.12.12"
+                },
+                "RSEQC_INFEREXPERIMENT": {
+                    "rseqc": "5.0.4"
+                },
+                "SAMTOOLS_FLAGSTAT": {
+                    "samtools": "1.23.1"
+                },
+                "SAMTOOLS_IDXSTATS": {
+                    "samtools": "1.23.1"
+                },
+                "SAMTOOLS_INDEX_FINAL": {
+                    "samtools": "1.23.1"
+                },
+                "SAMTOOLS_INDEX_SORT": {
+                    "samtools": "1.23.1"
+                },
+                "SAMTOOLS_SORT": {
+                    "samtools": "1.23.1"
+                },
+                "SAMTOOLS_STATS": {
+                    "samtools": "1.23.1"
+                },
+                "STAR_ALIGN_RTSTOP": {
+                    "gawk": "5.1.0",
+                    "samtools": 1.21,
+                    "star": "2.7.11b"
+                },
+                "STAR_GENOMEGENERATE": {
+                    "gawk": "5.1.0",
+                    "samtools": 1.21,
+                    "star": "2.7.11b"
+                },
+                "UCSC_WIGTOBIGWIG_REACTIVITY": {
+                    "ucsc": 482
+                },
+                "UCSC_WIGTOBIGWIG_SHANNON": {
+                    "ucsc": 482
+                },
+                "UCSC_WIGTOBIGWIG_TRANSCRIPT_REACTIVITY": {
+                    "ucsc": 482
+                },
+                "UCSC_WIGTOBIGWIG_TRANSCRIPT_SHANNON": {
+                    "ucsc": 482
+                },
+                "VIENNARNA": {
+                    "viennarna": "2.7.2"
+                },
+                "WIG_CHROM_SIZES_REACTIVITY": {
+                    "python": "3.12.12"
+                },
+                "WIG_CHROM_SIZES_SHANNON": {
+                    "python": "3.12.12"
+                },
+                "WIG_TO_GENOME_REACTIVITY": {
+                    "python": "3.12.12"
+                },
+                "WIG_TO_GENOME_SHANNON": {
+                    "python": "3.12.12"
+                },
+                "Workflow": {
+                    "nf-core/rnastructurome": "v1.1.0"
+                }
+            },
+            [
+                "cat",
+                "cat/HEK293T_treated_r1.merged.fastq.gz",
+                "cat/HEK293T_untreated_r1.merged.fastq.gz",
+                "count",
+                "count/HEK293T_treated_r1",
+                "count/HEK293T_treated_r1/HEK293T_treated_r1.rc",
+                "count/HEK293T_treated_r1/HEK293T_treated_r1.rc.rci",
+                "count/HEK293T_treated_r1/HEK293T_treated_r1.rfcount_genome.log",
+                "count/HEK293T_treated_r1/HEK293T_treated_r1.sorted.minus.rc",
+                "count/HEK293T_treated_r1/HEK293T_treated_r1.sorted.plus.rc",
+                "count/HEK293T_treated_r1/index.rci",
+                "count/HEK293T_untreated_r1",
+                "count/HEK293T_untreated_r1/HEK293T_untreated_r1.rc",
+                "count/HEK293T_untreated_r1/HEK293T_untreated_r1.rc.rci",
+                "count/HEK293T_untreated_r1/HEK293T_untreated_r1.rfcount_genome.log",
+                "count/HEK293T_untreated_r1/HEK293T_untreated_r1.sorted.minus.rc",
+                "count/HEK293T_untreated_r1/HEK293T_untreated_r1.sorted.plus.rc",
+                "count/HEK293T_untreated_r1/index.rci",
+                "count/rfcount_summary_all_samples.tsv",
+                "cutadapt",
+                "cutadapt/HEK293T_treated_r1.cutadapt.log",
+                "cutadapt/HEK293T_treated_r1.trim.fastq.gz",
+                "cutadapt/HEK293T_untreated_r1.cutadapt.log",
+                "cutadapt/HEK293T_untreated_r1.trim.fastq.gz",
+                "fastqc",
+                "fastqc/HEK293T_treated_r1_fastqc.html",
+                "fastqc/HEK293T_treated_r1_fastqc.zip",
+                "fastqc/HEK293T_treated_r1_trimmed_trimmed_fastqc.html",
+                "fastqc/HEK293T_treated_r1_trimmed_trimmed_fastqc.zip",
+                "fastqc/HEK293T_untreated_r1_fastqc.html",
+                "fastqc/HEK293T_untreated_r1_fastqc.zip",
+                "fastqc/HEK293T_untreated_r1_trimmed_trimmed_fastqc.html",
+                "fastqc/HEK293T_untreated_r1_trimmed_trimmed_fastqc.zip",
+                "fold",
+                "fold/HEK293T",
+                "fold/HEK293T/bp",
+                "fold/HEK293T/bp/ENST00000389680.bp",
+                "fold/HEK293T/rdat",
+                "fold/HEK293T/rdat/ENST00000389680.rdat",
+                "fold/HEK293T/rffold.log",
+                "fold/HEK293T/shannon",
+                "fold/HEK293T/shannon/ENST00000389680.wig",
+                "fold/HEK293T/structures",
+                "fold/genome_bp",
+                "fold/genome_bp/HEK293T_genome.bp",
+                "fold/shannon_genome_bw",
+                "fold/shannon_genome_bw/HEK293T_shannon_genome.bw",
+                "fold/shannon_transcript_bw",
+                "fold/shannon_transcript_bw/HEK293T_shannon_transcript.bw",
+                "fold/transcript_bp",
+                "fold/transcript_bp/HEK293T_transcript.bp",
+                "multiqc",
+                "multiqc/multiqc_report.html",
+                "norm",
+                "norm/HEK293T_1",
+                "norm/HEK293T_1/rfnorm.log",
+                "norm/HEK293T_1/wiggle",
+                "norm/HEK293T_1/wiggle/HEK293T_1.wig",
+                "norm/HEK293T_1/xml",
+                "norm/HEK293T_1/xml/ENST00000389680.xml",
+                "norm/genome_bw",
+                "norm/genome_bw/HEK293T_reactivity_genome.bw",
+                "norm/transcript_bw",
+                "norm/transcript_bw/HEK293T_reactivity_transcript.bw",
+                "pipeline_info",
+                "pipeline_info/nf_core_rnastructurome_software_mqc_versions.yml",
+                "rseqc",
+                "rseqc/HEK293T_treated_r1.infer_experiment.txt",
+                "rseqc/HEK293T_untreated_r1.infer_experiment.txt",
+                "samtools",
+                "samtools/HEK293T_treated_r1.flagstat",
+                "samtools/HEK293T_treated_r1.idxstats",
+                "samtools/HEK293T_treated_r1.sorted.bam",
+                "samtools/HEK293T_treated_r1.sorted.bam.bai",
+                "samtools/HEK293T_treated_r1.stats",
+                "samtools/HEK293T_untreated_r1.flagstat",
+                "samtools/HEK293T_untreated_r1.idxstats",
+                "samtools/HEK293T_untreated_r1.sorted.bam",
+                "samtools/HEK293T_untreated_r1.sorted.bam.bai",
+                "samtools/HEK293T_untreated_r1.stats",
+                "star",
+                "star/HEK293T_treated_r1.Aligned.out.bam",
+                "star/HEK293T_treated_r1.Log.final.out",
+                "star/HEK293T_treated_r1.Log.out",
+                "star/HEK293T_treated_r1.Log.progress.out",
+                "star/HEK293T_treated_r1.SJ.out.tab",
+                "star/HEK293T_untreated_r1.Aligned.out.bam",
+                "star/HEK293T_untreated_r1.Log.final.out",
+                "star/HEK293T_untreated_r1.Log.out",
+                "star/HEK293T_untreated_r1.Log.progress.out",
+                "star/HEK293T_untreated_r1.SJ.out.tab",
+                "star/star",
+                "star/star/Genome",
+                "star/star/Log.out",
+                "star/star/SA",
+                "star/star/SAindex",
+                "star/star/chrLength.txt",
+                "star/star/chrName.txt",
+                "star/star/chrNameLength.txt",
+                "star/star/chrStart.txt",
+                "star/star/exonGeTrInfo.tab",
+                "star/star/exonInfo.tab",
+                "star/star/geneInfo.tab",
+                "star/star/genomeParameters.txt",
+                "star/star/sjdbInfo.txt",
+                "star/star/sjdbList.fromGTF.out.tab",
+                "star/star/sjdbList.out.tab",
+                "star/star/transcriptInfo.tab"
+            ],
+            [
+                "HEK293T_treated_r1.merged.fastq.gz:md5,55840ed9897fd284f8fdc0d149ec5a05",
+                "HEK293T_untreated_r1.merged.fastq.gz:md5,1a479e6226243d8db026f00404eae88d",
+                "HEK293T_treated_r1.rc:md5,020c5cc15326106d894e73ad5ba7e4f2",
+                "HEK293T_treated_r1.rc.rci:md5,23ea091fbf287d5b30a7f8dc5a25ece9",
+                "HEK293T_treated_r1.rfcount_genome.log:md5,cdeaeb19b2f40aa216a0bd2e895f3d57",
+                "HEK293T_treated_r1.sorted.minus.rc:md5,eeeb37471f6f1c63020f4167e7001021",
+                "HEK293T_treated_r1.sorted.plus.rc:md5,e2293436f0aade24d266a0daba7864a7",
+                "index.rci:md5,cb579b03d485b47dce19f1a09293c6c7",
+                "HEK293T_untreated_r1.rc:md5,f6e665edf03191690346317c0f8cd6ef",
+                "HEK293T_untreated_r1.rc.rci:md5,535a2520f243a0ce17e19e36c7950eee",
+                "HEK293T_untreated_r1.rfcount_genome.log:md5,b004470b01f02e7d19066a250ae5e9e9",
+                "HEK293T_untreated_r1.sorted.minus.rc:md5,f7e7264d19260aae019e7357a3a913e6",
+                "HEK293T_untreated_r1.sorted.plus.rc:md5,51a8cbcdb4a0bef1b32d8e06f08506ee",
+                "index.rci:md5,cb579b03d485b47dce19f1a09293c6c7",
+                "rfcount_summary_all_samples.tsv:md5,ea35c992cb04b6d9f2d95142f4ce98ad",
+                "HEK293T_treated_r1.cutadapt.log:md5,e7e435aaadc95e2785163577052c92d2",
+                "HEK293T_treated_r1.trim.fastq.gz:md5,4ddfcb89ab2a4d3f23444a42cabdd77f",
+                "HEK293T_untreated_r1.cutadapt.log:md5,4856eb413f38d6d5e1fefad1eef7896f",
+                "HEK293T_untreated_r1.trim.fastq.gz:md5,fe65d456b2621d98fb8f4e81a2cb4e90",
+                "ENST00000389680.bp:md5,25da0904f44726108e91752cf01991cc",
+                "rffold.log:md5,0aaa33c23d2c3bc29c01833d51704c98",
+                "ENST00000389680.wig:md5,717d11c83a99243e1e9c0e56f9ee4f5a",
+                "HEK293T_genome.bp:md5,c25975e4ec67317bb88c0774f56666c2",
+                "HEK293T_shannon_genome.bw:md5,a7043be1f485d89e6639cb0d3b7562aa",
+                "HEK293T_shannon_transcript.bw:md5,cb0d9cd5a33f4e7986df829adb3d50bc",
+                "HEK293T_transcript.bp:md5,25da0904f44726108e91752cf01991cc",
+                "rfnorm.log:md5,d49c57428b6d2e361790774d81a25457",
+                "HEK293T_1.wig:md5,e5fb74fd4fae071bd0da41340451d749",
+                "ENST00000389680.xml:md5,1d188bb4842a19e9c2a4ccf626a06d0d",
+                "HEK293T_reactivity_genome.bw:md5,64e6892cb319b73d984eea2068239af5",
+                "HEK293T_reactivity_transcript.bw:md5,437c5d5803ef165850bfc74e9924a974",
+                "HEK293T_treated_r1.infer_experiment.txt:md5,4698d9a346e38272856ff8b57fff307b",
+                "HEK293T_untreated_r1.infer_experiment.txt:md5,3513e0f2eaf30f69107be20af46228c2",
+                "HEK293T_treated_r1.flagstat:md5,dde964b625e668271a6435c73e7a3b0a",
+                "HEK293T_treated_r1.idxstats:md5,94cf8a8e68cf45f989ba8a28c0017a24",
+                "HEK293T_treated_r1.stats:md5,4d584d3e15077f884a9dec1980c2b0ae",
+                "HEK293T_untreated_r1.flagstat:md5,15109df4fd1140928d3af5aa225218e7",
+                "HEK293T_untreated_r1.idxstats:md5,1e66a91ca745ca0753b6a6f86ae0d87a",
+                "HEK293T_untreated_r1.stats:md5,cb0bd4e06f296b34f9b871a6c39c4072",
+                "HEK293T_treated_r1.SJ.out.tab:md5,d41d8cd98f00b204e9800998ecf8427e",
+                "HEK293T_untreated_r1.SJ.out.tab:md5,d41d8cd98f00b204e9800998ecf8427e",
+                "Genome:md5,ae79513c8473db75dd96a6105b0eb6dc",
+                "SA:md5,0527fab679ff192ba1e41a37a4c920c3",
+                "SAindex:md5,b327217342d3468e69452a3029a443e8",
+                "chrLength.txt:md5,c0deaf46819564297fd69c490b69cf76",
+                "chrName.txt:md5,d9189e49407ad59a8d15e527a5262d88",
+                "chrNameLength.txt:md5,30b511352d47683c24e7d9b3ac75cea8",
+                "chrStart.txt:md5,67adf9a38295153bcf8280bc6ae49462",
+                "exonGeTrInfo.tab:md5,14ceda9b1d5973a2494ed26ecc5151a4",
+                "exonInfo.tab:md5,470eb75cd3b99b1429b0072267b333d6",
+                "geneInfo.tab:md5,5b8b8a2b82b050efc4a62aa3deae78cb",
+                "genomeParameters.txt:md5,6eabc0dae8b11a47a81c0be1827c7ef0",
+                "sjdbInfo.txt:md5,ad3a215e6d85cd5f8f857e9e21147c20",
+                "sjdbList.fromGTF.out.tab:md5,d41d8cd98f00b204e9800998ecf8427e",
+                "sjdbList.out.tab:md5,d41d8cd98f00b204e9800998ecf8427e",
+                "transcriptInfo.tab:md5,6285462c2dbf3119d7bc24fc696b98be"
+            ]
+        ],
+        "timestamp": "2026-10-13T10:17:01.095261",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "26.04.3"
+        }
+    }
+}

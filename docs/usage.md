@@ -4,158 +4,408 @@
 
 > _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
 
-## Introduction
+## Pipeline parameters
 
-<!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
+Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files supplied with `-c` can be used for infrastructure settings such as resources, executors, containers, or module arguments, but should not be used for ordinary pipeline parameters.
 
 ## Samplesheet input
 
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
+The easiest way to run this pipeline is to create a full samplesheet that contains all of the information about each sample in a comma-separated file, including the header row shown below and pass it as `--input '[path to samplesheet file]'`:
+
+```csv title="full_samplesheet.csv"
+sample,sample_id,fastq_1,fastq_2,method,principle,chemical,RT_enzyme,sample_group,condition,replicate,organism,pH,adapter_3p,adapter_5p,umi_pattern
+HEK293T_treated_r1,GSM000001,/data/treated_r1.fastq.gz,,SHAPE,RT-stop,NAI,M-MLV,HEK293T,treated,1,Homo sapiens,7.5,,,
+HEK293T_untreated_r1,GSM000002,/data/untreated_r1.fastq.gz,,SHAPE,RT-stop,NAI,M-MLV,HEK293T,untreated,1,Homo sapiens,7.5,,,
+```
+
+An [example samplesheet](../assets/samplesheet.csv) is provided.
+
+However, you can also provide a more minimal version if for example you don't need to specify some of the options, like in the example above you could decide to not provide the columns with information about the adapters or umi pattern if you are happy to use the default options.
+You can also provide a very minimal samplesheet with just the information required about each individual sample and pass the uniform values across all samples as parameters. For example:
+
+```csv title="minimal_samplesheet.csv"
+sample,fastq_1,sample_group,condition,replicate
+HEK293T_treated_r1,/data/treated_r1.fastq.gz,HEK293T,treated,1
+HEK293T_untreated_r1,/data/untreated_r1.fastq.gz,HEK293T,untreated,1
+```
+
+then pass essential but uniform options like this:
 
 ```bash
---input '[path to samplesheet file]'
+--input /path/to/samplesheet.csv --method SHAPE --principle RT-stop --organism "Homo sapiens"
 ```
 
-### Multiple runs of the same sample
+or in a `params` file.
 
-The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once e.g. to increase sequencing depth. The pipeline will concatenate the raw reads before performing any downstream analysis. Below is an example for the same sample sequenced across 3 lanes:
+### Column reference
 
-```csv title="samplesheet.csv"
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L004_R1_001.fastq.gz,AEG588A1_S1_L004_R2_001.fastq.gz
+| Column         | Required | Required in samplesheet | Description                                                                                                             |
+| -------------- | -------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `sample`       | yes      | yes                     | Sample identifier. Re-use the same name to concatenate re-sequenced samples (multi-lane support).                       |
+| `sample_id`    | no       | no                      | Unique identifier for an individual sequencing run.                                                                     |
+| `fastq_1`      | yes      | yes                     | Read 1 FASTQ path (`.fastq.gz` / `.fq.gz`).                                                                             |
+| `fastq_2`      | no       | no                      | Read 2 FASTQ path for paired-end data.                                                                                  |
+| `sample_group` | yes      | yes                     | Group key used for control pairing in `rf-norm`.                                                                        |
+| `condition`    | yes      | yes                     | One of `treated`, `untreated`, `denatured`.                                                                             |
+| `replicate`    | yes      | yes                     | Replicate key used for control pairing in `rf-norm`.                                                                    |
+| `method`       | yes      | no                      | Probing chemistry: `SHAPE` or `DMS`. Controls chemistry-specific defaults. Falls back to `--method`.                    |
+| `principle`    | yes      | no                      | Readout principle: `rt-stop` or `map`. Controls alignment, rf-count, and rf-norm defaults. Falls back to `--principle`. |
+| `chemical`     | no       | no                      | Probing reagent. Falls back to `--chemical`; if unset, rf-fold uses generic slope/intercept defaults.                   |
+| `RT_enzyme`    | no       | no                      | Reverse transcriptase enzyme. Falls back to `--RT_enzyme`; if unset, rf-count MaP settings use M-MLV defaults.          |
+| `organism`     | yes      | no                      | Used for automatic genome/transcriptome download from Ensembl/NCBI (e.g. `Homo sapiens`). Falls back to `--organism`.   |
+| `pH`           | no       | no                      | DMS reaction pH. Falls back to `--pH`; `pH >= 8.0` sets reactive bases to `ACGU`, otherwise DMS defaults to `AC`.       |
+| `adapter_3p`   | no       | no                      | 3′ adapter sequence passed to Cutadapt. Falls back to `--cutadapt_adapter_3p`, then `AGATCGGAAGAGC`.                    |
+| `adapter_5p`   | no       | no                      | 5′ adapter sequence passed to Cutadapt. Falls back to `--cutadapt_adapter_5p`, then `AGATCGGAAGAGC`.                    |
+| `umi_pattern`  | no       | no                      | UMI pattern passed to umi_tools. Falls back to `--umi_pattern`; if unset, UMI extraction is skipped.                    |
+
+## Other considerations and parameters
+
+### Using your own genome/transcriptome files
+
+This pipeline expects an `organism` parameter to be passed either in the samplesheet or as a global parameter, which will trigger an automatic download of FASTA and GTF files from Ensembl. In the cases of bacteria and viruses where Ensembl does not have a reference genome/transcriptome, it will look this up in NCBI and download the files from there instead. However, you can pass your own files if preferred. For this you need to use the `--fasta` and `--gtf` flags. If these flags are used, the pipeline will prioritise them over the Ensembl download even when `organism` is passed. Example of usage:
+
+```bash
+--input /path/to/samplesheet.csv --fasta /path/to/genome_or_transcriptome.fa.gz --gtf /path/to/annotation.gtf.gz
 ```
 
-### Full samplesheet
+The `--gtf` flag is optional. If you supply only `--fasta`, the pipeline enables the transcriptome route automatically with a warning, since the default genome route needs the GTF to extract and count transcripts. Without a GTF the run still produces all transcript-coordinate outputs (counts, reactivities, structures, transcript browser tracks and 2D diagrams) and skips only the annotation-dependent steps, each with a warning.
 
-The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 3 columns to match those defined in the table below.
+### Using genome versus transcriptome
 
-A final samplesheet file consisting of both single- and paired-end data may look something like the one below. This is for 6 samples, where `TREATMENT_REP3` has been sequenced twice.
+By default the pipeline aligns to the genome with STAR and extracts transcript-level counts using the GTF. To align directly to the transcriptome instead, pass `--transcriptome` and the rest happens automatically. See the [Alignment routes](#alignment-routes) section for more detail on when each route is appropriate.
 
-```csv title="samplesheet.csv"
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP2,AEG588A2_S2_L002_R1_001.fastq.gz,AEG588A2_S2_L002_R2_001.fastq.gz
-CONTROL_REP3,AEG588A3_S3_L002_R1_001.fastq.gz,AEG588A3_S3_L002_R2_001.fastq.gz
-TREATMENT_REP1,AEG588A4_S4_L003_R1_001.fastq.gz,
-TREATMENT_REP2,AEG588A5_S5_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L004_R1_001.fastq.gz,
+### Using optional modules
+
+Three optional RNAframework modules are available (each documented in more detail under [More details for key steps](#more-details-for-key-steps)):
+
+1. **rf-jackknife**: tunes folding parameters against reference RNA structures. Pass `--jackknife_reference` with a path to a `.db` file of known structures. When provided, rf-jackknife runs between rf-norm and rf-fold and calibrates the slope and intercept parameters passed to rf-fold. Add `--stop_after_jackknife` to run calibration only and skip rf-fold and downstream structure outputs.
+2. **rf-eval**: evaluates the agreement between your reactivity data and a set of reference RNA structures, computing metrics such as AUROC and DSCI that can be used as quality control. Pass `--rfeval_reference` with a path to a `.db` file of known structures to enable it.
+3. **rf-structextract**: pulls high-confidence structural elements out of the folded structures. Enable it with `--structextract true`.
+
+## More details for key steps
+
+### Adapter trimming
+
+Trimming is done with Cutadapt. Defaults differ by principle because RT-stop experiments encode signal at the read 3′ end and disabling 5′ quality trimming preserves those positions.
+
+| Principle | `--cutadapt_5quality` | `--cutadapt_3quality` |
+| --------- | --------------------- | --------------------- |
+| `RT-stop` | forced to `0`         | default `20`          |
+| `MaP`     | default `20`          | default `20`          |
+
+Adapter precedence: per-sample columns (`adapter_5p`, `adapter_3p`) → global flags (`--cutadapt_adapter_5p`, `--cutadapt_adapter_3p`) → fallback `AGATCGGAAGAGC`.
+
+Set `--cutadapt_quality_only` to skip adapter trimming and perform quality/length filtering only.
+
+On 2-colour runs (NextSeq/NovaSeq), lost signal reads as high-quality G, which quality trimming misses. If post-trim FastQC fails Adapter Content on PolyG, set `--cutadapt_nextseq_trim 20`.
+
+In short-insert libraries (e.g. tRNA, miRNA) every genuine read runs into the 3' adapter, so a read with no adapter found is read-through junk. Set `--cutadapt_discard_untrimmed` to drop those reads. It relies on adapter trimming, so the pipeline stops if it is combined with `--cutadapt_quality_only`.
+
+### Deduplication and UMI handling (optional)
+
+By default the pipeline does **not** deduplicate reads. Position-based deduplication is not valid for chemical-probing data without UMIs; reads that start at the same coordinate are independent molecules, not PCR duplicates. Set `--markdup` to enable SAMtools markdup if you know position-based dedup is appropriate for your library.
+
+UMI-tagged samples are deduplicated with `umi_tools`, enabled via `umi_pattern` (per-sample column or `--umi_pattern` if the pattern is the same for all samples).
+
+- Patterns containing only `N/C/X` use `umi_tools --bc-pattern` mode directly.
+- Patterns that contain IUPAC (e.g. containing `D`) are converted to `--extract-method=regex` mode automatically. Each IUPAC character is expanded to a regex character class (`D` → `[AGT]`, `N` → `[ACGT]`, etc.) and the pattern is anchored to the read start as a named capture group. For example, `DNNN` becomes `^(?P<umi_1>[AGT][ACGT][ACGT][ACGT])`.
+
+On the genome (STAR) route, STAR's transcriptome-coordinate BAM is produced at alignment time, before dedup. When dedup removes reads (UMI samples, or `--markdup`), the pipeline reconciles the transcript BAM against the surviving read names so transcript-level counts match the deduplicated genome BAM. Samples that undergo no read removal (non-UMI without `--markdup`) skip this reconciliation entirely.
+
+### Reference resolution
+
+The `organism` value (per-sample column or `--organism`) is used to resolve and download the reference automatically. Latin binomials (`Homo sapiens`) are preferred, but a small set of shorthands are also accepted: `human`, `mouse`, `rat`, and `yeast`.
+
+For organisms not in Ensembl, the pipeline falls back to NCBI using pre-configured RefSeq accessions. The following are already built-in: Influenza A, SARS-CoV-2, Dengue virus, Zika virus, HIV-1, Rotavirus A, and Escherichia coli (K-12 MG1655). For any other organism, the pipeline will attempt an NCBI auto-search.
+
+The pipeline always downloads the most recent available assembly - the current Ensembl release for eukaryotes, or the pinned RefSeq accession for NCBI organisms. To keep the reference version fixed across runs, run the pipeline once and then reuse the local files published under `reference/` by passing them with `--fasta` and `--gtf`.
+
+Resolution order for each file type:
+
+| File  | 1st       | 2nd              | 3rd                  |
+| ----- | --------- | ---------------- | -------------------- |
+| FASTA | `--fasta` | Ensembl download | NCBI fallback        |
+| GTF   | `--gtf`   | Ensembl download | Synthetic GTF (NCBI) |
+
+### Alignment routes
+
+**Default: genome alignment with STAR**
+
+The pipeline downloads a soft-masked genome FASTA (`dna_sm.toplevel.fa.gz`) and GTF from Ensembl, builds a STAR index, and aligns with splice-junction awareness. By default, STAR also emits transcript-coordinate alignments with `--quantMode TranscriptomeSAM`; these BAM files are reconciled with the deduplicated genome BAMs, corrected with `samtools calmd`, and counted directly with `rf-count` before passing to `rf-norm`. This is the recommended route for most experiments: STAR handles spliced reads correctly, the soft-masked genome reduces spurious multi-mappers from repetitive elements, and counting in transcript coordinates avoids known `rf-count-genome` edge cases at exon/intron boundaries.
+
+If you prefer to use the genome-coordinate counting path, set `--count_genome true`. This runs `rf-count-genome` on the genome BAM and then converts the genome-coordinate RC files to transcript-level RC files with `rf-rctools extract` using the GTF.
+
+`--star_multimap_nmax` (default `10`) sets the maximum number of genome locations a read is allowed to map to; reads exceeding this are discarded. The default of 10 is appropriate for most protein-coding genes. If you are probing highly repetitive RNAs such as rRNA or snRNA you may want to increase this (e.g. `--star_multimap_nmax 50`), though be aware that allowing too many multimappers can introduce noise if reads are assigned ambiguously.
+
+The STAR preset also differs by readout principle. RT-stop uses `--alignEndsType Extend5pOfRead1`, `--outFilterMismatchNoverReadLmax 0.04`, and `--outSAMattributes NH HI AS NM MD` to preserve stop positions while retaining the tags needed downstream. MaP uses `--alignEndsType Local`, `--outFilterMismatchNoverReadLmax 0.15`, `--outSAMprimaryFlag AllBestScore`, `--outSAMattributes All`, and `--sjdbOverhang` (default `200`) for mutation-tolerant alignment. For additional available STAR flags check out the parameters page.
+
+**Optional: transcriptome alignment with Bowtie**
+
+Add `--transcriptome` to align directly to a transcript FASTA instead of the genome. In this option, the pipeline downloads Ensembl cDNA + ncRNA FASTA files or for bacteria and viruses not in Ensembl it falls back to NCBI and builds a transcript FASTA from the genome assembly automatically. The aligner used depends on the probing principle: Bowtie for RT-stop and Bowtie2 for MaP.
+
+This route works well for bacteria and viruses since they lack introns and often their genome annotation is sparse or absent, or when you prefer to map directly to a curated set of transcripts. For bacteria and viruses, the pipeline enables the transcriptome (Bowtie) route automatically, so you do not need to pass `--transcriptome` explicitly.
+
+The transcriptome aligners are configured to retain isoform-compatible mappings by default, but Bowtie v1 and Bowtie2 handle this slightly differently. For RT-stop, Bowtie v1 uses `-a --best --strata`, so it reports all alignments in the best alignment stratum rather than lower-scoring valid hits. For MaP, Bowtie2 uses `-a` with the `--very-sensitive-local` preset by default, reporting all alignments it finds under that local, mutation-tolerant search mode.
+
+Set `--bowtie_all false` if you want more restrictive reporting. For RT-stop/Bowtie v1, `--bowtie_k 1` reports at most one best-stratum alignment per read; increasing `--bowtie_k` reports up to that many. For MaP/Bowtie2, setting `--bowtie_all false` with the default `--bowtie2_preset '--very-sensitive-local'` uses Bowtie2's single-alignment reporting. To apply `--bowtie_k` to Bowtie2 or control lower-level Bowtie2 search settings, first clear or replace `--bowtie2_preset` (for example, set it to an empty string in a params file). Other exposed Bowtie/Bowtie2 parameters are listed on the parameter page.
+
+### rf-count
+
+`rf-count` quantifies chemical probing signal from the aligned transcript-coordinate BAM files produced either by the transcriptome route or by STAR `--quantMode TranscriptomeSAM` on the default genome route. If `--count_genome true` is set, the genome route instead uses `rf-count-genome` followed by `rf-rctools extract`. What exactly is counted depends on the principle: for RT-stop experiments it tallies read 3′ ends that accumulate at modified bases; for MaP it measures per-position mutation rates.
+
+When `--count_genome true` is used, strandedness is handled automatically for `rf-count-genome`: RT-stop libraries are always treated as second-strand (this is fixed by experimental design), while for MaP the pipeline infers strandedness per sample using `RSeQC infer_experiment`. A sample is called stranded when more than 70% of reads support one orientation, otherwise unstranded. `--rfcount_strandedness first|second|unstranded` is only a fallback for samples where inference cannot run (references without a usable annotation, e.g. many viruses and bacteria); it does not override an inferred value. After genome-coordinate counting, `rf-rctools extract` converts the genome-coordinate RC files to transcript-level RC files using the GTF before passing to `rf-norm`.
+
+For MaP samples, `RT_enzyme` controls several mutation-cleanup defaults. Set it per sample with the `RT_enzyme` samplesheet column, or globally with `--RT_enzyme` when the same enzyme was used for all rows. The pipeline currently distinguishes Group II Intron RTs, including TGIRT, from all other or unset enzymes; non-Group-II values use M-MLV-like defaults.
+
+With M-MLV-like defaults, consecutive mutations/indels are collapsed (`--rfcount_map_collapse_consecutive true`, with `--rfcount_map_max_collapse_distance 2`) and deletion calls are assigned to the right-most deleted base (`--rfcount_map_right_deletion true`). With Group II Intron RTs, consecutive events are not collapsed by default; instead, insertion calls and ambiguously aligned deletions are ignored (`--rfcount_map_no_insertions true`, `--rfcount_map_no_ambiguous true`) and nearby mutations are filtered with `--rfcount_map_discard_consecutive 3`. Each of these automatic choices can be overridden explicitly with its corresponding `--rfcount_map_*` parameter.
+
+Other parameters worth knowing about:
+
+`--rfcount_img` generates per-transcript coverage plots. Disabled by default (`--rfcount_img false`) because they are slow to produce at transcriptome scale; enable with `--rfcount_img true` if you want them.
+
+`--rfcount_trim_5prime` trims a fixed number of bases from the 5′ end of each read before counting. This is useful for RT-stop experiments where the first few bases after the adapter can carry sequence-context bias that inflates apparent stop rates.
+
+`--rfcount_mask_file` accepts a BED file of regions to exclude from counting entirely; handy for masking rRNA or other highly-expressed contaminating transcripts that would otherwise dominate the output.
+
+`--rfcount_primary_only` restricts counting to alignments marked as primary. This is most relevant when the aligner emits multiple records per read, such as STAR multimappers or Bowtie2 `--bowtie_all`/`-k` output; otherwise a read can contribute to more than one locus or transcript. For Bowtie v1 `--bowtie_all`, use `--bowtie_all false` and `--bowtie_k` if you need stricter one-alignment-per-read reporting.
+
+`--rfcount_map_max_coverage` caps the coverage of each transcript in MaP samples which is helpful when transcripts are sequenced to extreme depths. Only transcripts above the cap are downsampled; `20000` is recommended, with a minimum of `1000` allowed. It is ignored with `--count_genome true`, because `rf-count-genome` has no such option.
+
+For the full list of available options see the [rf-count documentation](https://rnaframework-docs.readthedocs.io/en/latest/rf-count/). Any flag not exposed as a pipeline parameter can be passed directly via `ext.args` in a custom config.
+
+### rf-norm
+
+`rf-norm` normalises per-position counts into reactivity scores. Samples are grouped by `sample_group + replicate`, and treated samples are normalised against their matched controls within the same group. The scoring method is selected automatically based on the probing principle and which conditions are present. The normalisation method defaults to box-plot normalisation in most cases.
+
+You can override the scoring method with `--rfnorm_score_method`:
+
+- `1` is Ding scoring (RT-stop, treated-vs-untreated)
+- `2` is Rouskin scoring (RT-stop without an untreated control)
+- `3` is Siegfried scoring (MaP, treated-vs-untreated)
+- `4` is Zubradt scoring (MaP without an untreated control)
+
+Similarly, you can override the normalisation method with `--rfnorm_norm_method`:
+
+- `1` is 2-8% normalisation (takes the top 10% of reactivities, discards the very highest 2%, and uses the mean of the remaining 8% as the scaling factor)
+- `2` is 90% Winsorizing (clips any value above the 95th or below the 5th percentile to those boundaries, then divides all values by the 95th percentile). By default samples scored with Rouskin method will use this normalisation method as it is the only one compatible with it.
+- `3` is box-plot normalisation (removes outliers beyond 1.5× IQR then divides by the mean of the next top 10%), which is the default for most conditions
+- `4` is Mitchell normalisation (MaP only, uses the higher of the mean 90th-95th percentile reactivity or the 75th percentile of non-zero reactivities as the scaling factor)
+
+Treated samples are paired with the untreated (and denatured, if present) control that has the same `sample_group` and `replicate`. When the samplesheet has no exact match for a treated group, the pipeline falls back to the control whose `sample_group` shares the longest leading substring with it:
+
+| Treated sample                                   | Control used                          | Reason                                                                        |
+| ------------------------------------------------ | ------------------------------------- | ----------------------------------------------------------------------------- |
+| `MDA-MB-231_DMSO_treated_r1`                     | `MDA-MB-231_DMSO_untreated_r1`        | Exact match                                                                   |
+| `MDA-MB-231_MTX_treated_r1`                      | `MDA-MB-231_DMSO_untreated_r1`        | No exact match; shares `MDA-MB-231`                                           |
+| `HFF_uninfected_treated_r1` and `_r2`            | `HFF_uninfected_untreated_r1`         | Shares `HFF_uninfected`; the arm's only control is reused for both replicates |
+| `HFF_infected_HCMV_5hr_treated_r1` (and `_24hr`) | `HFF_infected_HCMV_72hr_untreated_r1` | Shares `HFF_infected_HCMV`, which is closer than `HFF_uninfected`             |
+
+Among equally close controls:
+
+- the one at the same replicate is used;
+- if none is at the same replicate and the closest arm has exactly one control, that control is reused for every replicate;
+- two equally close controls at the same replicate will throw an error.
+
+A control is never borrowed from a `sample_group` that shares no leading substring with the treated group; that group is left without a control (and errors downstream if `rf-normfactor` requires one; see below). A warning is logged whenever the fallback is used. Set `--exact_untreated_pairing` to turn the fallback off, so only exact `sample_group` + `replicate` matches are used and unmatched groups proceed without a negative control.
+
+For DMS experiments, a few defaults change automatically. `--rfnorm_reactive_bases` is set to `AC` (or `ACGU` when `pH ≥ 8`). `--rfnorm_dynamic_window` turns on when `pH < 8`, and `--rfnorm_norm_window` defaults to `50` for RT-stop samples and for DMS samples without four-base DMS; it controls the size of the sliding window used to compute local normalisation factors along the transcript. DMS-MaP samples at `pH ≥ 8` get four-base DMS analysis by default: reactivities at all four bases, each normalised separately over the whole transcript; see `--four_base_dms`.
+
+`--rfnorm_nan` (minimum reads at a position before reactivity is reported as NaN) defaults to `1000` for MaP or `50` for RT-stop.
+
+Other parameters worth knowing about:
+
+`--rfnorm_img` generates per-transcript reactivity plots. Disabled by default (`--rfnorm_img false`) because rendering them via R for thousands of transcripts is the main source of rf-norm runtime on large datasets; enable with `--rfnorm_img true` if you want them.
+
+`--rfnorm_mean_coverage` and `--rfnorm_median_coverage` discard transcripts whose mean or median coverage falls below the given threshold (both default `0`, i.e. no filtering).
+
+`--rfnorm_prefilter_min_coverage` (`--count_genome true` only) shrinks the full-annotation RC produced by `rf-rctools extract` before rf-norm by keeping only transcripts with at least one base at or above this coverage (default `1`; set `0` to keep the full annotation). This is what keeps the `rf-count-genome` RC transcriptome-sized.
+
+For the full list of available options see the [rf-norm documentation](https://rnaframework-docs.readthedocs.io/en/latest/rf-norm/). Any flag not exposed as a pipeline parameter can be passed directly via `ext.args` in a custom config.
+
+### rf-normfactor (cross-experiment normalisation)
+
+By default `rf-norm` normalises each `sample_group + replicate` group on its own, so reactivities are not directly comparable across samples. To fix that, whenever a reference has more than one treated sample (replicates or different conditions) the pipeline runs `rf-normfactor` automatically. It computes one set of transcriptome-wide normalisation factors from all of that reference's samples together, then applies them to every group (via `-nf`) so the whole reference sits on a single, comparable scale. Force this on or off with `--rfnorm_use_normfactor true|false`.
+
+For the full list of available options see the [rf-normfactor documentation](https://rnaframework-docs.readthedocs.io/en/latest/rf-normfactor/).
+
+### rf-correlate (replicate reproducibility)
+
+When a sample group has more than one replicate, `rf-correlate` measures how reproducible those replicates are by computing pairwise correlations between their reactivity profiles, both transcriptome-wide and per-transcript. It works from the normalised reactivity XMLs produced by `rf-norm`, so the replicates are already on a comparable scale and the correlation reflects genuine reactivity agreement rather than differences in sequencing depth. It runs by default (and is a no-op for single-replicate groups); disable it with `--correlate_replicates false`.
+
+The per-group correlations are summarised in a MultiQC table (one row per sample group, giving the replicate count and the mean pairwise Pearson and Spearman correlation) where a low value flags a discordant replicate before it dilutes the folded consensus. Both methods are computed for every comparison: **Pearson** on reactivities capped at `--rfcorrelate_cap_react` (default `1.5`, so a few extreme positions cannot dominate the score) and **Spearman** on ranks, to which the cap does not apply.
+
+Set `--correlate_img true` to additionally write the rf-correlate correlation heatmap PDF (off by default).
+
+For the full list of available options see the [rf-correlate documentation](https://rnaframework-docs.readthedocs.io/en/latest/rf-correlate/).
+
+### rf-fold
+
+`rf-fold` predicts RNA secondary structures from normalised reactivity profiles using ViennaRNA. The pipeline groups XMLs by `sample_group`, merging replicates, and folds them together. Dot-bracket output is the default; enable CT format with `--rffold_ct`.
+
+`--rffold_slope` and `--rffold_intercept` control how reactivity values are converted into folding constraints. Left unset, they are chosen automatically from the sample's `chemical`: DMS uses slope `4.6`/intercept `-2` ([Borovská et al. 2026](https://doi.org/10.1038/s41587-025-02739-0)); NAI uses `2.2`/`-0.8` and 2A3 uses `1`/`-0.4` ([Marinus et al. 2021](https://doi.org/10.1093/nar/gkaa1255)); any other or unspecified chemical falls back to `1.8`/`-0.6`. Set either flag explicitly to override, or calibrate optimal values from your own data with `rf-jackknife` (see below); jackknife values take priority over both the flags and the chemical-based defaults.
+
+For long transcripts, rf-fold can fold in a sliding window rather than the whole sequence at once. `--rffold_window` (default `1000`) sets the MFE folding window size and enables windowed folding; unset it (`null`) to fold the whole transcript. `--rffold_partition_window` (default `1000`) sets the partition-function window used for the Shannon entropy and dot-plot calculation, independently of MFE windowing, and `--rffold_vienna_max_bp_span` (default `600`) caps the maximum distance ViennaRNA allows between paired bases.
+
+`--rffold_shannon_entropy` (default `true`) computes per-position Shannon entropy alongside the predicted structure, giving a measure of folding confidence. `--rffold_only_common` keeps only transcripts covered in at least N XML experiments; when not set explicitly, the pipeline enables it automatically for fold groups with more than one replicate, setting N to the group's replicate count so only transcripts present in every replicate are retained. `--rffold_use_alifold` (default `true`) folds such a group's replicates together with RNAalifold, constrained by all their reactivity profiles at once, giving one consensus structure per transcript; set it to `false` to fold each replicate with RNAfold and aggregate the base pairs instead.
+
+Once structures are folded, the pipeline draws reactivity-coloured 2D structure diagrams using [R2DT](https://github.com/RNAcentral/R2DT) where a template exists (rRNA, snRNA, tRNA, and other well-characterised RNA families). All folded RNAs will also be folded with ViennaRNA's `RNAplot`. R2DT is only available under a container profile (`docker`, `singularity`, `apptainer`); under `conda` or `mamba` all diagrams fall back to `RNAplot`.
+
+The partition-function dot-plot (`--rffold_dotplot`, default `true`) records base-pairing probabilities across the whole structural ensemble. The pipeline converts these into base-pair (`.bp`) arc files and, together with the reactivity and Shannon-entropy profiles, exports them as genome-browser tracks; see [Genome-browser tracks](#genome-browser-tracks) for more information on this process. Each sample group's folded structures are also compiled with their rf-norm reactivities into RMDB-compatible **RDAT** files, recording the sequence, dot-bracket structure, reactivity values, and the parameters used to produce them.
+
+For the full list of available options see the [rf-fold documentation](https://rnaframework-docs.readthedocs.io/en/latest/rf-fold/). Any flag not exposed as a pipeline parameter can be passed directly via `ext.args` in a custom config.
+
+### Genome-browser tracks
+
+For visualisation in IGV or the UCSC browser, the pipeline exports three kinds of track: per-base **reactivity**, folding-confidence (**Shannon entropy**), and base-pairing (**arc**) tracks, in both genome and transcript coordinates.
+
+Reactivity tracks start from the rf-norm reactivities: `rf-wiggle` converts each sample's XML to WIG, replicates in a `sample_group` are merged (and averaged position-by-position when there is more than one), and the result is written both in transcript coordinates and, using the GTF to remap transcript positions onto the genome, in genomic coordinates, each converted to BigWig. Shannon-entropy tracks follow the same path from the rf-fold entropy profiles, and are produced only when `--rffold_shannon_entropy` is enabled. Base-pairing arcs come from the rf-fold dot-plots: the pairing-probability matrix is converted to base-pair (`.bp`) files that a browser renders as arcs between paired positions.
+
+The genome-coordinate tracks need a GTF for the reference in order to remap transcript positions; if none is available for a reference, its genome track is skipped and only the transcript-coordinate track is written. All of these outputs are skipped when `--stop_after_jackknife` is set.
+
+### rf-jackknife (optional)
+
+`rf-jackknife` calibrates the reactivity-to-folding-constraint conversion by grid-searching slope/intercept values against a known reference structure, choosing the pair that best reproduces it. It runs between rf-norm and rf-fold, and the resulting optimal slope/intercept take priority over both the `--rffold_slope`/`--rffold_intercept` flags and the chemical-based defaults. Enable it by supplying a reference `.db` structure file with `--jackknife_reference`; when omitted, jackknife is skipped and rf-fold uses whatever slope/intercept are otherwise set.
+
+The search space is defined by `--rfjackknife_slope` (default `0,5`) and `--rfjackknife_intercept` (default `-3,0`), stepped by `--rfjackknife_slope_step` and `--rfjackknife_intercept_step` (both default `0.2`). The fit is scored with the Fowlkes-Mallows index; `--rfjackknife_mfmi` (default `true`) uses the modified FMI and `--rfjackknife_relaxed` (default `true`) applies relaxed pairing criteria. `--rfjackknife_keep_lonelypairs` (default `true`) retains 1-bp helices in the reference, and `--rfjackknife_keep_pseudoknots` (default `false`) excludes pseudoknotted base-pairs. Additional rf-fold parameters used inside the search are passed with `--rfjackknife_rf_fold_params` (default `-md 600`).
+
+By default the pipeline pools XMLs from all sample groups into a single jackknife run to derive one consensus slope/intercept; set `--rfjackknife_pool_all false` to run a separate jackknife per group. `--rfjackknife_only_common` restricts the fit to transcripts present across all replicates, and `--rfjackknife_img` writes an R heatmap of the grid-search results. Set `--stop_after_jackknife` to end the run once calibration completes, skipping rf-fold and all downstream outputs.
+
+For the full list of available options see the [rf-jackknife documentation](https://rnaframework-docs.readthedocs.io/en/latest/rf-jackknife/). Any flag not exposed as a pipeline parameter can be passed directly via `ext.args` in a custom config.
+
+### rf-eval (optional)
+
+`rf-eval` assesses how well the reactivity data agrees with a set of known reference structures, giving a quality-control read on the probing signal itself. It compares each sample's rf-norm reactivity profile against the matching reference structure and reports three agreement metrics (each ranging from 0 to 1): the **unpaired coefficient**, the fraction of highly-reactive bases that are unpaired in the reference; **DSCI**, the probability that a randomly chosen unpaired base is more reactive than a randomly chosen paired base; and **AUROC**, how well reactivity discriminates paired from unpaired bases across all thresholds. Enable it by supplying a reference `.db` structure file with `--rfeval_reference`; when omitted, rf-eval is skipped.
+
+Of the three metrics, only AUROC has a fixed chance level (`0.5`). The baselines of DSCI and the unpaired coefficient are structure-specific, so neither can be called good or bad on its own, nor compared between structures. Every run therefore also scores each structure against circular rotations of its own reactivity profile as a comparable negative control and reports the mean and standard deviation of those scores next to each metric.
+
+`--rfeval_reactivity_cutoff` (default `0.7`) sets the reactivity above which a base is classified as highly-reactive when computing the unpaired coefficient. Terminal base-pairs are excluded from the comparison by default (`--rfeval_ignore_terminal true`); alternatively count them as unpaired with `--rfeval_terminal_as_unpaired true`. `--rfeval_keep_pseudoknots` (default `true`) and `--rfeval_keep_lonelypairs` (default `true`) control whether pseudoknotted and isolated 1-bp base-pairs in the reference are retained in the comparison. Set `--rfeval_img true` to additionally write R metric plots.
+
+`--rfeval_windows` takes an optional manifest that slices reactivities to the sub-region each reference structure covers before rf-eval runs, so a short element (e.g. an Rfam family on a whole genome) is not scored against the full transcript. Coordinates are 1-based inclusive in that reference's own space, `strand` is optional (`+` by default), and each `structure_id` must match an entry id in the `--rfeval_reference` `.db` file:
+
+```
+# ref_seq_id      start   end     structure_id    [strand]
+NC_012532.1        1       161     zika_5UTR       +
+NC_012532.1        10383   10454   zika_xrRNA1     +
+NC_012532.1        10467   10535   zika_xrRNA2     +
 ```
 
-| Column    | Description                                                                                                                                                                            |
-| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
-| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
-| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
+For the full list of available options see the [rf-eval documentation](https://rnaframework-docs.readthedocs.io/en/latest/rf-eval/). Any flag not exposed as a pipeline parameter can be passed directly via `ext.args` in a custom config.
 
-An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
+### rf-structextract (optional)
+
+Once structures are folded, `rf-structextract` can pull out the high-confidence structural elements: substructures whose bases show consistently low reactivity and low Shannon entropy, the signature of a well-defined, stably folded region, and that meet thermodynamic and geometric criteria. It runs after rf-fold on each `sample_group`, using the fold output (structures + Shannon entropy) together with the group's rf-norm reactivity profiles. Enable it with `--structextract true`.
+
+Two selection tests are toggled individually, and both run by default, so only regions with probing support _and_ high folding confidence are extracted. `--structextract_ignore_react` (default `false`) keeps the reactivity test on, so an unprobed region with no reactivity is not reported; set it `true` for structure-only mode, extracting well-defined motifs regardless of reactivity coverage. `--structextract_ignore_shannon` (default `false`) keeps the Shannon-entropy test on; set it `true` to skip it and relax the folding-confidence requirement.
+
+A 2D diagram is drawn for each extracted motif with ViennaRNA RNAplot, coloured by SHAPE reactivity in the same style as the rf-fold structure plots (the motif's reactivity is sliced from its parent transcript); disable them with `--structextract_plot false`.
+
+For the full list of available options see the [rf-structextract documentation](https://rnaframework-docs.readthedocs.io/en/latest/rf-structextract/).
 
 ## Running the pipeline
 
-The typical command for running the pipeline is as follows:
+Typical usage (genome route, auto-downloads reference from Ensembl):
 
 ```bash
-nextflow run nf-core/rnastructurome --input ./samplesheet.csv --outdir ./results --genome GRCh37 -profile docker
+nextflow run nf-core/rnastructurome \
+  --input samplesheet.csv \
+  --outdir results \
+  -profile docker
 ```
 
-This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
-
-Note that the pipeline will create the following files in your working directory:
+With local reference files:
 
 ```bash
-work                # Directory containing the nextflow working files
-<OUTDIR>            # Finished results in specified location (defined with --outdir)
-.nextflow_log       # Log file from Nextflow
-# Other nextflow hidden files, eg. history of pipeline runs and old logs.
+nextflow run nf-core/rnastructurome \
+  --input samplesheet.csv \
+  --outdir results \
+  --fasta genome.fa.gz \
+  --gtf annotation.gtf.gz \
+  -profile docker
 ```
 
-If you wish to repeatedly use the same parameters for multiple runs, rather than specifying each flag in the command, you can specify these in a params file.
+Transcriptome route with jackknife calibration:
 
-Pipeline settings can be provided in a `yaml` or `json` file via `-params-file <file>`.
+```bash
+nextflow run nf-core/rnastructurome \
+  --input samplesheet.csv \
+  --outdir results \
+  --transcriptome \
+  --jackknife_reference ecoli_rrna_calibration/ecoli_k12_rrna_reference_collab.db \
+  -profile docker
+```
 
 > [!WARNING]
 > Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c` must only be used for [tuning process resource specifications](https://nf-co.re/docs/running/run-pipelines#configuring-pipelines), other infrastructural tweaks (such as output directories), or module arguments (args).
 
-The above pipeline run specified with a params file in yaml format:
+For repeated runs with the same parameters, use a params file:
 
 ```bash
 nextflow run nf-core/rnastructurome -profile docker -params-file params.yaml
 ```
 
-with:
+Example `params.yaml`:
 
-```yaml title="params.yaml"
-input: './samplesheet.csv'
-outdir: './results/'
-genome: 'GRCh37'
-<...>
+```yaml
+input: /path/to/samplesheet.csv
+outdir: results
+organism: Homo sapiens
+method: SHAPE
+principle: RT-stop
+
+# trim 2 nt from 5' end to remove sequence-context bias
+rfcount_trim_5prime: 2
+
+# use 2-8% normalisation instead of the default box-plot
+rfnorm_norm_method: 1
 ```
 
-You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-co.re/launch).
+## Reproducibility
 
-### Updating the pipeline
-
-When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
+Always specify the pipeline version when running on your data using `-r` (one hyphen):
 
 ```bash
-nextflow pull nf-core/rnastructurome
+nextflow run nf-core/rnastructurome -r 1.0.0 -profile docker --input samplesheet.csv --outdir results
 ```
 
-### Reproducibility
+This pins the exact version of the pipeline code and all software containers, so re-running with the same `-r` tag months later will produce identical results. The version is recorded in the MultiQC report and in the RDAT files so you always know what was used.
 
-It is a good idea to specify the pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
-
-First, go to the [nf-core/rnastructurome releases page](https://github.com/nf-core/rnastructurome/releases) and find the latest pipeline version - numeric only (eg. `1.3.1`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 1.3.1`. Of course, you can switch to another version by changing the number after the `-r` flag.
-
-This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future. For example, at the bottom of the MultiQC reports.
-
-To further assist in reproducibility, you can use share and reuse [parameter files](#running-the-pipeline) to repeat pipeline runs with the same settings without having to write out a command with every single parameter.
-
-> [!TIP]
-> If you wish to share such profile (such as upload as supplementary material for academic publications), make sure to NOT include cluster specific paths to files, nor institutional specific profiles.
+For complete reproducibility, save your parameters to a `params.yaml` file (see [Running the pipeline](#running-the-pipeline)) and share it alongside your data. When doing so, avoid including cluster-specific paths or institutional profile names; use relative paths or published dataset identifiers instead so that others can reproduce the run in their own environment.
 
 ## Core Nextflow arguments
 
-> [!NOTE]
-> These options are part of Nextflow and use a _single_ hyphen (pipeline parameters use a double-hyphen)
+These options are part of Nextflow itself and use a single hyphen. Pipeline parameters use a double hyphen.
 
 ### `-profile`
 
-Use this parameter to choose a configuration profile. Profiles can give configuration presets for different compute environments.
+Use this parameter to choose a configuration profile. Profiles can give configuration presets for different compute environments or analyses.
 
-Several generic profiles are bundled with the pipeline which instruct the pipeline to use software packaged using different methods (Docker, Singularity, Podman, Shifter, Charliecloud, Apptainer, Conda) - see below.
+Several generic profiles are bundled with the pipeline which instruct the pipeline to use software packaged using different methods; see below. We highly recommend the use of Docker or Singularity containers for full pipeline reproducibility; when this is not possible, Conda is also supported.
 
-> [!IMPORTANT]
-> We highly recommend the use of Docker or Singularity containers for full pipeline reproducibility, however when this is not possible, Conda is also supported.
+The pipeline also dynamically loads configurations from [nf-core/configs](https://github.com/nf-core/configs) at run time, making institutional cluster profiles available automatically. For more information and to check if your system is supported, please see the [nf-core/configs documentation](https://github.com/nf-core/configs#documentation).
 
-The pipeline also dynamically loads configurations from [https://github.com/nf-core/configs](https://github.com/nf-core/configs) when it runs, making multiple config profiles for various institutional clusters available at run time. For more information and to check if your system is supported, please see the [nf-core/configs documentation](https://github.com/nf-core/configs#documentation).
+Multiple profiles can be combined; they are loaded in sequence so later profiles can overwrite earlier ones:
 
-Note that multiple profiles can be loaded, for example: `-profile test,docker` - the order of arguments is important!
-They are loaded in sequence, so later profiles can overwrite earlier profiles.
+```bash
+-profile test,docker
+```
 
-If `-profile` is not specified, the pipeline will run locally and expect all software to be installed and available on the `PATH`. This is _not_ recommended, since it can lead to different results on different machines dependent on the computer environment.
+If `-profile` is not specified, the pipeline will run locally and expect all software to be installed and available on `PATH`. This is not recommended as it can lead to different results on different machines.
 
-- `test`
-  - A profile with a complete configuration for automated testing
-  - Includes links to test data so needs no other parameters
-- `docker`
-  - A generic configuration profile to be used with [Docker](https://docker.com/)
-- `singularity`
-  - A generic configuration profile to be used with [Singularity](https://sylabs.io/docs/)
-- `podman`
-  - A generic configuration profile to be used with [Podman](https://podman.io/)
-- `shifter`
-  - A generic configuration profile to be used with [Shifter](https://nersc.gitlab.io/development/shifter/how-to-use/)
-- `charliecloud`
-  - A generic configuration profile to be used with [Charliecloud](https://charliecloud.io/)
-- `apptainer`
-  - A generic configuration profile to be used with [Apptainer](https://apptainer.org/)
-- `wave`
-  - A generic configuration profile to enable [Wave](https://seqera.io/wave/) containers. Use together with one of the above (requires Nextflow `24.03.0-edge` or later).
-- `conda`
-  - A generic configuration profile to be used with [Conda](https://conda.io/docs/). Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker, Singularity, Podman, Shifter, Charliecloud, or Apptainer.
+| Profile              | Description                                                                                                                                                                                                                                                 |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `test`               | Minimal test using the STAR genome-alignment route. Uses human mitochondrial chromosome (MT-RNR1) test data; no other parameters needed.                                                                                                                    |
+| `test_transcriptome` | Minimal test using the Bowtie2 transcriptome route. Uses a single-transcript FASTA (ENST00000389680 / MT-RNR1) to exercise the `--transcriptome` path; no other parameters needed.                                                                          |
+| `test_prokaryote`    | Prokaryote transcriptome-route test using E. coli 16S rRNA DMS-MaP data and a 16S reference structure for jackknife calibration; no other parameters needed. Significantly faster with `conda` than with container profiles since it includes rf-jackknife. |
+| `test_full`          | Full-size test on rice (_Oryza sativa_) in vivo DMS-MaPseq data (GSE197245, one DMS(-) control and three DMS(+) replicates), using the STAR genome route with the reference resolved from Ensembl Plants; no other parameters needed.                       |
+| `docker`             | Use [Docker](https://docs.docker.com/engine/installation/) containers.                                                                                                                                                                                      |
+| `singularity`        | Use [Singularity](https://www.sylabs.io/guides/3.0/user-guide/) containers.                                                                                                                                                                                 |
+| `podman`             | Use [Podman](https://podman.io/) containers.                                                                                                                                                                                                                |
+| `shifter`            | Use [Shifter](https://nersc.gitlab.io/development/shifter/how-to-use/) containers.                                                                                                                                                                          |
+| `charliecloud`       | Use [Charliecloud](https://hpc.github.io/charliecloud/) containers.                                                                                                                                                                                         |
+| `apptainer`          | Use [Apptainer](https://apptainer.org/) containers.                                                                                                                                                                                                         |
+| `wave`               | Enable [Wave](https://seqera.io/wave/) containers. Use together with one of the above (requires Nextflow ≥ 24.03.0-edge).                                                                                                                                   |
+| `conda`              | Use [Conda](https://conda.io/miniconda.html). Please only use Conda as a last resort when containers are not possible. Note that R2DT structure diagrams are not available under conda/mamba; ViennaRNA RNAplot is used as fallback.                        |
+| `arm64`              | Applies overrides supplying ARM-compatible containers and Conda environments. See [Running on Linux ARM architectures](#running-on-linux-arm-architectures).                                                                                                |
 
 ### `-resume`
 
@@ -165,15 +415,17 @@ You can also supply a run name to resume a specific run: `-resume [run-name]`. U
 
 ### `-c`
 
-Specify the path to a specific config file (this is a core Nextflow command). See the [nf-core website documentation](https://nf-co.re/usage/configuration) for more information.
+Specify the path to a specific config file for process resources, executors, or module-specific `ext.args`. See the [nf-core website documentation](https://nf-co.re/usage/configuration) for more information.
 
 ## Custom configuration
 
 ### Resource requests
 
-Whilst the default requirements set within the pipeline will hopefully work for most people and with most input data, you may find that you want to customise the compute resources that the pipeline requests. Each step in the pipeline has a default set of requirements for number of CPUs, memory and time. For most of the pipeline steps, if the job exits with any of the error codes specified [here](https://github.com/nf-core/rnaseq/blob/4c27ef5610c87db00c3c5a3eed10b1d161abf575/conf/base.config#L18) it will automatically be resubmitted with higher resources request (2 x original, then 3 x original). If it still fails after the third attempt then the pipeline execution is stopped.
+Whilst the default requirements set within the pipeline will hopefully work for most people and with most input data, you may find that you want to customise the compute resources that the pipeline requests. Each step in the pipeline has a default set of requirements for number of CPUs, memory and time. For most pipeline steps, if the job exits with any of the error codes specified [here](https://github.com/nf-core/rnaseq/blob/4c27ef5610c87db00c3c5a3eed10b1d161abf575/conf/base.config#L18), it will automatically be resubmitted with a higher resource request (2× original, then 3× original). If it still fails after the third attempt then the pipeline execution is stopped.
 
-To change the resource requests, please see the [max resources](https://nf-co.re/docs/running/configuration/nextflow-for-your-system#set-max-resources) and [customise process resources](https://nf-co.re/docs/running/configuration/nextflow-for-your-system#customize-process-resources) section of the nf-core website.
+Computationally intensive steps in this pipeline include STAR alignment, rf-count, rf-norm, and rf-fold. These are labelled `process_high` or `process_medium` and will benefit most from tuning.
+
+To change the resource requests, please see the [max resources](https://nf-co.re/docs/running/configuration/nextflow-for-your-system#set-max-resources) and [customise process resources](https://nf-co.re/docs/running/configuration/nextflow-for-your-system#customize-process-resources) sections of the nf-core website.
 
 ### Custom Containers
 
@@ -189,26 +441,32 @@ To learn how to provide additional arguments to a particular tool of the pipelin
 
 ### nf-core/configs
 
-In most cases, you will only need to create a custom config as a one-off but if you and others within your organisation are likely to be running nf-core pipelines regularly and need to use the same settings regularly it may be a good idea to request that your custom config file is uploaded to the `nf-core/configs` git repository. Before you do this please can you test that the config file works with your pipeline of choice using the `-c` parameter. You can then create a pull request to the `nf-core/configs` repository with the addition of your config file, associated documentation file (see examples in [`nf-core/configs/docs`](https://github.com/nf-core/configs/tree/master/docs)), and amending [`nfcore_custom.config`](https://github.com/nf-core/configs/blob/master/nfcore_custom.config) to include your custom profile.
+In most cases, you will only need to create a custom config as a one-off but if you and others within your organisation are likely to be running nf-core pipelines regularly and need to use the same settings regularly it may be a good idea to request that your custom config file is uploaded to the [nf-core/configs](https://github.com/nf-core/configs) git repository. Before you do this please can you test that the config file works with your pipeline of choice using the `-c` parameter. You can then create a pull request to the nf-core/configs repository with the addition of your config file, associated documentation file (see examples in [nf-core/configs/docs](https://github.com/nf-core/configs/tree/master/docs)), and amending [`nfcore_custom.config`](https://github.com/nf-core/configs/blob/master/nfcore_custom.config) to include your custom profile.
 
-See the main [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) for more information about creating your own configuration files.
+See the [main Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) for more information about creating your own configuration files.
 
 If you have any questions or issues please send us a message on [Slack](https://nf-co.re/join/slack) on the [`#configs` channel](https://nfcore.slack.com/channels/configs).
 
-## Running in the background
+### Running in the background
 
 Nextflow handles job submissions and supervises the running jobs. The Nextflow process must run until the pipeline is finished.
 
 The Nextflow `-bg` flag launches Nextflow in the background, detached from your terminal so that the workflow does not stop if you log out of your session. The logs are saved to a file.
 
-Alternatively, you can use `screen` / `tmux` or similar tool to create a detached session which you can log back into at a later time.
-Some HPC setups also allow you to run nextflow within a cluster job submitted your job scheduler (from where it submits more jobs).
+Alternatively, you can use `screen` / `tmux` or similar tool to create a detached session which you can log back into at a later time. Some HPC setups also allow you to run Nextflow within a cluster job submitted your job scheduler (from where it submits more jobs).
 
-## Nextflow memory requirements
+### Nextflow memory requirements
 
-In some cases, the Nextflow Java virtual machines can start to request a large amount of memory.
-We recommend adding the following line to your environment to limit this (typically in `~/.bashrc` or `~./bash_profile`):
+In some cases, the Nextflow Java virtual machine can start to request a large amount of memory. We recommend adding the following line to your environment to limit this (typically in `~/.bashrc` or `~/.bash_profile`):
 
 ```bash
 NXF_OPTS='-Xms1g -Xmx4g'
 ```
+
+## Troubleshooting
+
+### General debugging steps
+
+1. Check `.nextflow.log` for the first error message.
+2. Check `pipeline_info/execution_trace_<timestamp>.txt` to identify which process failed and its exit status.
+3. Use `-resume` after fixing issues; all previously successful tasks will be cached and skipped.

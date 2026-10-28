@@ -1,0 +1,72 @@
+nextflow_process {
+
+    name "Test Process ENSEMBL_GENOME"
+    script "../main.nf"
+    process "ENSEMBL_GENOME"
+
+    tag "modules"
+    tag "modules_local"
+    tag "ensembl"
+    tag "ensembl/genome"
+    config "./nextflow.config"
+
+    test("normalizes Latin binomial and downloads genome FASTA from local Ensembl fixture") {
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'human_fixture', organism:'Homo sapiens' ],
+                    'Homo sapiens'
+                ])
+                input[1] = [
+                    ensembl_release : 'current',
+                    ensembl_base_url: "file://${projectDir}/modules/local/ensembl/genome/tests/fixtures/ensembl/pub"
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.fasta.size() == 1 },
+                {
+                    def faText = path(process.out.fasta[0][1]).text
+                    assert faText.contains('>1 dna_sm:chromosome')
+                    assert faText.contains('ACGTacgtACGTacgtNNNN')
+                },
+                { assert path(process.out.source_url[0][1]).text.contains('/homo_sapiens/dna/Homo_sapiens.test.dna_sm.toplevel.fa.gz') },
+                { assert process.out.versions_ensembl[0][1] == 'ensembl' && process.out.versions_ensembl[0][2] == 'current' }
+            )
+        }
+    }
+
+    test("ensembl/genome - stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'human_fixture', organism:'Homo sapiens' ],
+                    'Homo sapiens'
+                ])
+                input[1] = [
+                    ensembl_release : 'current',
+                    ensembl_base_url: "file://${projectDir}/modules/local/ensembl/genome/tests/fixtures/ensembl/pub"
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.fasta.size() == 1 },
+                { assert process.out.versions_ensembl[0][1] == 'ensembl' && process.out.versions_ensembl[0][2] == 'current' }
+            )
+        }
+    }
+}

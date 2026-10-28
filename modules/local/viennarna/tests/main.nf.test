@@ -1,0 +1,99 @@
+nextflow_process {
+
+    name "Test Process VIENNARNA"
+    script "../main.nf"
+    process "VIENNARNA"
+
+    tag "modules"
+    tag "modules_local"
+    tag "viennarna"
+    config "./nextflow.config"
+
+    test("viennarna - stub produces SVG output and versions") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group1' ],
+                    file("${projectDir}/modules/local/viennarna/tests/fixtures/fold_group",                       type: 'dir',  checkIfExists: true),
+                    file("${projectDir}/modules/local/viennarna/tests/fixtures/reactivity/URS0000A1B2C3.xml",     checkIfExists: true),
+                    file("${projectDir}/modules/local/viennarna/tests/fixtures/r2dt_drawn_ids.txt",               checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.plots.size() == 1 },
+                {
+                    def svgs = process.out.plots[0][1]
+                    def fileList = svgs instanceof List ? svgs : [svgs]
+                    assert fileList.any { it.toString().endsWith('.svg') }
+                },
+                { assert process.out.versions_viennarna[0][1] == 'viennarna' && process.out.versions_viennarna[0][2] }
+            )
+        }
+    }
+
+    test("viennarna - stub multiple xml inputs (replicates)") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group_multi' ],
+                    file("${projectDir}/modules/local/viennarna/tests/fixtures/fold_group",                       type: 'dir',  checkIfExists: true),
+                    [
+                        file("${projectDir}/modules/local/viennarna/tests/fixtures/reactivity/URS0000A1B2C3.xml", checkIfExists: true),
+                        file("${projectDir}/modules/local/viennarna/tests/fixtures/reactivity/URS0000A1B2C3.xml", checkIfExists: true)
+                    ],
+                    file("${projectDir}/modules/local/viennarna/tests/fixtures/r2dt_drawn_ids.txt",               checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.plots.size() == 1 },
+                { assert process.out.versions_viennarna[0][1] == 'viennarna' && process.out.versions_viennarna[0][2] }
+            )
+        }
+    }
+
+    test("viennarna - stub publishDir routes to structures/viennarna") {
+
+        options "-stub"
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group_publish' ],
+                    file("${projectDir}/modules/local/viennarna/tests/fixtures/fold_group",                       type: 'dir',  checkIfExists: true),
+                    file("${projectDir}/modules/local/viennarna/tests/fixtures/reactivity/URS0000A1B2C3.xml",     checkIfExists: true),
+                    file("${projectDir}/modules/local/viennarna/tests/fixtures/r2dt_drawn_ids.txt",               checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert path("${outputDir}/fold/group_publish/structures/viennarna/stub_ENST00000000001.svg").exists() }
+            )
+        }
+    }
+}

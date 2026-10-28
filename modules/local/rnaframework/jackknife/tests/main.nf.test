@@ -1,0 +1,102 @@
+nextflow_process {
+
+    name "Test Process RNAFRAMEWORK_RFJACKKNIFE"
+    script "../main.nf"
+    process "RNAFRAMEWORK_RFJACKKNIFE"
+
+    tag "modules"
+    tag "modules_local"
+    tag "rnaframework"
+    tag "rnaframework/jackknife"
+    config "./nextflow.config"
+
+    test("rfjackknife - stub single xml") {
+
+        options "-stub"
+
+        when {
+            params {
+                module_args = ''
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group1' ],
+                    file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
+                ])
+                input[1] = file("${projectDir}/modules/local/rnaframework/jackknife/tests/fixtures/test_reference.db", checkIfExists: true)
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.csv.size() == 1 },
+                { assert path(process.out.csv[0][1]).text.contains('FMI') },
+                { assert process.out.log.size() == 1 },
+                { assert process.out.heatmap.size() == 0 }
+            )
+        }
+    }
+
+    test("rfjackknife - stub multiple xmls") {
+
+        options "-stub"
+
+        when {
+            params {
+                module_args = ''
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group_multi' ],
+                    [
+                        file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta', checkIfExists: true),
+                        file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta.fai', checkIfExists: true)
+                    ]
+                ])
+                input[1] = file("${projectDir}/modules/local/rnaframework/jackknife/tests/fixtures/test_reference.db", checkIfExists: true)
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.csv.size() == 1 },
+                { assert path(process.out.csv[0][1]).text.contains('FMI') },
+                { assert process.out.log.size() == 1 }
+            )
+        }
+    }
+
+    test("rfjackknife - stub with img flag") {
+
+        options "-stub"
+
+        when {
+            params {
+                module_args = '-g'
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group_img' ],
+                    file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
+                ])
+                input[1] = file("${projectDir}/modules/local/rnaframework/jackknife/tests/fixtures/test_reference.db", checkIfExists: true)
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.csv.size() == 1 },
+                { assert process.out.log.size() == 1 }
+            )
+        }
+    }
+}

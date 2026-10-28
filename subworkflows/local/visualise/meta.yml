@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "VISUALISE_STRUCTURES"
+description: Render secondary-structure visualisations from folded structures and reactivities using ViennaRNA and R2DT.
+keywords:
+  - visualisation
+  - rna structure
+  - r2dt
+  - viennarna
+  - rnastructurome
+components:
+  - r2dt
+  - resolvereferencekey
+  - viennarna
+input:
+  - ch_rfnorm_xml:
+      type: channel
+      description: |
+        Normalised reactivity XML. Structure: [ val(meta), path(xml) ]
+  - ch_fold_structures:
+      type: channel
+      description: |
+        Folded structure directory. Structure: [ val(meta), path(dir) ]
+  - ch_fold_input:
+      type: channel
+      description: |
+        Reactivity XMLs grouped by sample_group. Structure: [ val(meta), path(xmls) ]
+  - ch_reference_fasta_map:
+      type: map
+      description: |
+        Value map of reference_key -> [ val(meta), path(fasta) ].
+output:
+  - versions:
+      type: channel
+      description: |
+        Collected software version files. Structure: [ path(versions.yml) ]
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"

@@ -1,0 +1,56 @@
+name: wig_to_genome
+description: Remap transcript-coordinate WIG values to genomic-coordinate WIG
+  values using a GTF annotation
+keywords:
+  - wig
+  - gtf
+  - genome
+  - bigwig
+tools:
+  - python:
+      description: Python runtime used to remap transcript coordinates to genome
+        coordinates.
+      homepage: https://www.python.org/
+      documentation: https://docs.python.org/3/
+      licence:
+        - "Python-2.0"
+      identifier: ""
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing group/sample information
+    - wig:
+        type: file
+        description: Transcript-coordinate WIG file
+        pattern: "*.wig"
+        ontologies: []
+    - gtf:
+        type: file
+        description: GTF annotation with transcript exon coordinates
+        pattern: "*.{gtf,gtf.gz}"
+        ontologies: []
+output:
+  wig:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing group/sample information
+      - ${prefix}.genomic.wig: {}
+  chrom_sizes:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing group/sample information
+      - ${prefix}_genomic.chrom.sizes: {}
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies:
+          - edam: http://edamontology.org/format_3750
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"
