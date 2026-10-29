@@ -46,8 +46,8 @@ All paths are relative to the top-level output directory specified with `--outdi
 │   │   ├── structures/r2dt.log
 │   │   ├── structures/viennarna/*.svg
 │   │   ├── rdat/*.rdat
-│   │   ├── rdat/*.bpp.tsv
 │   │   ├── bp/*.bp
+│   │   ├── bp/*.bpp.tsv
 │   │   ├── shannon/*.wig
 │   │   ├── rffold.log
 │   │   └── extracted_structures/      (if --structextract)
@@ -277,8 +277,8 @@ The headline number is the pairwise correlation (here Pearson 0.765 between the 
   - `structures/viennarna/<transcript>.svg`: RNAplot 2D structure diagram drawn by ViennaRNA.
   - `structures/r2dt.log`: log of transcripts drawn/skipped by R2DT.
   - `rdat/<transcript>.rdat`: RDAT-format file (compatible with RMDB) which summarises results (sequence, dot-bracket notation, reactivities) and key parameters for how it was produced.
-  - `rdat/<transcript>.bpp.tsv`: Base-pair probabilities for the RDAT's structure, one row per base pair (`i`, `j`, 1-based, and `probability` from `rf-fold`'s partition function). `NaN` marks a pair too unlikely for `rf-fold` to report. Written when `--rffold_dotplot` is on (the default).
   - `bp/<transcript>.bp`: Per-transcript base-pair arcs in transcript coordinates, keeping pairs at 10% probability or above. These are merged into the transcript-coordinate `.bp` file below.
+  - `bp/<transcript>.bpp.tsv`: Base-pair probabilities for the pairs of the RDAT's structure only (not the full ensemble in the `.bp` file), one row per base pair (`i`, `j`, 1-based, and `probability` from `rf-fold`'s partition function). `NaN` marks a pair too unlikely for `rf-fold` to report. Written when `--rffold_dotplot` is on (the default).
   - `shannon/<transcript>.wig`: Per-transcript Shannon entropy in transcript coordinates. These are merged into the genome or transcript-coordinate BigWigs below.
   - `rffold.log`: Raw `rf-fold` console output.
 - `fold/genome_bp/`
