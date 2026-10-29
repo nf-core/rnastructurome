@@ -1,0 +1,4 @@
+track type=wiggle_0
+fixedStep chrom=chr1 start=1 step=1
+1
+2

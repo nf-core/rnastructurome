@@ -1,0 +1,61 @@
+name: rnaframework_rfstructextract
+description: Extract high-confidence, low-reactivity / low-Shannon structural motifs from rf-fold output
+keywords:
+  - rnaframework
+  - structure
+  - motif
+  - shannon
+  - reactivity
+tools:
+  - rnaframework:
+      description: |
+        RNAFramework is a toolkit for processing and analysing RNA structure probing data.
+      homepage: https://rnaframework-docs.readthedocs.io/
+      documentation: https://rnaframework-docs.readthedocs.io/en/latest/rf-structextract/
+      tool_dev_url: https://github.com/dincarnato/RNAFramework
+      licence: ["GPL-3.0-or-later"]
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample-group information
+          e.g. [ id:'HEK293T' ]
+    - fold_dir:
+        type: directory
+        description: rf-fold output directory containing CT/db structures and the shannon/ folder
+    - xmls:
+        type: file
+        description: rf-norm reactivity XML files for the same group (staged into an xml folder)
+        pattern: "*.{xml}"
+        ontologies: []
+output:
+  motifs:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample-group information
+            e.g. [ id:'HEK293T' ]
+      - "${prefix}_structextract/":
+          type: directory
+          description: Extracted structural motifs and their secondary structures
+  log:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample-group information
+            e.g. [ id:'HEK293T' ]
+      - "*.rfstructextract.log":
+          type: file
+          description: rf-structextract run log
+          pattern: "*.rfstructextract.log"
+          ontologies: []
+  versions:
+    - "versions.yml":
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies: []
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"

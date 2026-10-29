@@ -1,0 +1,44 @@
+nextflow_process {
+
+    name "Test Process ENSEMBL_GTF"
+    script "../main.nf"
+    process "ENSEMBL_GTF"
+
+    tag "modules"
+    tag "modules_local"
+    tag "ensembl"
+    tag "ensembl/gtf"
+    config "./nextflow.config"
+
+    test("normalizes Latin binomial and downloads GTF from local Ensembl fixture") {
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'human_fixture', organism:'Homo sapiens' ],
+                    'Homo sapiens'
+                ])
+                input[1] = [
+                    ensembl_release : 'current',
+                    ensembl_base_url: "file://${projectDir}/modules/local/ensembl/gtf/tests/fixtures/ensembl/pub"
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.gtf.size() == 1 },
+                {
+                    def gtfText = path(process.out.gtf[0][1]).text
+                    assert gtfText.contains('transcript_id "ENST000001"')
+                    assert gtfText.contains('\texon\t')
+                },
+                { assert path(process.out.source_urls[0][1]).text.contains('/current/gtf/homo_sapiens/Homo_sapiens.test.115.gtf.gz') },
+                { assert process.out.versions_ensembl[0][1] == 'ensembl' && process.out.versions_ensembl[0][2] == 'current' }
+            )
+        }
+    }
+}

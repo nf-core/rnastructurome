@@ -1,0 +1,39 @@
+name: ncbi_gtf
+description: Generate a pseudo-GTF annotation from an NCBI transcript FASTA where each sequence is treated as a single-exon transcript
+keywords:
+  - ncbi
+  - gtf
+  - annotation
+  - transcript
+tools:
+  - python:
+      description: Python runtime used to build the pseudo-GTF
+      homepage: https://www.python.org/
+      documentation: https://docs.python.org/3/
+      licence: ["Python-2.0"]
+input:
+  - - meta:
+        type: map
+        description: Groovy Map containing organism metadata (e.g. id, organism)
+    - fasta:
+        type: file
+        description: Compressed transcript FASTA file (one entry per transcript)
+        pattern: "*.fa.gz"
+output:
+  gtf:
+    - - meta:
+          type: map
+          description: Groovy Map containing organism metadata
+      - "${meta.id}.annotation.gtf":
+          type: file
+          description: GTF annotation with one single-exon entry per transcript
+          pattern: "*.annotation.gtf"
+  versions:
+    - "versions.yml":
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"

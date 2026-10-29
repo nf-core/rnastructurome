@@ -1,0 +1,74 @@
+name: rnaframework_rfnorm
+description: Normalise RNAframework raw count files to reactivity XML
+keywords:
+  - rnaframework
+  - structure
+  - normalization
+  - reactivity
+tools:
+  - rnaframework:
+      description: |
+        RNAFramework is a toolkit for processing and analysing RNA structure probing data.
+      homepage: https://rnaframework-docs.readthedocs.io/
+      documentation: https://rnaframework-docs.readthedocs.io/en/latest/rf-norm/
+      tool_dev_url: https://github.com/dincarnato/RNAFramework
+      licence: ["GPL-3.0-or-later"]
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing group-level information
+          e.g. [ id:'group1', principle:'MaP' ]
+    - treated:
+        type: file
+        description: Treated sample rc files
+        pattern: "*.{rc}"
+        ontologies: []
+    - untreated:
+        type: file
+        description: Optional untreated control rc files
+        pattern: "*.{rc}"
+        ontologies: []
+    - denatured:
+        type: file
+        description: Optional denatured control rc files
+        pattern: "*.{rc}"
+        ontologies: []
+    - rci_files:
+        type: file
+        description: Optional staged RNAframework rc index sidecar files for automatic rf-norm discovery
+        pattern: "*.{rci}"
+        ontologies: []
+output:
+  xml:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing group-level information
+            e.g. [ id:'group1', principle:'MaP' ]
+      - "*.xml":
+          type: file
+          description: RNAframework normalized reactivity XML output
+          pattern: "*.{xml}"
+          ontologies: []
+  plots:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing group-level information
+            e.g. [ id:'group1', principle:'MaP' ]
+      - "*.pdf":
+          type: file
+          description: Optional RNAframework rf-norm plots
+          pattern: "*.{pdf}"
+          ontologies: []
+  versions:
+    - "versions.yml":
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies: []
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"

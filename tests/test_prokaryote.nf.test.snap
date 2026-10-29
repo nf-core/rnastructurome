@@ -1,0 +1,234 @@
+{
+    "-profile test_prokaryote": {
+        "content": [
+            {
+                "BOWTIE2_ALIGN": {
+                    "bowtie2": "2.5.4",
+                    "pigz": 2.8,
+                    "samtools": 1.21
+                },
+                "BOWTIE2_BUILD": {
+                    "bowtie2": "2.5.4"
+                },
+                "CAT_FASTQ": {
+                    "cat": 9.5
+                },
+                "CUTADAPT_MAP": {
+                    "cutadapt": 5.2
+                },
+                "FASTA_SORT_LOCAL": {
+                    "seqkit": "2.9.0"
+                },
+                "FASTQC_POST": {
+                    "fastqc": "0.12.1"
+                },
+                "FASTQC_PRE": {
+                    "fastqc": "0.12.1"
+                },
+                "MERGE_BP": {
+                    "python": "3.12.12"
+                },
+                "MERGE_BP_TRANSCRIPT": {
+                    "python": "3.12.12"
+                },
+                "MERGE_SHANNON_WIG": {
+                    "cat": 9.11
+                },
+                "MERGE_WIG": {
+                    "cat": 9.11
+                },
+                "RNAFRAMEWORK_DOTPLOT2BP": {
+                    "python": "3.12.12"
+                },
+                "RNAFRAMEWORK_DOTPLOT2BP_TRANSCRIPT": {
+                    "python": "3.12.12"
+                },
+                "RNAFRAMEWORK_RFCOUNT": {
+                    "rnaframework": "2.9.8"
+                },
+                "RNAFRAMEWORK_RFEVAL": {
+                    "python": "3.13.16",
+                    "rnaframework": "2.9.8"
+                },
+                "RNAFRAMEWORK_RFFOLD": {
+                    "rnaframework": "2.9.8"
+                },
+                "RNAFRAMEWORK_RFJACKKNIFE": {
+                    "rnaframework": "2.9.8"
+                },
+                "RNAFRAMEWORK_RFNORM": {
+                    "rnaframework": "2.9.8"
+                },
+                "RNAFRAMEWORK_RFWIGGLE": {
+                    "rnaframework": "2.9.8"
+                },
+                "RNAFRAMEWORK_TORDAT": {
+                    "python": "3.12.12"
+                },
+                "SAMTOOLS_FLAGSTAT": {
+                    "samtools": "1.23.1"
+                },
+                "SAMTOOLS_IDXSTATS": {
+                    "samtools": "1.23.1"
+                },
+                "SAMTOOLS_INDEX_FINAL": {
+                    "samtools": "1.23.1"
+                },
+                "SAMTOOLS_INDEX_SORT": {
+                    "samtools": "1.23.1"
+                },
+                "SAMTOOLS_SORT": {
+                    "samtools": "1.23.1"
+                },
+                "SAMTOOLS_STATS": {
+                    "samtools": "1.23.1"
+                },
+                "UCSC_WIGTOBIGWIG_REACTIVITY": {
+                    "ucsc": 482
+                },
+                "UCSC_WIGTOBIGWIG_SHANNON": {
+                    "ucsc": 482
+                },
+                "UCSC_WIGTOBIGWIG_TRANSCRIPT_REACTIVITY": {
+                    "ucsc": 482
+                },
+                "UCSC_WIGTOBIGWIG_TRANSCRIPT_SHANNON": {
+                    "ucsc": 482
+                },
+                "VIENNARNA": {
+                    "viennarna": "2.7.2"
+                },
+                "WIG_CHROM_SIZES_REACTIVITY": {
+                    "python": "3.12.12"
+                },
+                "WIG_CHROM_SIZES_SHANNON": {
+                    "python": "3.12.12"
+                },
+                "WIG_TO_GENOME_REACTIVITY": {
+                    "python": "3.12.12"
+                },
+                "WIG_TO_GENOME_SHANNON": {
+                    "python": "3.12.12"
+                },
+                "Workflow": {
+                    "nf-core/rnastructurome": "v1.1.0"
+                }
+            },
+            [
+                "bowtie2",
+                "bowtie2/E_coli_DH5a_treated.bam",
+                "bowtie2/E_coli_DH5a_treated.bowtie2.log",
+                "bowtie2/bowtie2",
+                "bowtie2/bowtie2/escherichia_coli.sorted.1.bt2",
+                "bowtie2/bowtie2/escherichia_coli.sorted.2.bt2",
+                "bowtie2/bowtie2/escherichia_coli.sorted.3.bt2",
+                "bowtie2/bowtie2/escherichia_coli.sorted.4.bt2",
+                "bowtie2/bowtie2/escherichia_coli.sorted.rev.1.bt2",
+                "bowtie2/bowtie2/escherichia_coli.sorted.rev.2.bt2",
+                "cat",
+                "cat/E_coli_DH5a_treated.merged.fastq.gz",
+                "count",
+                "count/E_coli_DH5a_treated",
+                "count/E_coli_DH5a_treated/E_coli_DH5a_treated.rc",
+                "count/E_coli_DH5a_treated/E_coli_DH5a_treated.rfcount.log",
+                "count/E_coli_DH5a_treated/index.rci",
+                "count/rfcount_summary_all_samples.tsv",
+                "cutadapt",
+                "cutadapt/E_coli_DH5a_treated.cutadapt.log",
+                "cutadapt/E_coli_DH5a_treated.trim.fastq.gz",
+                "eval",
+                "eval/E_coli_DH5a_1",
+                "eval/E_coli_DH5a_1/E_coli_DH5a_1_rfeval.metrics.tsv",
+                "eval/E_coli_DH5a_1/rfeval.log",
+                "fastqc",
+                "fastqc/E_coli_DH5a_treated_fastqc.html",
+                "fastqc/E_coli_DH5a_treated_fastqc.zip",
+                "fastqc/E_coli_DH5a_treated_trimmed_trimmed_fastqc.html",
+                "fastqc/E_coli_DH5a_treated_trimmed_trimmed_fastqc.zip",
+                "fold",
+                "fold/E_coli_DH5a",
+                "fold/E_coli_DH5a/bp",
+                "fold/E_coli_DH5a/bp/16S_rRNA.bp",
+                "fold/E_coli_DH5a/rdat",
+                "fold/E_coli_DH5a/rdat/16S_rRNA.rdat",
+                "fold/E_coli_DH5a/rffold.log",
+                "fold/E_coli_DH5a/shannon",
+                "fold/E_coli_DH5a/shannon/16S_rRNA.wig",
+                "fold/E_coli_DH5a/structures",
+                "fold/genome_bp",
+                "fold/genome_bp/E_coli_DH5a_genome.bp",
+                "fold/shannon_genome_bw",
+                "fold/shannon_genome_bw/E_coli_DH5a_shannon_genome.bw",
+                "fold/shannon_transcript_bw",
+                "fold/shannon_transcript_bw/E_coli_DH5a_shannon_transcript.bw",
+                "fold/transcript_bp",
+                "fold/transcript_bp/E_coli_DH5a_transcript.bp",
+                "jackknife",
+                "jackknife/E_coli_DH5a_1_jackknife",
+                "jackknife/E_coli_DH5a_1_jackknife/mFMI.csv",
+                "jackknife/E_coli_DH5a_1_jackknife/rfjackknife.log",
+                "multiqc",
+                "multiqc/multiqc_report.html",
+                "norm",
+                "norm/E_coli_DH5a_1",
+                "norm/E_coli_DH5a_1/rfnorm.log",
+                "norm/E_coli_DH5a_1/wiggle",
+                "norm/E_coli_DH5a_1/wiggle/E_coli_DH5a_1.wig",
+                "norm/E_coli_DH5a_1/xml",
+                "norm/E_coli_DH5a_1/xml/16S_rRNA.xml",
+                "norm/genome_bw",
+                "norm/genome_bw/E_coli_DH5a_reactivity_genome.bw",
+                "norm/transcript_bw",
+                "norm/transcript_bw/E_coli_DH5a_reactivity_transcript.bw",
+                "pipeline_info",
+                "pipeline_info/nf_core_rnastructurome_software_mqc_versions.yml",
+                "samtools",
+                "samtools/E_coli_DH5a_treated.flagstat",
+                "samtools/E_coli_DH5a_treated.idxstats",
+                "samtools/E_coli_DH5a_treated.sorted.bam",
+                "samtools/E_coli_DH5a_treated.sorted.bam.bai",
+                "samtools/E_coli_DH5a_treated.stats"
+            ],
+            [
+                "E_coli_DH5a_treated.bowtie2.log:md5,f0876da450a7cd45dcd01b7c2514d82e",
+                "escherichia_coli.sorted.1.bt2:md5,f20bc7cb31e3e5fea750946ef0ac2062",
+                "escherichia_coli.sorted.2.bt2:md5,0081224cb50e2a0dea45ed7a425bb893",
+                "escherichia_coli.sorted.3.bt2:md5,6a5f6d9018e1fbf919300275b53461e4",
+                "escherichia_coli.sorted.4.bt2:md5,437fddfc37816d1ed7e9686e47ad57b8",
+                "escherichia_coli.sorted.rev.1.bt2:md5,bf603ccc39bd60c1b9295aee8579835d",
+                "escherichia_coli.sorted.rev.2.bt2:md5,150556a4fbba8182c598fc3d857db011",
+                "E_coli_DH5a_treated.merged.fastq.gz:md5,8a4b8988a0b8660104fbaaee49e69445",
+                "E_coli_DH5a_treated.rc:md5,5ee6c00cc40b0c09366aef0ef785446a",
+                "E_coli_DH5a_treated.rfcount.log:md5,e2439977c1b264f7c9dc23885a116805",
+                "index.rci:md5,1c410562ce87d72af1c379df9459969b",
+                "rfcount_summary_all_samples.tsv:md5,c64db30555d6e1ca3c0e50038dab4ab2",
+                "E_coli_DH5a_treated.cutadapt.log:md5,f856e0a5d37a470c2694cb08505167e1",
+                "E_coli_DH5a_treated.trim.fastq.gz:md5,bd761dafb8f462f729a8429a4a305889",
+                "E_coli_DH5a_1_rfeval.metrics.tsv:md5,5562289b2dfee31d2012f23f8811d183",
+                "rfeval.log:md5,4269f89fb697cfb64a4135b40e3e7243",
+                "16S_rRNA.bp:md5,48504ffbcf4e842bb971750d9fe8f88e",
+                "rffold.log:md5,0aaa33c23d2c3bc29c01833d51704c98",
+                "16S_rRNA.wig:md5,acc6dac4dfbee2c2c0acf7cde942d04a",
+                "E_coli_DH5a_genome.bp:md5,48504ffbcf4e842bb971750d9fe8f88e",
+                "E_coli_DH5a_shannon_genome.bw:md5,41db769662c288f6da624bb2ae7cbeb3",
+                "E_coli_DH5a_shannon_transcript.bw:md5,c41c16f6d878a24a6e692894a872a928",
+                "E_coli_DH5a_transcript.bp:md5,48504ffbcf4e842bb971750d9fe8f88e",
+                "mFMI.csv:md5,d42979718142ca90ba166666a5f25a48",
+                "rfjackknife.log:md5,8ebe5fccd6b78c01cdea4accb06f71b0",
+                "rfnorm.log:md5,d07972954e376c332c617f9af834ca27",
+                "E_coli_DH5a_1.wig:md5,838f69de098394d6986531bde8d7055d",
+                "16S_rRNA.xml:md5,55963e74eec24e83e6fcdd2e13af2fd3",
+                "E_coli_DH5a_reactivity_genome.bw:md5,daad4381dda93cb64d9ba39bdb8b6767",
+                "E_coli_DH5a_reactivity_transcript.bw:md5,4caafeef97edb71d1e8d7bd0fa6b0a81",
+                "E_coli_DH5a_treated.flagstat:md5,3ae0d61d9a97aec743936fa246db76db",
+                "E_coli_DH5a_treated.idxstats:md5,f88021e124e67ac7bfc304e3d1030313",
+                "E_coli_DH5a_treated.stats:md5,d8a11c6fbd7f5446f3376a08cc917e1e"
+            ]
+        ],
+        "timestamp": "2026-10-13T10:34:07.450368",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "26.04.3"
+        }
+    }
+}

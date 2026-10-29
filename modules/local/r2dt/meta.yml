@@ -1,0 +1,83 @@
+name: r2dt
+description: Draw RNA secondary structure diagrams using R2DT, then colour
+  nucleotides by SHAPE/DMS reactivity
+keywords:
+  - r2dt
+  - rna
+  - secondary structure
+  - svg
+  - reactivity
+  - shape
+  - dms
+tools:
+  - r2dt:
+      description: R2DT draws RNA secondary structures using a library of
+        templates derived from known structures
+      homepage: https://github.com/RNAcentral/R2DT
+      documentation: https://docs.r2dt.bio/
+      licence:
+        - "Apache-2.0"
+      identifier: biotools:r2dt
+  - python:
+      description: Python runtime used for reactivity colouring of SVG output
+      homepage: https://www.python.org/
+      documentation: https://docs.python.org/3/
+      licence:
+        - "Python-2.0"
+      identifier: ""
+input:
+  - - meta:
+        type: map
+        description: Groovy Map containing group metadata (e.g. sample_group,
+          condition)
+    - fold_dir:
+        type: directory
+        description: Directory of RNAFramework rf-fold output files (dot-bracket
+          structures)
+    - xml_files:
+        type: file
+        description: RNAFramework XML reactivity files (one per replicate)
+        pattern: "*.xml"
+        ontologies:
+          - edam: http://edamontology.org/format_2332
+    - fasta:
+        type: file
+        description: Transcript FASTA used for R2DT template matching
+        pattern: "*.fa{,.gz}"
+        ontologies: []
+output:
+  diagrams:
+    - - meta:
+          type: map
+          description: Groovy Map containing group metadata
+      - ${prefix}_r2dt/:
+          type: directory
+          description: Directory of reactivity-coloured SVG structure diagrams
+            (absent if no R2DT templates matched)
+          pattern: "*_r2dt/"
+  drawn_ids:
+    - - meta:
+          type: map
+          description: Groovy Map containing group metadata
+      - r2dt_drawn_ids.txt:
+          type: file
+          description: Text file listing transcript IDs for which R2DT diagrams
+            were produced
+          pattern: "r2dt_drawn_ids.txt"
+          ontologies: []
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies:
+          - edam: http://edamontology.org/format_3750
+  log:
+    - - meta:
+          type: map
+          description: Groovy Map containing group metadata
+      - ${prefix}_r2dt.log: {}
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"

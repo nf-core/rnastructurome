@@ -1,0 +1,5 @@
+1	test	exon	101	103	.	+	.	gene_id "GENEPLUS"; transcript_id "TXPLUS";
+1	test	exon	201	202	.	+	.	gene_id "GENEPLUS"; transcript_id "TXPLUS";
+2	test	exon	100	101	.	-	.	gene_id "GENEMINUS"; transcript_id "TXMINUS";
+2	test	exon	200	202	.	-	.	gene_id "GENEMINUS"; transcript_id "TXMINUS";
+1	test	exon	101	102	.	+	.	gene_id "GENEOVER"; transcript_id "TXOVER";

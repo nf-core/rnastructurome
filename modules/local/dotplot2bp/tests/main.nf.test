@@ -1,0 +1,66 @@
+nextflow_process {
+
+    name "Test Process RNAFRAMEWORK_DOTPLOT2BP"
+    script "../main.nf"
+    process "RNAFRAMEWORK_DOTPLOT2BP"
+
+    tag "modules"
+    tag "modules_local"
+    tag "dotplot2bp"
+    config "./nextflow.config"
+
+    test("converts plus and minus strand dotplots into genomic bp arcs") {
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'fold_group', organism:'Homo sapiens' ],
+                    file("${projectDir}/modules/local/dotplot2bp/tests/fixtures/fold_group", type: 'dir', checkIfExists: true),
+                    file("${projectDir}/modules/local/dotplot2bp/tests/fixtures/annotation.gtf", checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                {
+                    assert process.out.bp.size() == 1
+                    def bpFiles = process.out.bp[0][1]
+                    assert bpFiles.size() == 3
+                    def plusPath = bpFiles.find { it.toString().endsWith('TXPLUS.bp') }
+                    def lines = path(plusPath).text.readLines()
+                    def colorLines = lines.findAll { it.startsWith('color') }
+                    def arcLines = lines.findAll { !it.startsWith('color') }
+                    assert colorLines == [
+                        'color:\t189\t189\t189\t0-10% probability',
+                        'color:\t242\t204\t84\t10-40% probability',
+                        'color:\t120\t182\t220\t40-70% probability',
+                        'color:\t126\t198\t143\t70-100% probability'
+                    ]
+                    // TXPLUS.dp lists the pairs out of order; arcs must come out sorted by position.
+                    assert arcLines == [
+                        'chr1\t101\t101\t202\t202\t3',
+                        'chr1\t102\t102\t201\t201\t1'
+                    ]
+                },
+                {
+                    def bpFiles = process.out.bp[0][1]
+                    def versionedPath = bpFiles.find { it.toString().endsWith('TXPLUS.2.bp') }
+                    def lines = path(versionedPath).text.readLines().findAll { !it.startsWith('color') }
+                    assert lines.contains('chr1\t101\t101\t102\t102\t3')
+                },
+                {
+                    def bpFiles = process.out.bp[0][1]
+                    def minusPath = bpFiles.find { it.toString().endsWith('TXMINUS.bp') }
+                    def lines = path(minusPath).text.readLines().findAll { !it.startsWith('color') }
+                    assert lines.contains('chr2\t100\t100\t202\t202\t1')
+                    assert lines.contains('chr2\t101\t101\t201\t201\t0')
+                },
+                { assert process.out.versions_python[0][1] == 'python' && process.out.versions_python[0][2] }
+            )
+        }
+    }
+}

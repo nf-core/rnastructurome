@@ -1,0 +1,38 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "CORRELATE_REPLICATES"
+description: Assess replicate reproducibility by correlating per-sample_group reactivity XMLs with rf-correlate (Pearson and Spearman), emitting correlation matrices and a combined MultiQC report.
+keywords:
+  - reproducibility
+  - correlation
+  - replicates
+  - qc
+  - rnastructurome
+components:
+  - rnaframework/rfcorrelate
+input:
+  - ch_fold_input:
+      type: channel
+      description: |
+        Reactivity XMLs grouped by sample_group. Structure: [ val(meta), list(path(xml)) ]
+output:
+  - matrix_pearson:
+      type: channel
+      description: |
+        Pairwise Pearson correlation matrix (reactivity-capped). Structure: [ val(meta), path(matrix.csv) ]
+  - matrix_spearman:
+      type: channel
+      description: |
+        Pairwise Spearman correlation matrix. Structure: [ val(meta), path(matrix.csv) ]
+  - multiqc:
+      type: channel
+      description: |
+        Combined MultiQC report fragment (replicates, mean Pearson, mean Spearman per sample group).
+        Structure: path(rfcorrelate_mqc.yaml)
+  - versions:
+      type: channel
+      description: |
+        Collected software version files. Structure: [ path(versions.yml) ]
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"

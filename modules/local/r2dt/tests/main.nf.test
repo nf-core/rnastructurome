@@ -1,0 +1,100 @@
+nextflow_process {
+
+    name "Test Process R2DT"
+    script "../main.nf"
+    process "R2DT"
+
+    tag "modules"
+    tag "modules_local"
+    tag "r2dt"
+
+    config "./nextflow.config"
+
+    test("r2dt - stub produces output directory and versions") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group1', organism:'Homo sapiens' ],
+                    file("${projectDir}/modules/local/r2dt/tests/fixtures/fold_group",       type: 'dir',  checkIfExists: true),
+                    file("${projectDir}/modules/local/r2dt/tests/fixtures/reactivity/URS0000A1B2C3.xml", checkIfExists: true),
+                    file("${projectDir}/modules/local/r2dt/tests/fixtures/sequences.fa",       checkIfExists: true),
+                    []
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.diagrams.size() == 1 },
+                { assert path(process.out.diagrams[0][1].toString()).toFile().isDirectory() },
+                { assert path(process.out.diagrams[0][1].toString()).list().any { it.toString().endsWith('.svg') } },
+                { assert process.out.versions_r2dt[0][1] == 'r2dt' && process.out.versions_r2dt[0][2] }
+            )
+        }
+    }
+
+    test("r2dt - stub multiple xml inputs (replicates)") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group_multi', organism:'Homo sapiens' ],
+                    file("${projectDir}/modules/local/r2dt/tests/fixtures/fold_group",       type: 'dir',  checkIfExists: true),
+                    [
+                        file("${projectDir}/modules/local/r2dt/tests/fixtures/reactivity/URS0000A1B2C3.xml", checkIfExists: true),
+                        file("${projectDir}/modules/local/r2dt/tests/fixtures/reactivity/URS0000A1B2C3.xml", checkIfExists: true)
+                    ],
+                    file("${projectDir}/modules/local/r2dt/tests/fixtures/sequences.fa",       checkIfExists: true),
+                    []
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.diagrams.size() == 1 },
+                { assert process.out.versions_r2dt[0][1] == 'r2dt' && process.out.versions_r2dt[0][2] }
+            )
+        }
+    }
+
+    test("r2dt - stub publishDir strips prefix correctly") {
+
+        options "-stub"
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group_publish', organism:'Homo sapiens' ],
+                    file("${projectDir}/modules/local/r2dt/tests/fixtures/fold_group",       type: 'dir',  checkIfExists: true),
+                    file("${projectDir}/modules/local/r2dt/tests/fixtures/reactivity/URS0000A1B2C3.xml", checkIfExists: true),
+                    file("${projectDir}/modules/local/r2dt/tests/fixtures/sequences.fa",       checkIfExists: true),
+                    []
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert path("${outputDir}/r2dt/group_publish/structures/r2dt/stub_URS000035F234.svg").exists() }
+            )
+        }
+    }
+}

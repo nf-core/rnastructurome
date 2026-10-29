@@ -1,0 +1,50 @@
+name: tordat
+description: Convert RNAFramework XML reactivity files and dot-bracket structures to RDAT format
+keywords:
+  - rdat
+  - rnaframework
+  - reactivity
+  - secondary structure
+tools:
+  - python:
+      description: Python runtime used to build RDAT files from XML and dot-bracket input
+      homepage: https://www.python.org/
+      documentation: https://docs.python.org/3/
+      licence: ["Python-2.0"]
+input:
+  - - meta:
+        type: map
+        description: Groovy Map containing group metadata (e.g. sample_group, condition)
+    - xml:
+        type: file
+        description: RNAFramework XML reactivity files (one per replicate)
+        pattern: "*.xml"
+    - fold_dir:
+        type: directory
+        description: Directory of RNAFramework rf-fold output containing dot-bracket structures
+output:
+  rdat:
+    - - meta:
+          type: map
+          description: Groovy Map containing group metadata
+      - "${prefix}_rdat/*.rdat":
+          type: file
+          description: RDAT files with per-transcript reactivity and structure data (absent if no transcripts passed coverage filters)
+          pattern: "*.rdat"
+  bpp:
+    - - meta:
+          type: map
+          description: Groovy Map containing group metadata
+      - "${prefix}_rdat/*.bpp.tsv":
+          type: file
+          description: Per-transcript pairing probability of each base pair in the RDAT structure (absent without rf-fold dot plots)
+          pattern: "*.bpp.tsv"
+  versions:
+    - "versions.yml":
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"

@@ -1,0 +1,3 @@
+#!genome-build R64
+chrI	SGD	exon	1	72	.	+	.	gene_id "tK(UUU)K"; transcript_id "tK(UUU)K_tRNA"
+chrI	SGD	exon	100	200	.	+	.	gene_id "YNL042W-B"; transcript_id "YNL042W-B.1_mRNA"; note "keep(this)"

@@ -1,0 +1,340 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" height="452" width="452">
+  <script type="text/ecmascript">
+
+      var shown = 1;
+      function click() {
+        var seq = document.getElementById("seq");
+        if (shown==1) {
+          seq.setAttribute("style", "visibility: hidden");
+          shown = 0;
+        } else {
+          seq.setAttribute("style", "visibility: visible");
+          shown = 1;
+        }
+      }
+
+  </script>
+  <style type="text/css">
+
+      .nucleotide {
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      .backbone {
+        stroke: grey;
+        fill:   none;
+        stroke-width: 1.5;
+      }
+      .basepairs {
+        stroke: #808080;
+        fill:   none;
+        stroke-width: 2.5;
+      }
+
+  </style>
+
+  <rect style="stroke: white; fill: white" height="452" x="0" y="0" width="452" onclick="click(evt)" />
+  <g transform="scale(0.961702,0.961702) translate(132.500000,59.500000)">
+    <polyline class="backbone" id="outline" points="       106.622,-52.422       106.622,-37.422       106.622,-22.422       106.622,-7.422       106.622,7.578       106.622,22.578       106.622,37.578       106.622,52.578       106.622,67.578       106.622,82.578       93.729,99.884       104.341,119.520       102.567,134.415       100.793,149.309       99.019,164.204       97.245,179.099       95.471,193.994       91.491,200.365       93.872,209.355       92.540,224.296       91.208,239.237       83.013,251.801       69.877,259.042       56.741,266.284       47.554,267.729       43.328,273.940       30.412,281.568       17.497,289.196       4.581,296.824       -8.335,304.452       -21.671,296.835       -37.030,296.922       -50.279,304.691       -57.855,318.052       -57.719,333.410       -49.909,346.635       -36.524,354.169       -21.167,353.985       -7.966,346.133       -0.475,332.725       -0.707,317.368       12.209,309.740       25.125,302.112       38.040,294.484       50.956,286.856       63.983,279.420       77.119,272.178       90.255,264.937       83.478,278.318       90.462,291.593       105.329,293.588       115.565,282.623       112.555,267.928       123.318,278.377       134.081,288.825       144.843,299.273       155.606,309.722       166.368,320.170       177.131,330.618       187.894,341.066       198.656,351.515       209.419,361.963       220.181,372.411       230.944,382.859       234.900,398.774       250.733,403.045       262.156,391.279       257.417,375.579       241.392,372.097       230.630,361.648       219.867,351.200       209.105,340.752       198.342,330.304       187.579,319.855       176.817,309.407       166.054,298.959       155.291,288.511       144.529,278.062       133.766,267.614       123.004,257.166       116.626,244.202       106.148,240.569       107.480,225.628       108.812,210.687       110.366,195.768       112.140,180.873       113.914,165.978       115.688,151.084       117.462,136.189       119.236,121.294       126.962,117.277       132.332,110.544       134.481,102.302       133.115,93.991       128.545,87.031       121.622,82.578       121.622,67.578       121.622,52.578       121.622,37.578       121.622,22.578       121.622,7.578       121.622,-7.422       121.622,-22.422       121.622,-37.422       121.622,-52.422     " />
+    <g id="pairs">
+      <line class="basepairs" id="1,105" x1="106.62159" y1="-52.42249" x2="121.62159" y2="-52.42249" />
+      <line class="basepairs" id="2,104" x1="106.62159" y1="-37.42249" x2="121.62159" y2="-37.42249" />
+      <line class="basepairs" id="3,103" x1="106.62159" y1="-22.42249" x2="121.62159" y2="-22.42249" />
+      <line class="basepairs" id="4,102" x1="106.62159" y1="-7.42249" x2="121.62159" y2="-7.42249" />
+      <line class="basepairs" id="5,101" x1="106.62159" y1="7.57751" x2="121.62159" y2="7.57751" />
+      <line class="basepairs" id="6,100" x1="106.62159" y1="22.57751" x2="121.62159" y2="22.57751" />
+      <line class="basepairs" id="7,99" x1="106.62159" y1="37.57751" x2="121.62159" y2="37.57751" />
+      <line class="basepairs" id="8,98" x1="106.62159" y1="52.57751" x2="121.62159" y2="52.57751" />
+      <line class="basepairs" id="9,97" x1="106.62159" y1="67.57751" x2="121.62159" y2="67.57751" />
+      <line class="basepairs" id="10,96" x1="106.62159" y1="82.57751" x2="121.62159" y2="82.57751" />
+      <line class="basepairs" id="12,90" x1="104.34132" y1="119.52002" x2="119.23605" y2="121.29411" />
+      <line class="basepairs" id="13,89" x1="102.56723" y1="134.41473" x2="117.46194" y2="136.18883" />
+      <line class="basepairs" id="14,88" x1="100.79313" y1="149.30945" x2="115.68785" y2="151.08354" />
+      <line class="basepairs" id="15,87" x1="99.01904" y1="164.20416" x2="113.91375" y2="165.97826" />
+      <line class="basepairs" id="16,86" x1="97.24493" y1="179.09888" x2="112.13965" y2="180.87299" />
+      <line class="basepairs" id="17,85" x1="95.47084" y1="193.99359" x2="110.36555" y2="195.76770" />
+      <line class="basepairs" id="19,84" x1="93.87162" y1="209.35513" x2="108.81236" y2="210.68707" />
+      <line class="basepairs" id="20,83" x1="92.53968" y1="224.29587" x2="107.48043" y2="225.62781" />
+      <line class="basepairs" id="21,82" x1="91.20774" y1="239.23663" x2="106.14849" y2="240.56856" />
+      <line class="basepairs" id="22,48" x1="83.01331" y1="251.80051" x2="90.25520" y2="264.93652" />
+      <line class="basepairs" id="23,47" x1="69.87729" y1="259.04239" x2="77.11917" y2="272.17841" />
+      <line class="basepairs" id="24,46" x1="56.74127" y1="266.28427" x2="63.98315" y2="279.42029" />
+      <line class="basepairs" id="26,45" x1="43.32792" y1="273.94040" x2="50.95588" y2="286.85605" />
+      <line class="basepairs" id="27,44" x1="30.41226" y1="281.56836" x2="38.04023" y2="294.48401" />
+      <line class="basepairs" id="28,43" x1="17.49660" y1="289.19632" x2="25.12457" y2="302.11197" />
+      <line class="basepairs" id="29,42" x1="4.58095" y1="296.82428" x2="12.20892" y2="309.73996" />
+      <line class="basepairs" id="30,41" x1="-8.33470" y1="304.45227" x2="-0.70674" y2="317.36792" />
+      <line class="basepairs" id="53,80" x1="112.55539" y1="267.92847" x2="123.00365" y2="257.16586" />
+      <line class="basepairs" id="54,79" x1="123.31799" y1="278.37674" x2="133.76627" y2="267.61414" />
+      <line class="basepairs" id="55,78" x1="134.08060" y1="288.82501" x2="144.52887" y2="278.06238" />
+      <line class="basepairs" id="56,77" x1="144.84322" y1="299.27325" x2="155.29147" y2="288.51065" />
+      <line class="basepairs" id="57,76" x1="155.60582" y1="309.72153" x2="166.05409" y2="298.95892" />
+      <line class="basepairs" id="58,75" x1="166.36842" y1="320.16980" x2="176.81670" y2="309.40720" />
+      <line class="basepairs" id="59,74" x1="177.13104" y1="330.61804" x2="187.57930" y2="319.85544" />
+      <line class="basepairs" id="60,73" x1="187.89365" y1="341.06631" x2="198.34192" y2="330.30371" />
+      <line class="basepairs" id="61,72" x1="198.65625" y1="351.51459" x2="209.10452" y2="340.75198" />
+      <line class="basepairs" id="62,71" x1="209.41887" y1="361.96286" x2="219.86713" y2="351.20026" />
+      <line class="basepairs" id="63,70" x1="220.18147" y1="372.41113" x2="230.62975" y2="361.64850" />
+      <line class="basepairs" id="64,69" x1="230.94408" y1="382.85938" x2="241.39235" y2="372.09677" />
+    </g>
+    <g transform="translate(-4.6, 4)" id="seq">
+      <circle cx="110.622" cy="-56.422" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="106.622" y="-52.422" style="fill: #ffffff;">U</text>
+      <circle cx="110.622" cy="-41.422" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="106.622" y="-37.422" style="fill: #ffffff;">G</text>
+      <circle cx="110.622" cy="-26.422" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="106.622" y="-22.422" style="fill: #ffffff;">A</text>
+      <circle cx="110.622" cy="-11.422" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="106.622" y="-7.422" style="fill: #ffffff;">U</text>
+      <circle cx="110.622" cy="3.578" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="106.622" y="7.578" style="fill: #ffffff;">G</text>
+      <circle cx="110.622" cy="18.578" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="106.622" y="22.578" style="fill: #ffffff;">G</text>
+      <circle cx="110.622" cy="33.578" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="106.622" y="37.578" style="fill: #ffffff;">A</text>
+      <circle cx="110.622" cy="48.578" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="106.622" y="52.578" style="fill: #ffffff;">G</text>
+      <circle cx="110.622" cy="63.578" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="106.622" y="67.578" style="fill: #ffffff;">G</text>
+      <circle cx="110.622" cy="78.578" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="106.622" y="82.578" style="fill: #ffffff;">U</text>
+      <circle cx="97.729" cy="95.884" r="8" fill="#FFCD2F" fill-opacity="0.75" stroke="#FFCD2F" stroke-width="0.8" /><text class="nucleotide" x="93.729" y="99.884" style="fill: #000000;">A</text>
+      <circle cx="108.341" cy="115.520" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="104.341" y="119.520" style="fill: #ffffff;">C</text>
+      <circle cx="106.567" cy="130.415" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="102.567" y="134.415" style="fill: #ffffff;">U</text>
+      <circle cx="104.793" cy="145.309" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="100.793" y="149.309" style="fill: #ffffff;">G</text>
+      <circle cx="103.019" cy="160.204" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="99.019" y="164.204" style="fill: #ffffff;">C</text>
+      <circle cx="101.245" cy="175.099" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="97.245" y="179.099" style="fill: #ffffff;">C</text>
+      <circle cx="99.471" cy="189.994" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="95.471" y="193.994" style="fill: #ffffff;">A</text>
+      <circle cx="95.491" cy="196.365" r="8" fill="#FFCD2F" fill-opacity="0.75" stroke="#FFCD2F" stroke-width="0.8" /><text class="nucleotide" x="91.491" y="200.365" style="fill: #000000;">G</text>
+      <circle cx="97.872" cy="205.355" r="8" fill="#9A2322" fill-opacity="0.75" stroke="#9A2322" stroke-width="0.8" /><text class="nucleotide" x="93.872" y="209.355" style="fill: #ffffff;">G</text>
+      <circle cx="96.540" cy="220.296" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="92.540" y="224.296" style="fill: #ffffff;">C</text>
+      <circle cx="95.208" cy="235.237" r="8" fill="#FFCD2F" fill-opacity="0.75" stroke="#FFCD2F" stroke-width="0.8" /><text class="nucleotide" x="91.208" y="239.237" style="fill: #000000;">C</text>
+      <circle cx="87.013" cy="247.801" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="83.013" y="251.801" style="fill: #ffffff;">G</text>
+      <circle cx="73.877" cy="255.042" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="69.877" y="259.042" style="fill: #ffffff;">C</text>
+      <circle cx="60.741" cy="262.284" r="8" fill="#FFCD2F" fill-opacity="0.75" stroke="#FFCD2F" stroke-width="0.8" /><text class="nucleotide" x="56.741" y="266.284" style="fill: #000000;">U</text>
+      <circle cx="51.554" cy="263.729" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="47.554" y="267.729" style="fill: #ffffff;">G</text>
+      <circle cx="47.328" cy="269.940" r="8" fill="#9A2322" fill-opacity="0.75" stroke="#9A2322" stroke-width="0.8" /><text class="nucleotide" x="43.328" y="273.940" style="fill: #ffffff;">U</text>
+      <circle cx="34.412" cy="277.568" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="30.412" y="281.568" style="fill: #ffffff;">G</text>
+      <circle cx="21.497" cy="285.196" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="17.497" y="289.196" style="fill: #ffffff;">U</text>
+      <circle cx="8.581" cy="292.824" r="8" fill="#9A2322" fill-opacity="0.75" stroke="#9A2322" stroke-width="0.8" /><text class="nucleotide" x="4.581" y="296.824" style="fill: #ffffff;">G</text>
+      <circle cx="-4.335" cy="300.452" r="8" fill="#FFCD2F" fill-opacity="0.75" stroke="#FFCD2F" stroke-width="0.8" /><text class="nucleotide" x="-8.335" y="304.452" style="fill: #000000;">C</text>
+      <circle cx="-17.671" cy="292.835" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="-21.671" y="296.835" style="fill: #ffffff;">C</text>
+      <circle cx="-33.030" cy="292.922" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="-37.030" y="296.922" style="fill: #ffffff;">C</text>
+      <circle cx="-46.279" cy="300.691" r="8" fill="#FFCD2F" fill-opacity="0.75" stroke="#FFCD2F" stroke-width="0.8" /><text class="nucleotide" x="-50.279" y="304.691" style="fill: #000000;">A</text>
+      <circle cx="-53.855" cy="314.052" r="8" fill="#9A2322" fill-opacity="0.75" stroke="#9A2322" stroke-width="0.8" /><text class="nucleotide" x="-57.855" y="318.052" style="fill: #ffffff;">U</text>
+      <circle cx="-53.719" cy="329.410" r="8" fill="#9A2322" fill-opacity="0.75" stroke="#9A2322" stroke-width="0.8" /><text class="nucleotide" x="-57.719" y="333.410" style="fill: #ffffff;">U</text>
+      <circle cx="-45.909" cy="342.635" r="8" fill="#9A2322" fill-opacity="0.75" stroke="#9A2322" stroke-width="0.8" /><text class="nucleotide" x="-49.909" y="346.635" style="fill: #ffffff;">G</text>
+      <circle cx="-32.524" cy="350.169" r="8" fill="#FFCD2F" fill-opacity="0.75" stroke="#FFCD2F" stroke-width="0.8" /><text class="nucleotide" x="-36.524" y="354.169" style="fill: #000000;">C</text>
+      <circle cx="-17.167" cy="349.985" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="-21.167" y="353.985" style="fill: #ffffff;">C</text>
+      <circle cx="-3.966" cy="342.133" r="8" fill="#9A2322" fill-opacity="0.75" stroke="#9A2322" stroke-width="0.8" /><text class="nucleotide" x="-7.966" y="346.133" style="fill: #ffffff;">A</text>
+      <circle cx="3.525" cy="328.725" r="8" fill="#FFCD2F" fill-opacity="0.75" stroke="#FFCD2F" stroke-width="0.8" /><text class="nucleotide" x="-0.475" y="332.725" style="fill: #000000;">A</text>
+      <circle cx="3.293" cy="313.368" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="-0.707" y="317.368" style="fill: #ffffff;">G</text>
+      <circle cx="16.209" cy="305.740" r="8" fill="#9A2322" fill-opacity="0.75" stroke="#9A2322" stroke-width="0.8" /><text class="nucleotide" x="12.209" y="309.740" style="fill: #ffffff;">C</text>
+      <circle cx="29.125" cy="298.112" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="25.125" y="302.112" style="fill: #ffffff;">G</text>
+      <circle cx="42.040" cy="290.484" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="38.040" y="294.484" style="fill: #ffffff;">C</text>
+      <circle cx="54.956" cy="282.856" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="50.956" y="286.856" style="fill: #ffffff;">G</text>
+      <circle cx="67.983" cy="275.420" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="63.983" y="279.420" style="fill: #ffffff;">A</text>
+      <circle cx="81.119" cy="268.178" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="77.119" y="272.178" style="fill: #ffffff;">G</text>
+      <circle cx="94.255" cy="260.937" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="90.255" y="264.937" style="fill: #ffffff;">C</text>
+      <circle cx="87.478" cy="274.318" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="83.478" y="278.318" style="fill: #ffffff;">U</text>
+      <circle cx="94.462" cy="287.593" r="8" fill="#FFCD2F" fill-opacity="0.75" stroke="#FFCD2F" stroke-width="0.8" /><text class="nucleotide" x="90.462" y="291.593" style="fill: #000000;">A</text>
+      <circle cx="109.329" cy="289.588" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="105.329" y="293.588" style="fill: #ffffff;">C</text>
+      <circle cx="119.565" cy="278.623" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="115.565" y="282.623" style="fill: #ffffff;">U</text>
+      <circle cx="116.555" cy="263.928" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="112.555" y="267.928" style="fill: #ffffff;">G</text>
+      <circle cx="127.318" cy="274.377" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="123.318" y="278.377" style="fill: #ffffff;">U</text>
+      <circle cx="138.081" cy="284.825" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="134.081" y="288.825" style="fill: #ffffff;">G</text>
+      <circle cx="148.843" cy="295.273" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="144.843" y="299.273" style="fill: #ffffff;">G</text>
+      <circle cx="159.606" cy="305.722" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="155.606" y="309.722" style="fill: #ffffff;">G</text>
+      <circle cx="170.368" cy="316.170" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="166.368" y="320.170" style="fill: #ffffff;">C</text>
+      <circle cx="181.131" cy="326.618" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="177.131" y="330.618" style="fill: #ffffff;">U</text>
+      <circle cx="191.894" cy="337.066" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="187.894" y="341.066" style="fill: #ffffff;">G</text>
+      <circle cx="202.656" cy="347.515" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="198.656" y="351.515" style="fill: #ffffff;">G</text>
+      <circle cx="213.419" cy="357.963" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="209.419" y="361.963" style="fill: #ffffff;">C</text>
+      <circle cx="224.181" cy="368.411" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="220.181" y="372.411" style="fill: #ffffff;">U</text>
+      <circle cx="234.944" cy="378.859" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="230.944" y="382.859" style="fill: #ffffff;">C</text>
+      <circle cx="238.900" cy="394.774" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="234.900" y="398.774" style="fill: #ffffff;">U</text>
+      <circle cx="254.733" cy="399.045" r="8" fill="#FFCD2F" fill-opacity="0.75" stroke="#FFCD2F" stroke-width="0.8" /><text class="nucleotide" x="250.733" y="403.045" style="fill: #000000;">G</text>
+      <circle cx="266.156" cy="387.279" r="8" fill="#FFCD2F" fill-opacity="0.75" stroke="#FFCD2F" stroke-width="0.8" /><text class="nucleotide" x="262.156" y="391.279" style="fill: #000000;">C</text>
+      <circle cx="261.417" cy="371.579" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="257.417" y="375.579" style="fill: #ffffff;">C</text>
+      <circle cx="245.392" cy="368.097" r="8" fill="#FFCD2F" fill-opacity="0.75" stroke="#FFCD2F" stroke-width="0.8" /><text class="nucleotide" x="241.392" y="372.097" style="fill: #000000;">G</text>
+      <circle cx="234.630" cy="357.648" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="230.630" y="361.648" style="fill: #ffffff;">G</text>
+      <circle cx="223.867" cy="347.200" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="219.867" y="351.200" style="fill: #ffffff;">G</text>
+      <circle cx="213.105" cy="336.752" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="209.105" y="340.752" style="fill: #ffffff;">C</text>
+      <circle cx="202.342" cy="326.304" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="198.342" y="330.304" style="fill: #ffffff;">U</text>
+      <circle cx="191.579" cy="315.855" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="187.579" y="319.855" style="fill: #ffffff;">G</text>
+      <circle cx="180.817" cy="305.407" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="176.817" y="309.407" style="fill: #ffffff;">G</text>
+      <circle cx="170.054" cy="294.959" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="166.054" y="298.959" style="fill: #ffffff;">C</text>
+      <circle cx="159.291" cy="284.511" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="155.291" y="288.511" style="fill: #ffffff;">C</text>
+      <circle cx="148.529" cy="274.062" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="144.529" y="278.062" style="fill: #ffffff;">U</text>
+      <circle cx="137.766" cy="263.614" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="133.766" y="267.614" style="fill: #ffffff;">G</text>
+      <circle cx="127.004" cy="253.166" r="8" fill="#FFCD2F" fill-opacity="0.75" stroke="#FFCD2F" stroke-width="0.8" /><text class="nucleotide" x="123.004" y="257.166" style="fill: #000000;">C</text>
+      <circle cx="120.626" cy="240.202" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="116.626" y="244.202" style="fill: #ffffff;">U</text>
+      <circle cx="110.148" cy="236.569" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="106.148" y="240.569" style="fill: #ffffff;">G</text>
+      <circle cx="111.480" cy="221.628" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="107.480" y="225.628" style="fill: #ffffff;">G</text>
+      <circle cx="112.812" cy="206.687" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="108.812" y="210.687" style="fill: #ffffff;">C</text>
+      <circle cx="114.366" cy="191.768" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="110.366" y="195.768" style="fill: #ffffff;">U</text>
+      <circle cx="116.140" cy="176.873" r="8" fill="#FFCD2F" fill-opacity="0.75" stroke="#FFCD2F" stroke-width="0.8" /><text class="nucleotide" x="112.140" y="180.873" style="fill: #000000;">G</text>
+      <circle cx="117.914" cy="161.978" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="113.914" y="165.978" style="fill: #ffffff;">G</text>
+      <circle cx="119.688" cy="147.084" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="115.688" y="151.084" style="fill: #ffffff;">C</text>
+      <circle cx="121.462" cy="132.189" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="117.462" y="136.189" style="fill: #ffffff;">A</text>
+      <circle cx="123.236" cy="117.294" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="119.236" y="121.294" style="fill: #ffffff;">G</text>
+      <circle cx="130.962" cy="113.277" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="126.962" y="117.277" style="fill: #ffffff;">G</text>
+      <circle cx="136.332" cy="106.544" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="132.332" y="110.544" style="fill: #ffffff;">A</text>
+      <circle cx="138.481" cy="98.302" r="8" fill="#FFCD2F" fill-opacity="0.75" stroke="#FFCD2F" stroke-width="0.8" /><text class="nucleotide" x="134.481" y="102.302" style="fill: #000000;">G</text>
+      <circle cx="137.115" cy="89.991" r="8" fill="#9A2322" fill-opacity="0.75" stroke="#9A2322" stroke-width="0.8" /><text class="nucleotide" x="133.115" y="93.991" style="fill: #ffffff;">U</text>
+      <circle cx="132.545" cy="83.031" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="128.545" y="87.031" style="fill: #ffffff;">C</text>
+      <circle cx="125.622" cy="78.578" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="121.622" y="82.578" style="fill: #ffffff;">A</text>
+      <circle cx="125.622" cy="63.578" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="121.622" y="67.578" style="fill: #ffffff;">U</text>
+      <circle cx="125.622" cy="48.578" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="121.622" y="52.578" style="fill: #ffffff;">C</text>
+      <circle cx="125.622" cy="33.578" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="121.622" y="37.578" style="fill: #ffffff;">U</text>
+      <circle cx="125.622" cy="18.578" r="8" fill="#9A2322" fill-opacity="0.75" stroke="#9A2322" stroke-width="0.8" /><text class="nucleotide" x="121.622" y="22.578" style="fill: #ffffff;">U</text>
+      <circle cx="125.622" cy="3.578" r="8" fill="#FFCD2F" fill-opacity="0.75" stroke="#FFCD2F" stroke-width="0.8" /><text class="nucleotide" x="121.622" y="7.578" style="fill: #000000;">C</text>
+      <circle cx="125.622" cy="-11.422" r="8" fill="#000000" fill-opacity="0.75" stroke="#000000" stroke-width="0.8" /><text class="nucleotide" x="121.622" y="-7.422" style="fill: #ffffff;">A</text>
+      <circle cx="125.622" cy="-26.422" r="8" fill="#B1B3B6" fill-opacity="0.75" stroke="#B1B3B6" stroke-width="0.8" /><text class="nucleotide" x="121.622" y="-22.422" style="fill: #000000;">U</text>
+      <circle cx="125.622" cy="-41.422" r="8" fill="#B1B3B6" fill-opacity="0.75" stroke="#B1B3B6" stroke-width="0.8" /><text class="nucleotide" x="121.622" y="-37.422" style="fill: #000000;">C</text>
+      <circle cx="125.622" cy="-56.422" r="8" fill="#B1B3B6" fill-opacity="0.75" stroke="#B1B3B6" stroke-width="0.8" /><text class="nucleotide" x="121.622" y="-52.422" style="fill: #000000;">G</text>
+    </g>
+  </g>
+<script type="text/ecmascript">
+
+  let sequence = "UGAUGGAGGUACUGCCAGGCCGCUGUGUGCCCAUUGCCAAGCGCGAGCUACUGUGGGCUGGCUCUGCCGGGCUGGCCUGCUGGCUGGCAGGAGUCAUCUUCAUCG";
+  let structure = "((((((((((.((((((.((((((.(((((..........))))))))....((((((((((((....)))))))))))).))))))))).....))))))))))";
+  const basepairs = [
+    { i: 1, j: 105, type: "cWW" },
+    { i: 2, j: 104, type: "cWW" },
+    { i: 3, j: 103, type: "cWW" },
+    { i: 4, j: 102, type: "cWW" },
+    { i: 5, j: 101, type: "cWW" },
+    { i: 6, j: 100, type: "cWW" },
+    { i: 7, j: 99, type: "cWW" },
+    { i: 8, j: 98, type: "cWW" },
+    { i: 9, j: 97, type: "cWW" },
+    { i: 10, j: 96, type: "cWW" },
+    { i: 12, j: 90, type: "cWW" },
+    { i: 13, j: 89, type: "cWW" },
+    { i: 14, j: 88, type: "cWW" },
+    { i: 15, j: 87, type: "cWW" },
+    { i: 16, j: 86, type: "cWW" },
+    { i: 17, j: 85, type: "cWW" },
+    { i: 19, j: 84, type: "cWW" },
+    { i: 20, j: 83, type: "cWW" },
+    { i: 21, j: 82, type: "cWW" },
+    { i: 22, j: 48, type: "cWW" },
+    { i: 23, j: 47, type: "cWW" },
+    { i: 24, j: 46, type: "cWW" },
+    { i: 26, j: 45, type: "cWW" },
+    { i: 27, j: 44, type: "cWW" },
+    { i: 28, j: 43, type: "cWW" },
+    { i: 29, j: 42, type: "cWW" },
+    { i: 30, j: 41, type: "cWW" },
+    { i: 53, j: 80, type: "cWW" },
+    { i: 54, j: 79, type: "cWW" },
+    { i: 55, j: 78, type: "cWW" },
+    { i: 56, j: 77, type: "cWW" },
+    { i: 57, j: 76, type: "cWW" },
+    { i: 58, j: 75, type: "cWW" },
+    { i: 59, j: 74, type: "cWW" },
+    { i: 60, j: 73, type: "cWW" },
+    { i: 61, j: 72, type: "cWW" },
+    { i: 62, j: 71, type: "cWW" },
+    { i: 63, j: 70, type: "cWW" },
+    { i: 64, j: 69, type: "cWW" }];
+  const coords = [
+    { x: 106.622, y: -52.422 },
+    { x: 106.622, y: -37.422 },
+    { x: 106.622, y: -22.422 },
+    { x: 106.622, y: -7.422 },
+    { x: 106.622, y:  7.578 },
+    { x: 106.622, y: 22.578 },
+    { x: 106.622, y: 37.578 },
+    { x: 106.622, y: 52.578 },
+    { x: 106.622, y: 67.578 },
+    { x: 106.622, y: 82.578 },
+    { x: 93.729, y: 99.884 },
+    { x: 104.341, y: 119.520 },
+    { x: 102.567, y: 134.415 },
+    { x: 100.793, y: 149.309 },
+    { x: 99.019, y: 164.204 },
+    { x: 97.245, y: 179.099 },
+    { x: 95.471, y: 193.994 },
+    { x: 91.491, y: 200.365 },
+    { x: 93.872, y: 209.355 },
+    { x: 92.540, y: 224.296 },
+    { x: 91.208, y: 239.237 },
+    { x: 83.013, y: 251.801 },
+    { x: 69.877, y: 259.042 },
+    { x: 56.741, y: 266.284 },
+    { x: 47.554, y: 267.729 },
+    { x: 43.328, y: 273.940 },
+    { x: 30.412, y: 281.568 },
+    { x: 17.497, y: 289.196 },
+    { x:  4.581, y: 296.824 },
+    { x: -8.335, y: 304.452 },
+    { x: -21.671, y: 296.835 },
+    { x: -37.030, y: 296.922 },
+    { x: -50.279, y: 304.691 },
+    { x: -57.855, y: 318.052 },
+    { x: -57.719, y: 333.410 },
+    { x: -49.909, y: 346.635 },
+    { x: -36.524, y: 354.169 },
+    { x: -21.167, y: 353.985 },
+    { x: -7.966, y: 346.133 },
+    { x: -0.475, y: 332.725 },
+    { x: -0.707, y: 317.368 },
+    { x: 12.209, y: 309.740 },
+    { x: 25.125, y: 302.112 },
+    { x: 38.040, y: 294.484 },
+    { x: 50.956, y: 286.856 },
+    { x: 63.983, y: 279.420 },
+    { x: 77.119, y: 272.178 },
+    { x: 90.255, y: 264.937 },
+    { x: 83.478, y: 278.318 },
+    { x: 90.462, y: 291.593 },
+    { x: 105.329, y: 293.588 },
+    { x: 115.565, y: 282.623 },
+    { x: 112.555, y: 267.928 },
+    { x: 123.318, y: 278.377 },
+    { x: 134.081, y: 288.825 },
+    { x: 144.843, y: 299.273 },
+    { x: 155.606, y: 309.722 },
+    { x: 166.368, y: 320.170 },
+    { x: 177.131, y: 330.618 },
+    { x: 187.894, y: 341.066 },
+    { x: 198.656, y: 351.515 },
+    { x: 209.419, y: 361.963 },
+    { x: 220.181, y: 372.411 },
+    { x: 230.944, y: 382.859 },
+    { x: 234.900, y: 398.774 },
+    { x: 250.733, y: 403.045 },
+    { x: 262.156, y: 391.279 },
+    { x: 257.417, y: 375.579 },
+    { x: 241.392, y: 372.097 },
+    { x: 230.630, y: 361.648 },
+    { x: 219.867, y: 351.200 },
+    { x: 209.105, y: 340.752 },
+    { x: 198.342, y: 330.304 },
+    { x: 187.579, y: 319.855 },
+    { x: 176.817, y: 309.407 },
+    { x: 166.054, y: 298.959 },
+    { x: 155.291, y: 288.511 },
+    { x: 144.529, y: 278.062 },
+    { x: 133.766, y: 267.614 },
+    { x: 123.004, y: 257.166 },
+    { x: 116.626, y: 244.202 },
+    { x: 106.148, y: 240.569 },
+    { x: 107.480, y: 225.628 },
+    { x: 108.812, y: 210.687 },
+    { x: 110.366, y: 195.768 },
+    { x: 112.140, y: 180.873 },
+    { x: 113.914, y: 165.978 },
+    { x: 115.688, y: 151.084 },
+    { x: 117.462, y: 136.189 },
+    { x: 119.236, y: 121.294 },
+    { x: 126.962, y: 117.277 },
+    { x: 132.332, y: 110.544 },
+    { x: 134.481, y: 102.302 },
+    { x: 133.115, y: 93.991 },
+    { x: 128.545, y: 87.031 },
+    { x: 121.622, y: 82.578 },
+    { x: 121.622, y: 67.578 },
+    { x: 121.622, y: 52.578 },
+    { x: 121.622, y: 37.578 },
+    { x: 121.622, y: 22.578 },
+    { x: 121.622, y:  7.578 },
+    { x: 121.622, y: -7.422 },
+    { x: 121.622, y: -22.422 },
+    { x: 121.622, y: -37.422 },
+    { x: 121.622, y: -52.422 }];
+
+</script>
+<g transform="translate(387.0,401.5) scale(0.75)"><rect x="0" y="0" width="12" height="12" fill="#9A2322" stroke="#000000" stroke-width="0.5" /><text x="15" y="10" style="font-family: Arial, Helvetica, sans-serif; font-size: 11px; fill: #000000;">0.7+</text><rect x="0" y="13" width="12" height="12" fill="#FFCD2F" stroke="#000000" stroke-width="0.5" /><text x="15" y="23" style="font-family: Arial, Helvetica, sans-serif; font-size: 11px; fill: #000000;">0.4-0.7</text><rect x="0" y="26" width="12" height="12" fill="#000000" stroke="#000000" stroke-width="0.5" /><text x="15" y="36" style="font-family: Arial, Helvetica, sans-serif; font-size: 11px; fill: #000000;">0-0.4</text><rect x="0" y="39" width="12" height="12" fill="#B1B3B6" stroke="#000000" stroke-width="0.5" /><text x="15" y="49" style="font-family: Arial, Helvetica, sans-serif; font-size: 11px; fill: #000000;">No data</text></g></svg>

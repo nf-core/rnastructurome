@@ -20,7 +20,7 @@
                     "mimetype": "text/csv",
                     "pattern": "^\\S+\\.csv$",
                     "description": "Path to comma-separated file containing information about the samples in the experiment.",
-                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/rnastructurome/usage#samplesheet-input).",
+                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. At minimum it must include `sample`, `fastq_1`, `sample_group`, `condition`, and `replicate` columns, with optional `fastq_2` for paired-end data. `sample_id`, `method`, `principle`, `organism`, `chemical`, `RT_enzyme`, `pH`, `adapter_3p`, `adapter_5p`, and `umi_pattern` can be optionally specified in the samplesheet or as flags.",
                     "fa_icon": "fas fa-file-csv"
                 },
                 "outdir": {
@@ -49,35 +49,911 @@
             "fa_icon": "fas fa-dna",
             "description": "Reference genome related files and options required for the workflow.",
             "properties": {
-                "genome": {
-                    "type": "string",
-                    "description": "Name of iGenomes reference.",
-                    "fa_icon": "fas fa-book",
-                    "help_text": "If using a reference genome configured in the pipeline using iGenomes, use this parameter to give the ID for the reference. This is then used to build the full paths for all required reference genome files e.g. `--genome GRCh38`. \n\nSee the [nf-core website docs](https://nf-co.re/usage/reference_genomes) for more details."
-                },
                 "fasta": {
                     "type": "string",
                     "format": "file-path",
                     "exists": true,
                     "mimetype": "text/plain",
                     "pattern": "^\\S+\\.fn?a(sta)?(\\.gz)?$",
-                    "description": "Path to FASTA genome file.",
-                    "help_text": "This parameter is *mandatory* if `--genome` is not specified. If you don't have a BWA index available this will be generated for you automatically. Combine with `--save_reference` to save BWA index for future runs.",
+                    "description": "Path to transcript FASTA file.",
+                    "help_text": "Provide a transcript-level FASTA for rf-count/rf-norm/rf-fold. If omitted, the pipeline will try to resolve transcript FASTA from `params.genomes[organism]` (`transcript_fasta`, `transcriptome`, or `cdna`).",
                     "fa_icon": "far fa-file-code"
                 },
-                "igenomes_ignore": {
-                    "type": "boolean",
-                    "description": "Do not load the iGenomes reference config.",
-                    "fa_icon": "fas fa-ban",
-                    "hidden": true,
-                    "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`."
-                },
-                "igenomes_base": {
+                "gtf": {
                     "type": "string",
-                    "description": "The base path to the igenomes reference files",
+                    "format": "file-path",
+                    "exists": true,
+                    "mimetype": "text/plain",
+                    "pattern": "^\\S+\\.gtf(\\.gz)?$",
+                    "description": "Path to transcript annotation GTF file.",
+                    "help_text": "Provide a GTF annotation directly. If omitted, the pipeline will try to resolve GTF from `params.genomes[organism].gtf` or download one from Ensembl.",
+                    "fa_icon": "far fa-file-alt"
+                },
+                "genomes": {
+                    "type": "object",
+                    "description": "Optional custom reference map keyed by organism/reference name.",
                     "fa_icon": "fas fa-ban",
                     "hidden": true,
-                    "default": "s3://ngi-igenomes/igenomes/"
+                    "additionalProperties": true
+                },
+                "ensembl_base_url": {
+                    "type": "string",
+                    "description": "Ensembl FTP base URL used when auto-resolving transcript FASTA.",
+                    "default": "https://ftp.ensembl.org/pub"
+                },
+                "ensembl_release": {
+                    "type": "string",
+                    "description": "Ensembl release for transcript FASTA auto-resolution (`current`, `latest`, or release number like `114`).",
+                    "default": "current"
+                },
+                "ensembl_species_map": {
+                    "type": "object",
+                    "description": "Optional map from organism keys to Ensembl species names used for transcript FASTA auto-resolution.",
+                    "hidden": true,
+                    "additionalProperties": true
+                },
+                "ncbi_accessions_map": {
+                    "type": "object",
+                    "description": "Internal map from normalized viral organism keys to NCBI accession lists.",
+                    "hidden": true,
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "sample_metadata_options": {
+            "title": "Sample metadata options",
+            "type": "object",
+            "fa_icon": "fas fa-tags",
+            "description": "Global fallback metadata values used when the corresponding column is missing or empty in the input CSV.",
+            "properties": {
+                "sample_id": {
+                    "type": "string",
+                    "description": "Fallback sample ID for rows missing `sample_id`.",
+                    "pattern": "^\\S+$"
+                },
+                "method": {
+                    "type": "string",
+                    "description": "Fallback probing method for rows missing `method`."
+                },
+                "principle": {
+                    "type": "string",
+                    "description": "Fallback probing principle for rows missing `principle`.",
+                    "enum": ["RT-stop", "MaP", "rt-stop", "map"]
+                },
+                "organism": {
+                    "type": "string",
+                    "description": "Fallback organism for rows missing `organism`, typically a Latin binomial such as `Homo sapiens`."
+                },
+                "chemical": {
+                    "type": "string",
+                    "description": "Fallback chemical probing reagent for rows missing `chemical` (e.g. `1M7`)."
+                },
+                "RT_enzyme": {
+                    "type": "string",
+                    "description": "Fallback reverse transcriptase enzyme for rows missing `RT_enzyme` (e.g. `M-MLV`)."
+                },
+                "pH": {
+                    "type": "number",
+                    "description": "Fallback DMS reaction pH for rows missing `pH`."
+                },
+                "umi_pattern": {
+                    "type": "string",
+                    "description": "Fallback UMI pattern for rows missing `umi_pattern`. Supplying a pattern enables umi_tools extract before cutadapt."
+                },
+                "exact_untreated_pairing": {
+                    "type": "boolean",
+                    "description": "Require an exact `sample_group`+`replicate` match when pairing treated samples with untreated/denatured controls. By default, a treated group with no exact match falls back to the control whose `sample_group` shares the longest leading substring with it (see the usage docs). With this set, unmatched treated groups proceed without an untreated control (scoring method 2 or 4)."
+                },
+                "fuzzy_untreated_pairing": {
+                    "type": "boolean",
+                    "description": "Deprecated: use `--exact_untreated_pairing` (inverted).",
+                    "hidden": true
+                }
+            }
+        },
+        "read_trimming_options": {
+            "title": "Read trimming options",
+            "type": "object",
+            "fa_icon": "fas fa-cut",
+            "description": "Cutadapt trimming parameters.",
+            "properties": {
+                "cutadapt_adapter_5p": {
+                    "default": "AGATCGGAAGAGC",
+                    "type": "string",
+                    "description": "Global fallback 5' adapter sequence(s), comma-separated. If omitted and no per-sample adapter is provided, the pipeline defaults to AGATCGGAAGAGC."
+                },
+                "cutadapt_adapter_3p": {
+                    "default": "AGATCGGAAGAGC",
+                    "type": "string",
+                    "description": "Global fallback 3' adapter sequence(s), comma-separated. If omitted and no per-sample adapter is provided, the pipeline defaults to AGATCGGAAGAGC."
+                },
+                "cutadapt_quality_only": {
+                    "type": "boolean",
+                    "description": "If true, skip adapter trimming and apply quality/length trimming only.",
+                    "default": false
+                },
+                "cutadapt_5quality": {
+                    "type": "integer",
+                    "description": "Base quality threshold for 5' trimming (used for MaP; RT-stop is forced to 0).",
+                    "default": 20
+                },
+                "cutadapt_3quality": {
+                    "type": "integer",
+                    "description": "Base quality threshold for 3' trimming.",
+                    "default": 20
+                },
+                "cutadapt_len": {
+                    "type": "integer",
+                    "description": "Minimum read length retained after trimming.",
+                    "default": 25
+                },
+                "cutadapt_min_align": {
+                    "type": "integer",
+                    "description": "Minimum adapter overlap required for trimming.",
+                    "default": 3
+                },
+                "cutadapt_trim_n": {
+                    "type": "boolean",
+                    "description": "Trim terminal N bases.",
+                    "default": true
+                },
+                "cutadapt_nextseq_trim": {
+                    "type": "integer",
+                    "description": "Enable cutadapt `--nextseq-trim` with this 3' quality cutoff, trimming high-quality poly-G tails left by 2-colour (NextSeq/NovaSeq) chemistry. Off by default."
+                },
+                "cutadapt_discard_untrimmed": {
+                    "type": "boolean",
+                    "description": "Discard reads in which no adapter was found. For short-insert libraries (e.g. tRNA, miRNA) where every genuine read runs into the adapter.",
+                    "default": false
+                }
+            }
+        },
+        "alignment_options": {
+            "title": "Alignment options",
+            "type": "object",
+            "fa_icon": "fas fa-map",
+            "description": "STAR/Bowtie/Bowtie2 mapping options.",
+            "properties": {
+                "transcriptome": {
+                    "type": "boolean",
+                    "description": "Align against a transcript-level FASTA using Bowtie (RT-stop) / Bowtie2 (MaP). Default (false) downloads a genome FASTA and aligns with STAR.",
+                    "default": false,
+                    "fa_icon": "fas fa-sitemap"
+                },
+                "count_genome": {
+                    "type": "boolean",
+                    "description": "Genome route (STAR) quantification method. Default (false) uses STAR --quantMode TranscriptomeSAM projected onto transcripts, tag-corrected with samtools calmd, counted with rf-count. Set true for the legacy rf-count-genome + rf-rctools extract path.",
+                    "default": false,
+                    "fa_icon": "fas fa-dna"
+                },
+                "star_multimap_nmax": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "default": 10,
+                    "description": "Maximum number of loci a read is allowed to map to in STAR (`--outFilterMultimapNmax`). Reads mapping to more loci than this are discarded. Increase when studying repetitive non-coding RNAs."
+                },
+                "bowtie_k": {
+                    "default": 1,
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Report up to this number of alignments per read (`-k`)."
+                },
+                "bowtie_all": {
+                    "default": true,
+                    "type": ["boolean", "string"],
+                    "description": "Report all valid alignments (`-a`)."
+                },
+                "bowtie_trim5": {
+                    "default": 0,
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Trim this many bases from 5' read end (`--trim5`)."
+                },
+                "bowtie_trim3": {
+                    "default": 0,
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Trim this many bases from 3' read end (`--trim3`)."
+                },
+                "bowtie_index": {
+                    "type": "string",
+                    "description": "Optional path to a prebuilt Bowtie index (currently not consumed by workflow logic)."
+                },
+                "bowtie_n": {
+                    "default": 2,
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 3,
+                    "description": "Bowtie v1 `-n` seed mismatch mode value."
+                },
+                "bowtie_v": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 3,
+                    "description": "Bowtie v1 `-v` mismatch mode value."
+                },
+                "bowtie_max": {
+                    "default": 1,
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Bowtie v1 `-m` maximum reportable alignments per read before suppression."
+                },
+                "bowtie_chunkmbs": {
+                    "default": 512,
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Bowtie v1 `--chunkmbs` memory chunk size."
+                },
+                "bowtie2_preset": {
+                    "type": "string",
+                    "default": "--very-sensitive-local",
+                    "description": "Bowtie2 alignment preset. Default is equivalent to `--local -N 0 -D 20 -R 3 -L 20 -i S,1,0.50`."
+                },
+                "bowtie2_mp": {
+                    "default": "6,2",
+                    "type": "string",
+                    "pattern": "^\\d+,\\d+$",
+                    "description": "Bowtie2 `--mp` mismatch penalties as `max,min`."
+                },
+                "bowtie2_dpad": {
+                    "default": 15,
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Bowtie2 `--dpad` padding around DP table."
+                },
+                "bowtie2_rdg": {
+                    "default": "5,3",
+                    "type": "string",
+                    "pattern": "^\\d+,\\d+$",
+                    "description": "Bowtie2 `--rdg` read gap penalties as `open,extend`."
+                },
+                "bowtie2_rfg": {
+                    "default": "5,3",
+                    "type": "string",
+                    "pattern": "^\\d+,\\d+$",
+                    "description": "Bowtie2 `--rfg` reference gap penalties as `open,extend`."
+                },
+                "bowtie2_softclip": {
+                    "type": "boolean",
+                    "description": "Enable Bowtie2 local alignment mode (`--local`)."
+                },
+                "bowtie2_ma": {
+                    "default": 2,
+                    "type": "integer",
+                    "description": "Bowtie2 `--ma` match bonus used with `--local`."
+                },
+                "bowtie2_dovetail": {
+                    "default": true,
+                    "type": "boolean",
+                    "description": "Allow dovetailing mates (`--dovetail`)."
+                },
+                "markdup": {
+                    "type": "boolean",
+                    "description": "Run SAMtools markdup deduplication on non-UMI libraries. Off by default: position-based duplicate removal is not valid for chemical-probing libraries without UMIs, where reads sharing a 5' start are independent RT events rather than PCR duplicates. UMI libraries are always deduplicated via UMI-tools."
+                },
+                "skip_markdup": {
+                    "type": "boolean",
+                    "description": "Deprecated: use `--markdup` (inverted).",
+                    "hidden": true
+                },
+                "star_map_sjdb_overhang": {
+                    "default": 200,
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "STAR `--sjdbOverhang` for MaP alignment. Ideally `readLength - 1`; default 200 suits 201 bp reads."
+                }
+            }
+        },
+        "rnaframework_options": {
+            "title": "RNAframework options",
+            "type": "object",
+            "fa_icon": "fas fa-wave-square",
+            "description": "rf-count/rf-norm/rf-fold options.",
+            "allOf": [
+                {
+                    "not": {
+                        "properties": {
+                            "rfcount_paired_only": {
+                                "const": true
+                            },
+                            "rfcount_properly_paired": {
+                                "const": true
+                            }
+                        },
+                        "required": ["rfcount_paired_only", "rfcount_properly_paired"]
+                    }
+                }
+            ],
+            "properties": {
+                "rfcount_img": {
+                    "type": "boolean",
+                    "description": "Deprecated: rf-count plot generation (`-g`) is always enabled.",
+                    "default": false
+                },
+                "rfcount_strandedness": {
+                    "type": "string",
+                    "enum": ["unstranded", "first", "second"],
+                    "description": "Library strandedness fallback for rf-count-genome when RSeQC inference is unavailable (e.g. viral/bacterial references without a usable BED annotation).",
+                    "default": "unstranded"
+                },
+                "rfcount_genome_map_quality": {
+                    "default": 0,
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Minimum MAPQ score for rf-count-genome (`--map-quality`). Useful for filtering multi-mappers; 0 keeps all alignments."
+                },
+                "rfcount_genome_block_size": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Block size for per-chromosome memory allocation in rf-count-genome (`-bs`); increase for large genomes.",
+                    "default": 100000
+                },
+                "rfcount_genome_samtools_threads": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "SAMtools working threads per processor instance in rf-count-genome (`-wt`); total threads = `-p` × `-wt`.",
+                    "default": 1
+                },
+                "rfcount_map_median_quality": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "MaP only: discard reads with median Phred+33 base quality below this value (`-eq`).",
+                    "default": 20
+                },
+                "rfcount_map_no_deletions": {
+                    "type": "boolean",
+                    "description": "MaP only: ignore all deletion events during mutation counting (`-nd`).",
+                    "default": false
+                },
+                "rfcount_map_no_ambiguous": {
+                    "type": "boolean",
+                    "description": "MaP only: ignore ambiguously aligned deletion events (`-na`). Auto: off for M-MLV, on for Group II Intron (e.g. TGIRT); leave unset to use the auto default."
+                },
+                "rfcount_map_no_insertions": {
+                    "type": "boolean",
+                    "description": "MaP only: ignore insertion events during mutation counting (`-ni`). Auto: off for M-MLV, on for Group II Intron (e.g. TGIRT); leave unset to use the auto default."
+                },
+                "rfcount_map_right_deletion": {
+                    "type": "boolean",
+                    "description": "MaP only: mark only the right-most base of a deletion as mutated (`--right-deletion`). Auto: on for M-MLV, off for Group II Intron (e.g. TGIRT); leave unset to use the auto default."
+                },
+                "rfcount_map_discard_consecutive": {
+                    "type": "integer",
+                    "description": "MaP only: discard mutations within N nt of each other (`-dc N`). Auto: 3 when `RT_enzyme` is a Group II Intron RT (e.g. TGIRT), off for M-MLV; leave unset to use the auto default."
+                },
+                "rfcount_map_eval_surrounding": {
+                    "type": "boolean",
+                    "description": "MaP only: also evaluate quality of ±1 nt surrounding each mutation (`-es`).",
+                    "default": true
+                },
+                "rfcount_trim_5prime": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Trim this many bases from the 5' read end for rf-count (`-t5`).",
+                    "default": 0
+                },
+                "rfcount_mask_file": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "description": "Path to rf-count mask file (`--mask-file`)."
+                },
+                "rfcount_primary_only": {
+                    "type": "boolean",
+                    "description": "Use only primary alignments in rf-count (`--primary-only`).",
+                    "default": false
+                },
+                "rfcount_discard_clipped_reads": {
+                    "type": "boolean",
+                    "description": "Discard reads with excessive 5' or 3' end clipping in rf-count / rf-count-genome (`--discard-clipped-reads`).",
+                    "default": false
+                },
+                "rfcount_map_max_coverage": {
+                    "type": "integer",
+                    "minimum": 1000,
+                    "description": "In mutation mode (`-m`), downsample each transcript above this coverage in rf-count (`--max-coverage`). Unset means off. Ignored with `--count_genome true`.",
+                    "help_text": "rf-count counts one transcript at a time, so a transcript at extreme depth (mitochondrial transcripts, or a viral genome at ~10^6x) can take days. Only transcripts above the cap are downsampled. 20000 is recommended. When set, rf-count also skips reads that start within one read length of each transcript's 3' end."
+                },
+                "rfcount_paired_only": {
+                    "type": "boolean",
+                    "description": "For paired-end samples, use only reads with both mates mapped (`--paired-only`).",
+                    "default": false
+                },
+                "rfcount_properly_paired": {
+                    "type": "boolean",
+                    "description": "For paired-end samples, use only properly paired reads (`--properly-paired`).",
+                    "default": false
+                },
+                "rfcount_map_sort_by_read_name": {
+                    "type": "boolean",
+                    "description": "In mutation mode (`-m`), pre-sort paired-end reads by read name (`--sort-by-read-name`). No effect on single-end data.",
+                    "default": true
+                },
+                "rfcount_map_discard_shorter": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "In mutation mode (`-m`), discard reads shorter than this value (`--discard-shorter`).",
+                    "default": 1
+                },
+                "rfcount_map_min_quality": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "In mutation mode (`-m`), minimum Phred+33 base quality for mutations (`--min-quality`).",
+                    "default": 20
+                },
+                "rfcount_map_collapse_consecutive": {
+                    "type": "boolean",
+                    "description": "In mutation mode (`-m`), collapse consecutive mutations/indels (`--collapse-consecutive`). Auto: on unless `RT_enzyme` is a Group II Intron RT (e.g. TGIRT); leave unset to use the auto default."
+                },
+                "rfcount_map_max_collapse_distance": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "In mutation mode with collapsing enabled, max distance to collapse (`--max-collapse-distance`).",
+                    "default": 2
+                },
+                "rfnorm_remap_reactivities": {
+                    "type": "boolean",
+                    "description": "Remap normalized reactivities to the 0-1 range according to Zarringhalam et al. (`--remap-reactivities`).",
+                    "default": false
+                },
+                "rfnorm_reactive_bases": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z]+$",
+                    "description": "Reactive bases used for normalization window selection (`--reactive-bases`), e.g. `AC` for DMS."
+                },
+                "rfnorm_norm_window": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Normalization window size (`--norm-window`). Auto: 50 for DMS or RT-stop, unset otherwise; leave unset to use the auto default."
+                },
+                "rfnorm_window_offset": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Normalization window offset (`--window-offset`)."
+                },
+                "rfnorm_dynamic_window": {
+                    "type": ["integer", "boolean"],
+                    "minimum": 0,
+                    "description": "Enable dynamic normalization window (`--dynamic-window`). Set to a positive integer to enable (value is passed to `--norm-window`); set to `false` or `0` to explicitly disable even for DMS (which enables it by default). Leave unset to use the per-method default."
+                },
+                "rfnorm_norm_independent": {
+                    "type": "boolean",
+                    "description": "Normalize each reactive base independently (`--norm-independent`).",
+                    "default": false
+                },
+                "four_base_dms": {
+                    "type": "boolean",
+                    "description": "Four-base DMS analysis (Mitchell et al., 2023) for DMS-MaP samples at pH >= 8: rf-count keeps only G->C/G->T mutations on G and drops indels (`-om H2N,G2Y -ncl`), and rf-norm normalises each base separately over the whole transcript (`-4d`).",
+                    "help_text": "Applies only to samples with `method` DMS, `principle` MaP and `pH` 8 or above. On by default, so these samples get different reactivities than in previous releases; set to `false` for the previous analysis.",
+                    "default": true
+                },
+                "rfnorm_use_normfactor": {
+                    "type": "boolean",
+                    "description": "Cross-experiment normalization via rf-normfactor (one factor set per reference, fed to rf-norm via `-nf`), putting reactivities on a common scale. Leave unset for auto (enabled only for a reference with more than one treated sample to cross-normalise); set `true` to force on, `false` to force off (per-sample box-plot)."
+                },
+                "rfnorm_normfactor_min_coverage": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "rf-normfactor minimum coverage (`-mc`): bases below this coverage are excluded from the normalization factor calculation. Auto: 1000 for MaP, 50 for RT-stop; leave unset to use the auto default."
+                },
+                "rfnorm_score_method": {
+                    "type": "integer",
+                    "enum": [1, 2, 3, 4],
+                    "description": "Override rf-norm scoring method (`-sm`). 1=Ding, 2=Rouskin, 3=Siegfried, 4=Zubradt."
+                },
+                "rfnorm_norm_method": {
+                    "type": "integer",
+                    "enum": [1, 2, 3, 4],
+                    "description": "Override rf-norm normalization method (`-nm`). 1=2-8%, 2=90% Winsorizing, 3=Box-plot, 4=Mitchell (MaP only)."
+                },
+                "rfnorm_raw": {
+                    "type": "boolean",
+                    "description": "Score raw reactivities without applying normalization (`--raw`).",
+                    "default": false
+                },
+                "rfnorm_pseudocount": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "Pseudocount used by Ding scoring (`--pseudocount`)."
+                },
+                "rfnorm_ignore_lower_than_untreated": {
+                    "type": "boolean",
+                    "description": "Set reactivities lower than untreated to zero for Ding or Siegfried scoring (`--ignore-lower-than-untreated`).",
+                    "default": false
+                },
+                "rfnorm_mean_coverage": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "Discard transcripts with mean coverage below this threshold (`--mean-coverage`).",
+                    "default": 0
+                },
+                "rfnorm_median_coverage": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "Discard transcripts with median coverage below this threshold (`--median-coverage`).",
+                    "default": 0
+                },
+                "rfnorm_nan": {
+                    "description": "Positions with read coverage below this threshold are reported as NaN (`--nan`). Auto: 1000 for MaP, 50 for RT-stop. Set to 0 to disable NaN masking."
+                },
+                "rfnorm_prefilter_min_coverage": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "`--count_genome true` only: after rf-rctools extract, keep transcripts with at least one position at this coverage or higher before rf-norm. Set to 0 to keep the full annotation RC.",
+                    "default": 1
+                },
+                "rfnorm_img": {
+                    "type": "boolean",
+                    "description": "Deprecated: rf-norm plot generation (`--img`) is always enabled.",
+                    "default": false
+                },
+                "rffold_img": {
+                    "type": "boolean",
+                    "description": "Generate ViennaRNA RNAplot structure diagrams via rf-fold (`-g`). Disabled by default; slow on large transcriptomes. Use `--r2dt` for template-based diagrams instead.",
+                    "default": false
+                },
+                "jackknife_reference": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "description": "Path to a reference `.db` structure file for rf-jackknife normalisation assessment. When provided, rf-jackknife runs between rf-norm and rf-fold and the output CSV reports optimal slope/intercept values. When omitted, rf-fold runs directly using whatever slope/intercept params are set."
+                },
+                "rfjackknife_slope": {
+                    "default": "0,5",
+                    "type": "string",
+                    "pattern": "^-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?$",
+                    "description": "Comma-separated slope range to search in rf-jackknife (`-sl`), e.g. `0,5`."
+                },
+                "rfjackknife_intercept": {
+                    "default": "-3,0",
+                    "type": "string",
+                    "pattern": "^-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?$",
+                    "description": "Comma-separated intercept range to search in rf-jackknife (`-in`), e.g. `-3,0`."
+                },
+                "rfjackknife_slope_step": {
+                    "default": 0.2,
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "description": "Step size for slope grid search in rf-jackknife (`-ss`)."
+                },
+                "rfjackknife_intercept_step": {
+                    "default": 0.2,
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "description": "Step size for intercept grid search in rf-jackknife (`-is`)."
+                },
+                "rfjackknife_mfmi": {
+                    "type": "boolean",
+                    "description": "Use modified FMI (Lan et al. 2022) instead of standard FMI in rf-jackknife (`-m`).",
+                    "default": true
+                },
+                "rfjackknife_relaxed": {
+                    "type": "boolean",
+                    "description": "Use relaxed FMI criteria (Deigan et al. 2009) in rf-jackknife (`-x`).",
+                    "default": true
+                },
+                "rfjackknife_keep_lonelypairs": {
+                    "default": true,
+                    "type": "boolean",
+                    "description": "Retain lonely base-pairs (1 bp helices) in the reference structure before comparison (`-kl`)."
+                },
+                "rfjackknife_keep_pseudoknots": {
+                    "type": "boolean",
+                    "description": "Retain pseudoknotted base-pairs in the reference structure during FMI comparison (`-kp`). Disabled by default because rf-fold cannot predict pseudoknots, so including them systematically lowers FMI."
+                },
+                "rfjackknife_only_common": {
+                    "type": "boolean",
+                    "description": "Only use transcripts present across all replicates in rf-jackknife (`-oc`)."
+                },
+                "rfjackknife_img": {
+                    "type": "boolean",
+                    "description": "Generate R heatmap of grid-search results in rf-jackknife (`-g`)."
+                },
+                "rfjackknife_rf_fold_params": {
+                    "default": "-md 600",
+                    "type": "string",
+                    "description": "Additional rf-fold parameters passed inside rf-jackknife (`-rp`), e.g. `-md 500`."
+                },
+                "rfjackknife_pool_all": {
+                    "default": true,
+                    "type": "boolean",
+                    "description": "Pool XMLs from all sample groups into a single rf-jackknife run (output: `jackknife/all_groups/`) instead of running one jackknife per group. Default: true."
+                },
+                "stop_after_jackknife": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Stop the pipeline after rf-jackknife completes, skipping rf-fold, structure visualisation, browser track generation, and RDAT output. Useful for calibration runs where you only want jackknife statistics."
+                },
+                "rfrctools_gtf_feature": {
+                    "type": "string",
+                    "description": "GTF feature type to extract with rf-rctools (`-f`); override for non-standard annotations.",
+                    "default": "exon"
+                },
+                "rfrctools_gtf_attribute": {
+                    "type": "string",
+                    "description": "GTF attribute used as the output RC entry ID by rf-rctools (`-b`).",
+                    "default": "transcript_id"
+                },
+                "rfeval_reference": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "pattern": "^\\S+\\.db$",
+                    "description": "Path to a `.db` file of known RNA secondary structures. Enables rf-eval when provided.",
+                    "fa_icon": "far fa-file-code"
+                },
+                "rfeval_windows": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "description": "Optional manifest of sub-region references, one per line: `ref_seq_id start end structure_id [strand]` (1-based inclusive, in the XML's own coordinate space). When set, rf-norm reactivities are sliced to each window before rf-eval, so a sub-region structure (e.g. an Rfam element on a whole chromosome) is scored against a matching windowed XML instead of the diluted full transcript. `structure_id` must match an entry in `--rfeval_reference`.",
+                    "fa_icon": "far fa-file-alt"
+                },
+                "rfeval_reactivity_cutoff": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "Cutoff for classifying a base as highly-reactive in rf-eval unpaired-coefficient calculation (`-c`).",
+                    "default": 0.7
+                },
+                "rfeval_ignore_terminal": {
+                    "type": "boolean",
+                    "description": "Exclude terminal base-pairs from rf-eval calculations (`-it`).",
+                    "default": true
+                },
+                "rfeval_terminal_as_unpaired": {
+                    "type": "boolean",
+                    "description": "Treat terminal base-pairs as unpaired in rf-eval (`-tu`).",
+                    "default": false
+                },
+                "rfeval_keep_pseudoknots": {
+                    "type": "boolean",
+                    "description": "Retain pseudoknotted base-pairs in rf-eval (`-kp`).",
+                    "default": true
+                },
+                "rfeval_keep_lonelypairs": {
+                    "type": "boolean",
+                    "description": "Retain lonely/isolated base-pairs in rf-eval (`-kl`).",
+                    "default": true
+                },
+                "rfeval_img": {
+                    "type": "boolean",
+                    "description": "Generate R metric plots in rf-eval (`-g`).",
+                    "default": false
+                },
+                "structextract": {
+                    "type": "boolean",
+                    "description": "Run rf-structextract after rf-fold to extract high-confidence, low-reactivity / low-Shannon structural motifs from the folded structures.",
+                    "default": false
+                },
+                "structextract_win_size": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "rf-structextract window size in nt for median reactivity/Shannon calculations (`-w`).",
+                    "default": 50
+                },
+                "structextract_min_transcript_len": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "rf-structextract skips low-reactivity/low-Shannon evaluation for transcripts below this length (`-ml`).",
+                    "default": 500
+                },
+                "structextract_min_value_frac": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "rf-structextract windows with less than this fraction of bases covered are set to NaN (`-mv`).",
+                    "default": 0.4
+                },
+                "structextract_min_below_median": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "rf-structextract minimum fraction of bases whose Shannon and reactivity are below the transcript median (`-mb`).",
+                    "default": 0.7
+                },
+                "structextract_min_paired_frac": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "rf-structextract discards elements with less than this fraction of paired bases (`-mp`).",
+                    "default": 0.45
+                },
+                "structextract_min_motif_len": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "rf-structextract discards structure elements shorter than this (`-mm`).",
+                    "default": 50
+                },
+                "structextract_max_motif_len": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "rf-structextract discards structure elements longer than this (`-xm`). Unset for no limit."
+                },
+                "structextract_max_loop_size": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "rf-structextract discards elements with a loop larger than this (`-xl`). Unset for no limit."
+                },
+                "structextract_ignore_react": {
+                    "type": "boolean",
+                    "description": "rf-structextract skips low-reactivity evaluation (`-ir`). When false (default), reactivity is evaluated so only regions with probing support are extracted.",
+                    "default": false
+                },
+                "structextract_ignore_shannon": {
+                    "type": "boolean",
+                    "description": "rf-structextract skips low-Shannon evaluation (`-is`). When `false`, the Shannon-entropy test is applied so only high-confidence regions are extracted.",
+                    "default": false
+                },
+                "structextract_multiway_only": {
+                    "type": "boolean",
+                    "description": "rf-structextract only reports elements encompassing multiway junctions (`-mo`).",
+                    "default": false
+                },
+                "structextract_one_per_file": {
+                    "type": "boolean",
+                    "description": "rf-structextract reports each extracted element in a separate file (`-opf`).",
+                    "default": false
+                },
+                "structextract_eval_energy": {
+                    "type": "boolean",
+                    "description": "rf-structextract only reports elements with a free energy significantly lower than expected by chance (`-ee`).",
+                    "default": false
+                },
+                "structextract_pvalue": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "rf-structextract p-value threshold for energy significance (`-v`); requires `--structextract_eval_energy`.",
+                    "default": 0.05
+                },
+                "structextract_n_shufflings": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "rf-structextract number of sequence shufflings for energy evaluation (`-ns`).",
+                    "default": 100
+                },
+                "structextract_dinucl_shuffle": {
+                    "type": "boolean",
+                    "description": "rf-structextract preserves dinucleotide frequencies when shuffling for energy evaluation (`-ds`).",
+                    "default": false
+                },
+                "structextract_plot": {
+                    "type": "boolean",
+                    "description": "Render an SVG diagram per extracted rf-structextract motif via ViennaRNA RNAplot.",
+                    "default": true
+                },
+                "correlate_replicates": {
+                    "type": "boolean",
+                    "description": "Run rf-correlate to compute pairwise reactivity-profile correlations between replicates of each sample group (a replicate-reproducibility QC surfaced in MultiQC). Only runs for sample groups with more than one replicate; a no-op otherwise.",
+                    "default": true
+                },
+                "rfcorrelate_cap_react": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "Cap reactivities to this value before Pearson correlation in rf-correlate (`--cap-react`). Not applied to the Spearman run, which is rank-based.",
+                    "default": 1.5
+                },
+                "correlate_min_values": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "rf-correlate minimum number of values to calculate a correlation (`-m`); a value between 0 and 1 is interpreted as a fraction of transcript length. Unset uses the tool default (off)."
+                },
+                "correlate_ignore_sequence": {
+                    "type": "boolean",
+                    "description": "rf-correlate ignores sequence differences (e.g. SNVs) between compared transcripts (`-I`).",
+                    "default": false
+                },
+                "correlate_img": {
+                    "type": "boolean",
+                    "description": "Generate the rf-correlate correlation heatmap PDF (`-g`; requires R).",
+                    "default": false
+                },
+                "rffold_ct": {
+                    "type": "boolean",
+                    "description": "Write CT format structures with rf-fold (`-ct`). Disabled by default to keep dot-bracket output.",
+                    "default": false
+                },
+                "rffold_window": {
+                    "type": "integer",
+                    "minimum": 50,
+                    "description": "Enable windowed MFE folding in rf-fold with this window size (`-w -fw N`). Set null/unset to fold the whole transcript instead.",
+                    "default": 1000
+                },
+                "rffold_partition_window": {
+                    "type": "integer",
+                    "minimum": 50,
+                    "description": "Partition-function window size in rf-fold (`-pw N`).",
+                    "default": 1000
+                },
+                "rffold_unconstrained": {
+                    "type": "boolean",
+                    "description": "Fold without reactivity constraints in rf-fold (`-i`).",
+                    "default": false
+                },
+                "rffold_vienna_no_lonely_pairs": {
+                    "type": "boolean",
+                    "description": "Pass ViennaRNA no-lonely-pairs mode to rf-fold (`-nlp`).",
+                    "default": false
+                },
+                "rffold_vienna_constrained": {
+                    "type": "boolean",
+                    "description": "Use ViennaRNA hard constraints with rf-fold (`-hc`).",
+                    "default": false
+                },
+                "rffold_vienna_max_bp_span": {
+                    "default": 600,
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Maximal base-pair span for ViennaRNA in rf-fold (`-md`)."
+                },
+                "rffold_only_common": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Only fold transcripts covered in at least this number of XML experiments (`-oc`)."
+                },
+                "rffold_use_alifold": {
+                    "type": "boolean",
+                    "description": "Fold a group's replicates together with RNAalifold, constrained by all their reactivity profiles at once, instead of folding each with RNAfold and aggregating base pairs (`-ua`). Applies only to groups with more than one replicate.",
+                    "default": true
+                },
+                "rffold_fold_constraint_file": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "description": "Constraint file for allowed base-pairing positions (`-c`)."
+                },
+                "rffold_dotplot": {
+                    "type": "boolean",
+                    "description": "Generate dot plots from rf-fold (`-dp`).",
+                    "default": true
+                },
+                "rffold_shannon_entropy": {
+                    "type": "boolean",
+                    "description": "Compute and report Shannon entropy in rf-fold (`-sh`).",
+                    "default": true
+                },
+                "rffold_slope": {
+                    "type": "number",
+                    "description": "Slope for reactivity-to-folding-constraint conversion in rf-fold (`-sl`). Auto by `chemical`: DMS 4.6, NAI 2.2, 2A3 1, other/unset 1.8. Overridden by jackknife calibration when available."
+                },
+                "rffold_intercept": {
+                    "type": "number",
+                    "description": "Intercept for reactivity-to-folding-constraint conversion in rf-fold (`-in`). Auto by `chemical`: DMS -2, NAI -0.8, 2A3 -0.4, other/unset -0.6. Overridden by jackknife calibration when available."
+                },
+                "rffold_vienna_rnaplot": {
+                    "type": "string",
+                    "description": "Path to ViennaRNA `RNAplot` binary for the ViennaRNA and rf-structextract SVG structure plots.",
+                    "default": "RNAplot"
+                },
+                "r2dt": {
+                    "type": "boolean",
+                    "description": "Generate template-based 2D RNA structure diagrams using R2DT, coloured by normalised SHAPE/chemical-probing reactivity.",
+                    "default": true
+                },
+                "r2dt_templatable_biotypes": {
+                    "type": "string",
+                    "description": "Comma-separated GTF biotypes sent to R2DT. R2DT only has templates for structured ncRNA classes; transcripts of other biotypes (mRNA, lncRNA, ...) are excluded so R2DT never force-fits them to the wrong template, and are drawn by ViennaRNA instead. Matched case-insensitively against transcript/gene biotype.",
+                    "default": "rRNA,Mt_rRNA,tRNA,Mt_tRNA,snoRNA,scaRNA,snRNA,SRP_RNA,RNase_P_RNA,RNase_MRP_RNA,tmRNA"
+                },
+                "rfwiggle_report_zeroes": {
+                    "type": "boolean",
+                    "description": "Report positions with zero reactivity in the WIG/BigWig output (`-z`). Enabled by default so genome browsers receive complete tracks without gaps.",
+                    "default": true
+                },
+                "rfwiggle_keep_bases": {
+                    "type": "string",
+                    "description": "Restrict WIG output to specific bases using an IUPAC code or combination (e.g. `AC` for DMS probing) (`-kb`). Default: all bases (`N`)."
+                },
+                "rnaframework_r_path": {
+                    "type": "string",
+                    "description": "Path to R executable used by rf-count, rf-norm, and rf-fold plotting.",
+                    "default": "/usr/bin/R"
                 }
             }
         },
@@ -129,6 +1005,33 @@
                 }
             }
         },
+        "executor_options": {
+            "title": "Executor options",
+            "type": "object",
+            "fa_icon": "fas fa-server",
+            "description": "Cluster/executor parameters consumed by the `slurm` profile.",
+            "help_text": "These parameters are read by the generic `slurm` profile to set the SLURM partition, account, and any additional sbatch flags. They have no effect when the `slurm` profile is not active. Use the EBI-specific `codon` profile if you want the EBI Codon defaults without supplying these.",
+            "properties": {
+                "slurm_queue": {
+                    "type": "string",
+                    "description": "SLURM partition / queue name passed via `--partition`.",
+                    "help_text": "Translates to `process.queue` inside the `slurm` profile. Leave unset to omit `--partition` and use the cluster default.",
+                    "fa_icon": "fas fa-stream"
+                },
+                "slurm_account": {
+                    "type": "string",
+                    "description": "SLURM account / allocation passed via `--account`.",
+                    "help_text": "Appended to `process.clusterOptions` inside the `slurm` profile.",
+                    "fa_icon": "fas fa-id-card"
+                },
+                "slurm_clusterOptions": {
+                    "type": "string",
+                    "description": "Extra sbatch flags appended verbatim to `process.clusterOptions`.",
+                    "help_text": "Use for site-specific sbatch arguments (e.g. `--qos=highmem --constraint=avx2`). Combined with `--slurm_account` when both are provided.",
+                    "fa_icon": "fas fa-sliders-h"
+                }
+            }
+        },
         "generic_options": {
             "title": "Generic options",
             "type": "object",
@@ -177,6 +1080,13 @@
                     "type": "boolean",
                     "description": "Do not use coloured log outputs.",
                     "fa_icon": "fas fa-palette",
+                    "hidden": true
+                },
+                "hook_url": {
+                    "type": "string",
+                    "description": "Incoming hook URL for messaging service",
+                    "fa_icon": "fas fa-people-group",
+                    "help_text": "Incoming hook URL for messaging service. Currently, MS Teams and Slack are supported.",
                     "hidden": true
                 },
                 "multiqc_config": {
@@ -240,7 +1150,22 @@
             "$ref": "#/$defs/reference_genome_options"
         },
         {
+            "$ref": "#/$defs/sample_metadata_options"
+        },
+        {
+            "$ref": "#/$defs/read_trimming_options"
+        },
+        {
+            "$ref": "#/$defs/alignment_options"
+        },
+        {
+            "$ref": "#/$defs/rnaframework_options"
+        },
+        {
             "$ref": "#/$defs/institutional_config_options"
+        },
+        {
+            "$ref": "#/$defs/executor_options"
         },
         {
             "$ref": "#/$defs/generic_options"

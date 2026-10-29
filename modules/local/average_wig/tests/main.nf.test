@@ -1,0 +1,112 @@
+nextflow_process {
+
+    name "Test Process AVERAGE_WIG"
+    script "../main.nf"
+    process "AVERAGE_WIG"
+
+    tag "modules"
+    tag "modules_local"
+    tag "average_wig"
+    config "./nextflow.config"
+
+    test("passes through a single wiggle file unchanged") {
+
+        when {
+            params {
+                module_prefix = 'group1'
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group1' ],
+                    file("${projectDir}/modules/local/average_wig/tests/fixtures/single_input.wig", checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.merged_wig.size() == 1 },
+                {
+                    def mergedText = path(process.out.merged_wig[0][1]).text
+                    assert mergedText.readLines() == [
+                        'track type=wiggle_0',
+                        'fixedStep chrom=chr1 start=1 step=1',
+                        '1',
+                        '2'
+                    ]
+                },
+                { assert process.out.versions_python[0][1] == 'python' && process.out.versions_python[0][2] }
+            )
+        }
+    }
+
+    test("averages multiple wiggle files across shared and non-shared positions") {
+
+        when {
+            params {
+                module_prefix = 'group1'
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group1' ],
+                    [
+                        file("${projectDir}/modules/local/average_wig/tests/fixtures/rep1.wig", checkIfExists: true),
+                        file("${projectDir}/modules/local/average_wig/tests/fixtures/rep2.wig", checkIfExists: true)
+                    ]
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.merged_wig.size() == 1 },
+                {
+                    def mergedText = path(process.out.merged_wig[0][1]).text
+                    assert mergedText.readLines() == [
+                        'track type=wiggle_0',
+                        'variableStep chrom=chr1',
+                        '1 2',
+                        '2 3',
+                        'variableStep chrom=chr2',
+                        '1 4',
+                        '2 7'
+                    ]
+                },
+                { assert process.out.versions_python[0][1] == 'python' && process.out.versions_python[0][2] }
+            )
+        }
+    }
+
+    test("average_wig - stub") {
+
+        options "-stub"
+
+        when {
+            params {
+                module_prefix = 'group1'
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group1' ],
+                    file("${projectDir}/modules/local/average_wig/tests/fixtures/single_input.wig", checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.merged_wig.size() == 1 },
+                { assert process.out.versions_python[0][1] == 'python' && process.out.versions_python[0][2] }
+            )
+        }
+    }
+}

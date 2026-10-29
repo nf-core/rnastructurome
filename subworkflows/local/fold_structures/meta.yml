@@ -1,0 +1,77 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "FOLD_STRUCTURES"
+description: Fold normalised reactivities into secondary structures with rf-fold, optionally optimising slope/intercept via rf-jackknife and evaluating against references with rf-eval, and extract structural elements.
+keywords:
+  - rna structure
+  - folding
+  - rf-fold
+  - jackknife
+  - rnastructurome
+components:
+  - merge/bp
+  - resolvereferencekey
+  - rnaframework/dotplot2bp
+  - rnaframework/rfeval
+  - rnaframework/rffold
+  - rnaframework/rfjackknife
+  - rnaframework/rfstructextract
+input:
+  - ch_rfnorm_xml:
+      type: channel
+      description: |
+        Normalised reactivity XML, one entry per rf-norm group. Structure: [ val(meta), path(xml) ]
+  - ch_reference_gtf_map:
+      type: map
+      description: |
+        Value map of reference_key -> [ val(meta), path(gtf) ].
+output:
+  - fold_input:
+      type: channel
+      description: |
+        Reactivity XMLs grouped by sample_group. Structure: [ val(meta), list(path(xml)) ]
+  - structures:
+      type: channel
+      description: |
+        Folded structure directory; empty when --stop_after_jackknife. Structure: [ val(meta), path(fold_dir) ]
+  - shannon_wig:
+      type: channel
+      description: |
+        Shannon entropy WIG; empty when --stop_after_jackknife. Structure: [ val(meta), path(wig) ]
+  - rffold_log:
+      type: channel
+      description: |
+        rf-fold log; empty when --stop_after_jackknife. Structure: [ val(meta), path(log) ]
+  - jackknife_csv:
+      type: channel
+      description: |
+        rf-jackknife results; empty when --jackknife_reference not set. Structure: [ val(meta), path(csv) ]
+  - rfeval_metrics:
+      type: channel
+      description: |
+        rf-eval agreement metrics per structure, with null z-scores and empirical p-values when
+        --rfeval_null_replicates is set; empty when --rfeval_reference not set.
+        Structure: [ val(meta), path(tsv) ]
+  - bp_dotplot:
+      type: channel
+      description: |
+        Base-pair probability dotplot; empty when --stop_after_jackknife. Structure: [ val(meta), path(bp) ]
+  - bp:
+      type: channel
+      description: |
+        Base-pair file; empty when --stop_after_jackknife. Structure: [ val(meta), path(bp) ]
+  - bp_transcript:
+      type: channel
+      description: |
+        Per-transcript base-pair file; empty when --stop_after_jackknife. Structure: [ val(meta), path(bp) ]
+  - structextract:
+      type: channel
+      description: |
+        Extracted structural elements; empty unless --structextract. Structure: [ val(meta), path(dir) ]
+  - versions:
+      type: channel
+      description: |
+        Collected software version files. Structure: [ path(versions.yml) ]
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"

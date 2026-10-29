@@ -1,0 +1,76 @@
+name: rnaframework_rfnormfactor
+description: Derive transcriptome-wide, cross-experiment normalisation factors from RNAframework raw count files for use with rf-norm
+keywords:
+  - rnaframework
+  - structure
+  - normalization
+  - reactivity
+  - cross-experiment
+tools:
+  - rnaframework:
+      description: |
+        RNAFramework is a toolkit for processing and analysing RNA structure probing data.
+      homepage: https://rnaframework-docs.readthedocs.io/
+      documentation: https://rnaframework-docs.readthedocs.io/en/latest/rf-normfactor/
+      tool_dev_url: https://github.com/dincarnato/RNAFramework
+      licence: ["GPL-3.0-or-later"]
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing reference-level information shared by all samples
+          that contribute to a single normalisation factor
+          e.g. [ id:'homo_sapiens', principle:'MaP' ]
+    - treated:
+        type: file
+        description: Treated sample rc files across the experiment
+        pattern: "*.{rc}"
+        ontologies: []
+    - untreated:
+        type: file
+        description: Optional untreated control rc files
+        pattern: "*.{rc}"
+        ontologies: []
+    - denatured:
+        type: file
+        description: Optional denatured control rc files (Siegfried scoring)
+        pattern: "*.{rc}"
+        ontologies: []
+    - rci_files:
+        type: file
+        description: Optional staged RNAframework rc index sidecar files
+        pattern: "*.{rci}"
+        ontologies: []
+output:
+  factors:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing reference-level information
+            e.g. [ id:'homo_sapiens', principle:'MaP' ]
+      - "*.norm_factors.txt":
+          type: file
+          description: Transcriptome-wide normalisation factors for rf-norm (-nf)
+          pattern: "*.norm_factors.txt"
+          ontologies: []
+  log:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing reference-level information
+            e.g. [ id:'homo_sapiens', principle:'MaP' ]
+      - "*.rfnormfactor.log":
+          type: file
+          description: rf-normfactor run log
+          pattern: "*.rfnormfactor.log"
+          ontologies: []
+  versions:
+    - "versions.yml":
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies: []
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"

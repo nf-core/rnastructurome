@@ -1,0 +1,70 @@
+nextflow_process {
+
+    name "Test Process WIG_CHROM_SIZES"
+    script "../main.nf"
+    process "WIG_CHROM_SIZES"
+
+    tag "modules"
+    tag "modules_local"
+    tag "wig_chrom_sizes"
+    config "./nextflow.config"
+
+    test("computes chrom sizes from fixedStep and variableStep wiggle") {
+
+        when {
+            params {
+                module_prefix = 'group1'
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group1' ],
+                    file("${projectDir}/modules/local/wig_chrom_sizes/tests/fixtures/sample.wig", checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.sizes.size() == 1 },
+                {
+                    def sizesText = path(process.out.sizes[0][1]).text
+                    assert sizesText.readLines() == [
+                        'TX1\t3',
+                        'TX2\t100'
+                    ]
+                },
+                { assert process.out.versions_python[0][1] == 'python' && process.out.versions_python[0][2] }
+            )
+        }
+    }
+
+    test("wig_chrom_sizes - stub") {
+
+        options "-stub"
+
+        when {
+            params {
+                module_prefix = 'group1'
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group1' ],
+                    file("${projectDir}/modules/local/wig_chrom_sizes/tests/fixtures/sample.wig", checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.sizes.size() == 1 },
+                { assert process.out.versions_python[0][1] == 'python' && process.out.versions_python[0][2] }
+            )
+        }
+    }
+}

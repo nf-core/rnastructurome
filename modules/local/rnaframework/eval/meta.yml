@@ -1,0 +1,103 @@
+name: rnaframework_rfeval
+description: |
+  Evaluates the agreement between rf-norm reactivity profiles and a set of
+  known reference secondary structures using the Unpaired Coefficient, DSCI,
+  and AUROC metrics. Run optionally to benchmark pipeline output against
+  published or experimentally validated structures.
+keywords:
+  - rnaframework
+  - structure
+  - evaluation
+  - benchmarking
+  - reactivity
+tools:
+  - rnaframework:
+      description: |
+        RNAFramework is a toolkit for processing and analysing RNA structure probing data.
+      homepage: https://rnaframework-docs.readthedocs.io/
+      documentation: https://rnaframework-docs.readthedocs.io/en/latest/rf-eval/
+      tool_dev_url: https://github.com/dincarnato/RNAFramework
+      licence: ["GPL-3.0-or-later"]
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample/group information
+          e.g. [ id:'group1' ]
+    - xml:
+        type: file
+        description: |
+          One or more rf-norm XML reactivity files (staged as xml_input*/).
+        pattern: "*.xml"
+        ontologies: []
+  - structures:
+      type: file
+      description: |
+        Reference secondary structure file(s) in Vienna/dotbracket format.
+        Can be a single file containing multiple entries or a directory of
+        per-transcript .db files. Transcript IDs must match those in the XML.
+      pattern: "*.{db,txt}"
+      ontologies: []
+  - windows:
+      type: file
+      description: |
+        Optional manifest of sub-region references, one per line:
+        `ref_seq_id start end structure_id [strand]` (1-based inclusive, in the
+        XML's own coordinate space). When supplied, reactivities are sliced to
+        each window before rf-eval runs. Pass `[]` to disable.
+      pattern: "*.{tsv,txt}"
+      ontologies: []
+output:
+  metrics:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample/group information
+      - "*_rfeval.metrics.tsv":
+          type: file
+          description: |
+            Per-structure evaluation metrics: unpaired coefficient, DSCI and AUROC.
+            With a null baseline (`ext.args2`), each of DSCI and AUROC also carries
+            the null mean, standard deviation, z-score and empirical p-value.
+          pattern: "*.tsv"
+          ontologies: []
+  plots:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample/group information
+      - "plots/**.pdf":
+          type: file
+          description: |
+            Optional metric plots — per-structure DSCI plots under plots/dsci/,
+            plus ROC and summary plots (requires -g flag and R).
+          pattern: "*.pdf"
+          ontologies: []
+  log:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample/group information
+      - "rfeval.log":
+          type: file
+          description: rf-eval run log
+          pattern: "rfeval.log"
+          ontologies: []
+  windows:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample/group information
+      - "*_rfeval_windows/*.xml":
+          type: file
+          description: |
+            Reactivity XMLs sliced to each reference region, emitted only when a
+            windows manifest is supplied.
+          pattern: "*.xml"
+          ontologies: []
+  versions:
+    - "versions.yml":
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies: []
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"

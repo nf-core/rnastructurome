@@ -1,0 +1,8 @@
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bioconda::viennarna=2.7.2
+  - python=3.12.12
+  - conda-forge::llvm-openmp
+  - conda-forge::findutils

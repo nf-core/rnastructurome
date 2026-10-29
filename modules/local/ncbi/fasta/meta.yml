@@ -1,0 +1,51 @@
+name: ncbi_fasta
+description: Fetch transcript sequences from NCBI using a list of accession numbers and produce a compressed FASTA file
+keywords:
+  - ncbi
+  - fasta
+  - download
+  - transcript
+tools:
+  - python:
+      description: Python runtime used to query the NCBI Entrez API
+      homepage: https://www.python.org/
+      documentation: https://docs.python.org/3/
+      licence: ["Python-2.0"]
+  - biopython:
+      description: Python library providing tools for bioinformatics including NCBI Entrez access
+      homepage: https://biopython.org/
+      documentation: https://biopython.org/docs/
+      licence: ["Biopython"]
+input:
+  - - meta:
+        type: map
+        description: Groovy Map containing organism metadata (e.g. id, organism)
+    - accessions:
+        type: string
+        description: Comma-separated list of NCBI accession numbers to fetch
+output:
+  fasta:
+    - - meta:
+          type: map
+          description: Groovy Map containing organism metadata
+      - "${meta.id}.transcripts.fa.gz":
+          type: file
+          description: Compressed FASTA file of fetched transcript sequences
+          pattern: "*.transcripts.fa.gz"
+  source_accessions:
+    - - meta:
+          type: map
+          description: Groovy Map containing organism metadata
+      - "ncbi_source_accessions.txt":
+          type: file
+          description: Text file listing the accessions that were successfully fetched
+          pattern: "ncbi_source_accessions.txt"
+  versions:
+    - "versions.yml":
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"
