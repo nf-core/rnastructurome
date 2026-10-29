@@ -17,3 +17,5 @@ tmp/*
 ecoli_calibration/
 data/
 .lineage/
+.nf-test/
+.nf-test.log
