@@ -1,0 +1,89 @@
+nextflow_process {
+
+    name "Test Process WIG_TO_GENOME"
+    script "../main.nf"
+    process "WIG_TO_GENOME"
+
+    tag "modules"
+    tag "modules_local"
+    tag "wig_to_genome"
+    config "./nextflow.config"
+
+    test("remaps transcript wiggle values into genomic coordinates") {
+
+        when {
+            params {
+                module_prefix = 'group1'
+                module_args = '--ucsc-common-chrom-names'
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group1', organism:'Homo sapiens' ],
+                    file("${projectDir}/modules/local/wig_to_genome/tests/fixtures/transcript.wig", checkIfExists: true),
+                    file("${projectDir}/modules/local/wig_to_genome/tests/fixtures/annotation.gtf", checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.wig.size() == 1 },
+                { assert process.out.chrom_sizes.size() == 1 },
+                {
+                    def wigText = path(process.out.wig[0][1]).text
+                    assert wigText.readLines() == [
+                        'track type=wiggle_0',
+                        'variableStep chrom=chr1',
+                        '101 3',
+                        '102 3',
+                        'variableStep chrom=chr2',
+                        '101 40',
+                        '201 20',
+                        '202 10'
+                    ]
+                },
+                {
+                    def sizesText = path(process.out.chrom_sizes[0][1]).text
+                    assert sizesText.readLines() == [
+                        'chr1\t202',
+                        'chr2\t202'
+                    ]
+                },
+                { assert process.out.versions_python[0][1] == 'python' && process.out.versions_python[0][2] }
+            )
+        }
+    }
+
+    test("wig_to_genome - stub") {
+
+        options "-stub"
+
+        when {
+            params {
+                module_prefix = 'group1'
+                module_args = ''
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group1', organism:'Homo sapiens' ],
+                    file("${projectDir}/modules/local/wig_to_genome/tests/fixtures/transcript.wig", checkIfExists: true),
+                    file("${projectDir}/modules/local/wig_to_genome/tests/fixtures/annotation.gtf", checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.wig.size() == 1 },
+                { assert process.out.chrom_sizes.size() == 1 },
+                { assert process.out.versions_python[0][1] == 'python' && process.out.versions_python[0][2] }
+            )
+        }
+    }
+}

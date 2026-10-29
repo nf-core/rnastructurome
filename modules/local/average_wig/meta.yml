@@ -1,0 +1,39 @@
+name: average_wig
+description: Average per-replicate WIG reactivity files across replicates, or pass through a single replicate unchanged
+keywords:
+  - wig
+  - reactivity
+  - average
+  - rnaframework
+tools:
+  - python:
+      description: Python runtime used for WIG averaging
+      homepage: https://www.python.org/
+      documentation: https://docs.python.org/3/
+      licence: ["Python-2.0"]
+input:
+  - - meta:
+        type: map
+        description: Groovy Map containing group metadata (e.g. sample_group, condition)
+    - wigs:
+        type: file
+        description: One or more per-replicate WIG reactivity files
+        pattern: "*.wig"
+output:
+  merged_wig:
+    - - meta:
+          type: map
+          description: Groovy Map containing group metadata
+      - "*.merged.wig":
+          type: file
+          description: Averaged (or pass-through) WIG file
+          pattern: "*.merged.wig"
+  versions:
+    - "versions.yml":
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"

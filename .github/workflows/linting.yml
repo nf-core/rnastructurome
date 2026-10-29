@@ -27,6 +27,10 @@ jobs:
 
       - name: Install Nextflow
         uses: nf-core/setup-nextflow@v3
+        with:
+          # Pin below the 26.04 line: `nextflow inspect` there prints banner lines to stdout that
+          # break nf-core lint's container-config JSON parsing (nf-core/tools 4.0.2).
+          version: "25.10.2"
 
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:

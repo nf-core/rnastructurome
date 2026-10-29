@@ -1,0 +1,46 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "NORMALISE_REACTIVITIES"
+description: Normalise per-base reactivities with rf-norm, optionally computing cross-experiment normalisation factors with rf-normfactor.
+keywords:
+  - normalisation
+  - reactivity
+  - rf-norm
+  - rf-normfactor
+  - rnastructurome
+components:
+  - rnaframework/rfnorm
+  - rnaframework/rfnormfactor
+input:
+  - ch_rfcount_rc:
+      type: channel
+      description: |
+        rf-count RC files. Structure: [ val(meta), path(rc) ]
+  - ch_rfcount_rci:
+      type: channel
+      description: |
+        rf-count RC index files. Structure: [ val(meta), path(rci) ]
+output:
+  - xml:
+      type: channel
+      description: |
+        Normalised reactivity XML. Structure: [ val(meta), path(xml) ]
+  - plots:
+      type: channel
+      description: |
+        Per-transcript reactivity plots. Structure: [ val(meta), path(plots) ]
+  - rfnorm_log:
+      type: channel
+      description: |
+        rf-norm log. Structure: [ val(meta), path(log) ]
+  - norm_groups:
+      type: channel
+      description: |
+        RC files keyed by group and condition. Structure: [ group, condition, val(meta), path(rc), path(rci) ]
+  - versions:
+      type: channel
+      description: |
+        Collected software version files. Structure: [ path(versions.yml) ]
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"

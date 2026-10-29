@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "BROWSER_TRACKS"
+description: Build genome-browser tracks (bigWig) from rf-norm reactivity XML and fold Shannon entropy WIG, merging per-reference and converting to genome coordinates.
+keywords:
+  - genome browser
+  - bigwig
+  - wig
+  - tracks
+  - rnastructurome
+components:
+  - average/wig
+  - merge/shannon/wig
+  - merge/wig
+  - resolvereferencekey
+  - rnaframework/rfwiggle
+  - ucsc/wigtobigwig
+  - wig/chrom/sizes
+  - wig/to/genome
+input:
+  - ch_rfnorm_xml:
+      type: channel
+      description: |
+        rf-norm reactivity XML per group. Structure: [ val(meta), path(xml) ]
+  - ch_fold_shannon_wig:
+      type: channel
+      description: |
+        Shannon entropy WIG from folding. Structure: [ val(meta), path(shannon_wig) ]
+  - ch_reference_gtf_map:
+      type: map
+      description: |
+        Value map of reference_key -> [ val(meta), path(gtf) ].
+output:
+  - versions:
+      type: channel
+      description: |
+        Collected software version files. Structure: [ path(versions.yml) ]
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"

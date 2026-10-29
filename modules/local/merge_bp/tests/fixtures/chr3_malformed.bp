@@ -1,0 +1,8 @@
+color:	189	189	189	0-10% probability
+color:	242	204	84	10-40% probability
+color:	120	182	220	40-70% probability
+color:	126	198	143	70-100% probability
+chr3	500	500	600	600	0
+	500	500	601	601	1
+chr3	None	None	700	700	2
+chr3	800	800	900	900	1

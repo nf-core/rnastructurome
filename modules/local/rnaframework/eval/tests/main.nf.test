@@ -1,0 +1,210 @@
+nextflow_process {
+
+    name "Test Process RNAFRAMEWORK_RFEVAL"
+    script "../main.nf"
+    process "RNAFRAMEWORK_RFEVAL"
+
+    tag "modules"
+    tag "modules_local"
+    tag "rnaframework"
+    tag "rnaframework/eval"
+    config "./nextflow.config"
+
+    test("rfeval - stub single xml") {
+
+        options "-stub"
+
+        when {
+            params {
+                module_args = ''
+                module_args2 = ''
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group1' ],
+                    file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
+                ])
+                input[1] = file("${projectDir}/modules/local/rnaframework/eval/tests/fixtures/test_structures.db", checkIfExists: true)
+                input[2] = []
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.metrics.size() == 1 },
+                { assert path(process.out.metrics[0][1]).text.contains('auroc') },
+                { assert path(process.out.metrics[0][1]).text.contains('dsci') },
+                // no baseline requested, so the table carries no baseline columns
+                { assert !path(process.out.metrics[0][1]).text.contains('dsci_baseline_mean') },
+                { assert process.out.log.size() == 1 },
+                { assert process.out.plots.size() == 0 },
+                { assert process.out.windows.size() == 0 }
+            )
+        }
+    }
+
+    test("rfeval - stub with windows manifest") {
+
+        options "-stub"
+
+        when {
+            params {
+                module_args = ''
+                module_args2 = ''
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group_windows' ],
+                    file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
+                ])
+                input[1] = file("${projectDir}/modules/local/rnaframework/eval/tests/fixtures/test_structures.db", checkIfExists: true)
+                input[2] = file("${projectDir}/modules/local/rnaframework/eval/tests/fixtures/test_windows.tsv", checkIfExists: true)
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.metrics.size() == 1 },
+                { assert process.out.windows.size() == 1 },
+                // versions.yml must stay valid YAML — a failed probe reports 'unknown',
+                // it never leaks a shell error message onto the line
+                { assert process.out.versions_python[0][1] == 'python' },
+                { assert !process.out.versions_python[0][2].contains('command not found') }
+            )
+        }
+    }
+
+    test("rfeval - stub with rotation baseline") {
+
+        options "-stub"
+
+        when {
+            params {
+                module_args = ''
+                module_args2 = '--replicates 200 --min-shift 5'
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group_baseline' ],
+                    file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
+                ])
+                input[1] = file("${projectDir}/modules/local/rnaframework/eval/tests/fixtures/test_structures.db", checkIfExists: true)
+                input[2] = []
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.metrics.size() == 1 },
+                // the baseline pass adds per-structure columns to the same table
+                { assert path(process.out.metrics[0][1]).text.contains('dsci_baseline_mean') },
+                { assert path(process.out.metrics[0][1]).text.contains('dsci_baseline_sd') },
+                { assert path(process.out.metrics[0][1]).text.contains('auroc_baseline_mean') },
+                { assert path(process.out.metrics[0][1]).text.contains('coeff_unpaired_baseline_mean') },
+                { assert path(process.out.metrics[0][1]).text.contains("baseline_num") }
+            )
+        }
+    }
+
+    test("rfeval - stub multiple xmls") {
+
+        options "-stub"
+
+        when {
+            params {
+                module_args = ''
+                module_args2 = ''
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group_multi' ],
+                    [
+                        file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta', checkIfExists: true),
+                        file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta.fai', checkIfExists: true)
+                    ]
+                ])
+                input[1] = file("${projectDir}/modules/local/rnaframework/eval/tests/fixtures/test_structures.db", checkIfExists: true)
+                input[2] = []
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.metrics.size() == 1 },
+                { assert path(process.out.metrics[0][1]).text.contains('coeff_unpaired') },
+                { assert process.out.log.size() == 1 }
+            )
+        }
+    }
+
+    test("rfeval - stub with plots") {
+
+        options "-stub"
+
+        when {
+            params {
+                module_args = '-g'
+                module_args2 = ''
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group_plots' ],
+                    file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
+                ])
+                input[1] = file("${projectDir}/modules/local/rnaframework/eval/tests/fixtures/test_structures.db", checkIfExists: true)
+                input[2] = []
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.metrics.size() == 1 },
+                { assert process.out.log.size() == 1 }
+            )
+        }
+    }
+
+    test("rfeval - stub with reactivity cutoff") {
+
+        options "-stub"
+
+        when {
+            params {
+                module_args = '-c 0.5'
+                module_args2 = ''
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group_cutoff' ],
+                    file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
+                ])
+                input[1] = file("${projectDir}/modules/local/rnaframework/eval/tests/fixtures/test_structures.db", checkIfExists: true)
+                input[2] = []
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.metrics.size() == 1 }
+            )
+        }
+    }
+}

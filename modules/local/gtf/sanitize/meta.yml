@@ -1,0 +1,50 @@
+name: gtf_sanitize
+description: Strip regex/shell-unsafe characters from GTF transcript_id/gene_id attributes
+keywords:
+  - gtf
+  - annotation
+  - sanitize
+tools:
+  - python:
+      description: Python runtime used to rewrite GTF transcript_id/gene_id attributes.
+      homepage: https://www.python.org/
+      documentation: https://docs.python.org/3/
+      licence: ["Python-2.0"]
+
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing reference metadata
+          e.g. [ id:'saccharomyces_cerevisiae', organism:'saccharomyces_cerevisiae' ]
+    - gtf:
+        type: file
+        description: GTF annotation whose transcript_id/gene_id attributes may contain
+          characters (e.g. parentheses in yeast tRNA IDs like tK(UUU)K) that hang
+          RNAframework's XML parser
+        pattern: "*.gtf"
+
+output:
+  gtf:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing reference metadata
+            e.g. [ id:'saccharomyces_cerevisiae', organism:'saccharomyces_cerevisiae' ]
+      - "*.sanitized.gtf":
+          type: file
+          description: GTF with transcript_id/gene_id attributes sanitized
+          pattern: "*.sanitized.gtf"
+          ontologies:
+            - edam: "http://edamontology.org/format_2306"
+  versions:
+    - "versions.yml":
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies: []
+
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"

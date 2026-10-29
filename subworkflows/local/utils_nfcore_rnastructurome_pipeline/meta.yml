@@ -1,0 +1,52 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "PIPELINE_INITIALISATION"
+description: Subworkflow with utility functions specific to the nf-core/rnastructurome pipeline
+keywords:
+  - utility
+  - pipeline
+  - initialise
+  - rnastructurome
+components:
+  - utils_nfschema_plugin
+  - utils_nfcore_pipeline
+  - utils_nextflow_pipeline
+  - completionemail
+  - completionsummary
+input:
+  - version:
+      type: boolean
+      description: |
+        Display version and exit
+  - validate_params:
+      type: boolean
+      description: |
+        Validate parameters against the schema at runtime
+  - monochrome_logs:
+      type: boolean
+      description: |
+        Do not use coloured log outputs
+  - nextflow_cli_args:
+      type: list
+      description: |
+        List of positional Nextflow CLI args
+  - outdir:
+      type: string
+      description: |
+        Output directory where results will be saved
+  - input:
+      type: string
+      description: |
+        Path to input samplesheet CSV
+output:
+  - samplesheet:
+      type: channel
+      description: |
+        Channel containing validated sample metadata and FASTQ paths
+  - versions:
+      type: channel
+      description: |
+        Channel containing software versions
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"

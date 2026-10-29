@@ -1,0 +1,64 @@
+name: rnaframework_rfcorrelate
+description: Compute pairwise reactivity-profile correlations between replicates of a sample group
+keywords:
+  - rnaframework
+  - structure
+  - correlation
+  - reproducibility
+  - qc
+tools:
+  - rnaframework:
+      description: |
+        RNAFramework is a toolkit for processing and analysing RNA structure probing data.
+      homepage: https://rnaframework-docs.readthedocs.io/
+      documentation: https://rnaframework-docs.readthedocs.io/en/latest/rf-correlate/
+      tool_dev_url: https://github.com/dincarnato/RNAFramework
+      licence: ["GPL-3.0-or-later"]
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map for one sample group, carrying correlate_replicate_sizes (XML count per
+          replicate) and correlate_replicate_labels (rf-correlate sample label per replicate)
+          e.g. [ id:'HEK293T', correlate_replicate_sizes:[12,12], correlate_replicate_labels:['rep1','rep2'] ]
+    - xmls:
+        type: file
+        description: rf-norm reactivity XML files for all replicates of the group (replicate-grouped order)
+        pattern: "*.{xml}"
+        ontologies: []
+output:
+  matrix:
+    - - meta:
+          type: map
+          description: Groovy Map for the sample group
+      - "${prefix}_correlate/matrix.csv":
+          type: file
+          description: Overall pairwise correlation matrix between replicates
+          pattern: "matrix.csv"
+          ontologies: []
+  results:
+    - - meta:
+          type: map
+          description: Groovy Map for the sample group
+      - "${prefix}_correlate/":
+          type: directory
+          description: Full rf-correlate output (matrix + per-transcript pairwise TSVs, optional heatmap)
+  log:
+    - - meta:
+          type: map
+          description: Groovy Map for the sample group
+      - "*.rfcorrelate.log":
+          type: file
+          description: rf-correlate run log
+          pattern: "*.rfcorrelate.log"
+          ontologies: []
+  versions:
+    - "versions.yml":
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies: []
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"

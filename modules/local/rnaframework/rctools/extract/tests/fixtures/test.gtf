@@ -1,0 +1,6 @@
+MN908947.3	test_annotation	gene	266	21555	.	+	.	gene_id "ORF1ab"; gene_name "ORF1ab";
+MN908947.3	test_annotation	transcript	266	21555	.	+	.	gene_id "ORF1ab"; transcript_id "YP_009724389.1"; gene_name "ORF1ab";
+MN908947.3	test_annotation	exon	266	21555	.	+	.	gene_id "ORF1ab"; transcript_id "YP_009724389.1"; gene_name "ORF1ab"; exon_number "1";
+MN908947.3	test_annotation	gene	21563	25384	.	+	.	gene_id "S"; gene_name "S";
+MN908947.3	test_annotation	transcript	21563	25384	.	+	.	gene_id "S"; transcript_id "YP_009724390.1"; gene_name "S";
+MN908947.3	test_annotation	exon	21563	25384	.	+	.	gene_id "S"; transcript_id "YP_009724390.1"; gene_name "S"; exon_number "1";

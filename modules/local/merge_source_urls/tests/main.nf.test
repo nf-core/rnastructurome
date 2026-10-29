@@ -1,0 +1,69 @@
+nextflow_process {
+
+    name "Test Process MERGE_SOURCE_URLS"
+    script "../main.nf"
+    process "MERGE_SOURCE_URLS"
+
+    tag "modules"
+    tag "modules_local"
+    tag "merge_source_urls"
+    config "./nextflow.config"
+
+    test("concatenates per-reference source URL files in order") {
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'homo_sapiens' ],
+                    [
+                        file("${projectDir}/modules/local/merge_source_urls/tests/fixtures/url_a.txt", checkIfExists: true),
+                        file("${projectDir}/modules/local/merge_source_urls/tests/fixtures/url_b.txt", checkIfExists: true)
+                    ]
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.urls.size() == 1 },
+                {
+                    def text = path(process.out.urls[0][1]).text
+                    assert text.readLines() == [
+                        'https://ftp.ensembl.org/pub/homo_sapiens/genome.fa.gz',
+                        'https://ftp.ensembl.org/pub/homo_sapiens/annotation.gtf.gz'
+                    ]
+                },
+                { assert process.out.versions_cat[0][1] == 'cat' && process.out.versions_cat[0][2] }
+            )
+        }
+    }
+
+    test("merge_source_urls - stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'homo_sapiens' ],
+                    [
+                        file("${projectDir}/modules/local/merge_source_urls/tests/fixtures/url_a.txt", checkIfExists: true)
+                    ]
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.urls.size() == 1 },
+                { assert process.out.versions_cat[0][1] == 'cat' && process.out.versions_cat[0][2] }
+            )
+        }
+    }
+}

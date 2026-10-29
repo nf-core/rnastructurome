@@ -1,0 +1,115 @@
+nextflow_process {
+
+    name "Test Process RNAFRAMEWORK_RFFOLD"
+    script "../main.nf"
+    process "RNAFRAMEWORK_RFFOLD"
+
+    tag "modules"
+    tag "modules_local"
+    tag "rnaframework"
+    tag "rnaframework/fold"
+    config "./nextflow.config"
+
+    test("rffold - stub single input") {
+
+        options "-stub"
+
+        when {
+            params {
+                module_args = ''
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group1' ],
+                    file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.structures.size() == 1 },
+                { assert process.out.dotbracket.size() == 1 },
+                { assert process.out.structure_plots.size() == 0 },
+                { assert process.out.summaries.size() == 0 },
+                { assert process.out.dotplot.size() == 0 },
+                { assert process.out.shannon_wig.size() == 1 },
+                { assert process.out.log.size() == 1 },
+                { assert process.out.missing_transcripts.size() == 0 },
+                { assert process.out.partial_warning.size() == 0 }
+            )
+        }
+    }
+
+    test("rffold - stub multiple inputs") {
+
+        options "-stub"
+
+        when {
+            params {
+                module_args = ''
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group_multi' ],
+                    [
+                        file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta', checkIfExists: true),
+                        file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta.fai', checkIfExists: true)
+                    ]
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.structures.size() == 1 },
+                { assert process.out.dotbracket.size() == 1 },
+                { assert process.out.structure_plots.size() == 0 },
+                { assert process.out.summaries.size() == 0 },
+                { assert process.out.dotplot.size() == 0 },
+                { assert process.out.shannon_wig.size() == 1 },
+                { assert process.out.log.size() == 1 },
+                { assert process.out.missing_transcripts.size() == 0 },
+                { assert process.out.partial_warning.size() == 0 }
+            )
+        }
+    }
+
+    test("rffold - stub publishes leaf outputs without copying the whole fold directory") {
+
+        options "-stub"
+
+        when {
+            params {
+                module_args = ''
+                outdir = "$outputDir"
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group_publish' ],
+                    file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert path("${outputDir}/fold/group_publish/dotbracket/example.db").exists() },
+                { assert path("${outputDir}/fold/group_publish/shannon/example.wig").exists() },
+                { assert path("${outputDir}/fold/group_publish/rffold.log").exists() },
+                { assert !path("${outputDir}/fold/group_publish/structures/viennarna").exists() },
+                { assert !path("${outputDir}/fold/group_publish/summaries").exists() }
+            )
+        }
+    }
+
+}

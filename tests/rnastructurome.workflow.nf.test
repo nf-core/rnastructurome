@@ -1,0 +1,819 @@
+nextflow_workflow {
+
+    name "Test Workflow RNASTRUCTUROME"
+    script "../workflows/rnastructurome.nf"
+    config "${new File('tests/nextflow.config').absolutePath}"
+    workflow "RNASTRUCTUROME"
+    tag "workflows"
+    tag "rnastructurome"
+
+    test("Routes RT-stop to bowtie and MaP to bowtie2") {
+
+        options "-stub"
+
+        when {
+            params {
+                outdir = "$outputDir"
+                fasta  = "https://raw.githubusercontent.com/nf-core/test-datasets/rnastructurome/testdata/test_transcriptome/Homo_sapiens.GRCh38.ENST00000389680.fa"
+            }
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id:'rtstop_sample', sample_id:'rtstop_sample', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'rtstop_line', replicate:'rep1', condition:'treated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ],
+                    [
+                        [ id:'map_sample', sample_id:'map_sample', principle:'MaP', organism:'Mus musculus', single_end:true, sample_group:'map_line', replicate:'rep1', condition:'treated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ]
+                )
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert workflow.out.mapped_bam.size() == 2 },
+                { assert workflow.out.mapped_bam.collect { entry -> entry[0].principle }.toSet() == ['RT-stop', 'MaP'] as Set },
+                { assert snapshot(
+                    workflow.out.mapped_bam,
+                    // R2DT is container-only (custom CM image), so it emits no version entry under
+                    // -profile conda; drop it so the versions snapshot matches across all engines.
+                    removeNextflowVersion("${outputDir}/pipeline_info/nf_core_rnastructurome_software_mqc_versions.yml")
+                        .findAll { process, _v -> process != 'R2DT' }
+                ).match() }
+            )
+        }
+    }
+
+    test("Concatenates resequenced paired-end FASTQs before preprocessing") {
+
+        options "-stub"
+
+        when {
+            params {
+                outdir = "$outputDir"
+                fasta  = "https://raw.githubusercontent.com/nf-core/test-datasets/rnastructurome/testdata/test_transcriptome/Homo_sapiens.GRCh38.ENST00000389680.fa"
+            }
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id:'reseq_rtstop', sample_id:'reseq_rtstop', principle:'RT-stop', organism:'Homo sapiens', single_end:false, sample_group:'reseq_line', replicate:'rep1', condition:'treated' ],
+                        [
+                            file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true),
+                            file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true),
+                            file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true),
+                            file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true)
+                        ]
+                    ]
+                )
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert workflow.out.mapped_bam.size() == 1 },
+                { assert path("${outputDir}/pipeline_info/nf_core_rnastructurome_software_mqc_versions.yml").text.contains('CAT_FASTQ') }
+            )
+        }
+    }
+
+    test("Accepts organism as the reference key") {
+
+        options "-stub"
+
+        when {
+            params {
+                outdir   = "$outputDir"
+                fasta    = "https://raw.githubusercontent.com/nf-core/test-datasets/rnastructurome/testdata/test_transcriptome/Homo_sapiens.GRCh38.ENST00000389680.fa"
+                organism = null
+            }
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id:'organism_sample', sample_id:'organism_sample', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'organism_line', replicate:'rep1', condition:'treated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ]
+                )
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert workflow.out.mapped_bam.size() == 1 }
+            )
+        }
+    }
+
+    test("Fails when organism is missing") {
+
+        options "-stub"
+
+        when {
+            params {
+                outdir   = "$outputDir"
+                fasta    = "https://raw.githubusercontent.com/nf-core/test-datasets/rnastructurome/testdata/test_transcriptome/Homo_sapiens.GRCh38.ENST00000389680.fa"
+                organism = null
+            }
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id:'missing_build', sample_id:'missing_build', principle:'RT-stop', single_end:true ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ]
+                )
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert !workflow.success },
+                { assert workflow.errorMessage.contains("Missing organism") }
+            )
+        }
+    }
+
+    test("Accepts rf-count parameter overrides") {
+
+        options "-stub"
+
+        when {
+            params {
+                outdir                            = "$outputDir"
+                fasta                             = "https://raw.githubusercontent.com/nf-core/test-datasets/rnastructurome/testdata/test_transcriptome/Homo_sapiens.GRCh38.ENST00000389680.fa"
+                rfcount_img                       = true
+                rfcount_trim_5prime               = 2
+                rfcount_primary_only              = true
+                rfcount_map_sort_by_read_name     = true
+                rfcount_map_discard_shorter       = 5
+                rfcount_map_min_quality           = 25
+                rfcount_map_collapse_consecutive  = true
+                rfcount_map_max_collapse_distance = 3
+                rfcount_map_max_coverage          = 1000
+            }
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id:'map_rfcount', sample_id:'map_rfcount', principle:'MaP', organism:'Homo sapiens', single_end:true, sample_group:'map_rfcount_line', replicate:'rep1', condition:'treated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ]
+                )
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert workflow.out.mapped_bam.size() == 1 }
+            )
+        }
+    }
+
+    test("Groups rf-norm inputs by matching sample_group and replicate") {
+
+        options "-stub"
+
+        when {
+            params {
+                outdir = "$outputDir"
+                fasta  = "https://raw.githubusercontent.com/nf-core/test-datasets/rnastructurome/testdata/test_transcriptome/Homo_sapiens.GRCh38.ENST00000389680.fa"
+            }
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id:'hek_treated_rep1', sample_id:'hek_treated_rep1', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'hek293T', replicate:'rep1', condition:'treated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ],
+                    [
+                        [ id:'hek_untreated_rep1', sample_id:'hek_untreated_rep1', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'hek293T', replicate:'rep1', condition:'untreated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ],
+                    [
+                        [ id:'hek_treated_rep2', sample_id:'hek_treated_rep2', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'hek293T', replicate:'rep2', condition:'treated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ],
+                    [
+                        [ id:'hek_untreated_rep2', sample_id:'hek_untreated_rep2', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'hek293T', replicate:'rep2', condition:'untreated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ]
+                )
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert workflow.out.normalized_xml.size() == 2 },
+                { assert workflow.out.normalized_xml.collect { entry -> entry[0].id }.toSet() == ['hek293T_rep1', 'hek293T_rep2'] as Set },
+                { assert workflow.out.normalized_xml.collect { entry -> entry[0].rfnorm_scoring_method }.toSet() == [1] as Set },
+                { assert workflow.out.normalized_xml.collect { entry -> entry[0].rfnorm_norm_method }.toSet() == [3] as Set },
+                // Rows follow sample name, not the order the rf-count tasks happened to finish.
+                { assert path("${outputDir}/count/rfcount_summary_all_samples.tsv").readLines().drop(1).collect { line -> line.split('\t')[0] } ==
+                    ['hek_treated_rep1', 'hek_treated_rep2', 'hek_untreated_rep1', 'hek_untreated_rep2'] }
+            )
+        }
+    }
+
+    test("Selects RT-stop treated-only rf-norm defaults") {
+
+        options "-stub"
+
+        when {
+            params {
+                outdir = "$outputDir"
+                fasta  = "https://raw.githubusercontent.com/nf-core/test-datasets/rnastructurome/testdata/test_transcriptome/Homo_sapiens.GRCh38.ENST00000389680.fa"
+            }
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id:'hek_treated_only', sample_id:'hek_treated_only', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'hek293T', replicate:'rep1', condition:'treated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ]
+                )
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert workflow.out.normalized_xml.size() == 1 },
+                { assert workflow.out.normalized_xml[0][0].rfnorm_scoring_method == 2 },
+                { assert workflow.out.normalized_xml[0][0].rfnorm_norm_method == 2 }
+            )
+        }
+    }
+
+    test("Allows explicit rf-norm normalization override") {
+
+        options "-stub"
+
+        when {
+            params {
+                outdir             = "$outputDir"
+                fasta              = "https://raw.githubusercontent.com/nf-core/test-datasets/rnastructurome/testdata/test_transcriptome/Homo_sapiens.GRCh38.ENST00000389680.fa"
+                rfnorm_norm_method = 2
+            }
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id:'hek_treated_rep1', sample_id:'hek_treated_rep1', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'hek293T', replicate:'rep1', condition:'treated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ],
+                    [
+                        [ id:'hek_untreated_rep1', sample_id:'hek_untreated_rep1', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'hek293T', replicate:'rep1', condition:'untreated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ]
+                )
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert workflow.out.normalized_xml.size() == 1 },
+                { assert workflow.out.normalized_xml[0][0].rfnorm_scoring_method == 1 },
+                { assert workflow.out.normalized_xml[0][0].rfnorm_norm_method == 2 }
+            )
+        }
+    }
+
+    test("Allows explicit rf-norm scoring override") {
+
+        options "-stub"
+
+        when {
+            params {
+                outdir              = "$outputDir"
+                fasta               = "https://raw.githubusercontent.com/nf-core/test-datasets/rnastructurome/testdata/test_transcriptome/Homo_sapiens.GRCh38.ENST00000389680.fa"
+                rfnorm_score_method = 2
+            }
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id:'hek_treated_rep1', sample_id:'hek_treated_rep1', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'hek293T', replicate:'rep1', condition:'treated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ],
+                    [
+                        [ id:'hek_untreated_rep1', sample_id:'hek_untreated_rep1', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'hek293T', replicate:'rep1', condition:'untreated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ]
+                )
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert workflow.out.normalized_xml.size() == 1 },
+                { assert workflow.out.normalized_xml[0][0].rfnorm_scoring_method == 2 },
+                { assert workflow.out.normalized_xml[0][0].rfnorm_norm_method == 2 }
+            )
+        }
+    }
+
+    test("Fails on unsupported rf-norm normalization override") {
+
+        options "-stub"
+
+        when {
+            params {
+                outdir             = "$outputDir"
+                fasta              = "https://raw.githubusercontent.com/nf-core/test-datasets/rnastructurome/testdata/test_transcriptome/Homo_sapiens.GRCh38.ENST00000389680.fa"
+                rfnorm_norm_method = 99
+            }
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id:'hek_treated_rep1', sample_id:'hek_treated_rep1', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'hek293T', replicate:'rep1', condition:'treated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ]
+                )
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert !workflow.success },
+                { assert workflow.stdout.any { it.contains("Unsupported rf-norm normalization method '99'") } }
+            )
+        }
+    }
+
+    test("Fails on unsupported rf-norm scoring override") {
+
+        options "-stub"
+
+        when {
+            params {
+                outdir              = "$outputDir"
+                fasta               = "https://raw.githubusercontent.com/nf-core/test-datasets/rnastructurome/testdata/test_transcriptome/Homo_sapiens.GRCh38.ENST00000389680.fa"
+                rfnorm_score_method = 99
+            }
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id:'hek_treated_rep1', sample_id:'hek_treated_rep1', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'hek293T', replicate:'rep1', condition:'treated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ]
+                )
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert !workflow.success },
+                { assert workflow.stdout.any { it.contains("Unsupported rf-norm scoring method '99'") } }
+            )
+        }
+    }
+
+    test("Selects MaP rf-norm defaults from available controls") {
+
+        options "-stub"
+
+        when {
+            params {
+                outdir = "$outputDir"
+                fasta  = "https://raw.githubusercontent.com/nf-core/test-datasets/rnastructurome/testdata/test_transcriptome/Homo_sapiens.GRCh38.ENST00000389680.fa"
+            }
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id:'map_treated_rep1', sample_id:'map_treated_rep1', principle:'MaP', organism:'Homo sapiens', single_end:true, sample_group:'hek293T', replicate:'rep1', condition:'treated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ],
+                    [
+                        [ id:'map_untreated_rep1', sample_id:'map_untreated_rep1', principle:'MaP', organism:'Homo sapiens', single_end:true, sample_group:'hek293T', replicate:'rep1', condition:'untreated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ],
+                    [
+                        [ id:'map_denatured_rep1', sample_id:'map_denatured_rep1', principle:'MaP', organism:'Homo sapiens', single_end:true, sample_group:'hek293T', replicate:'rep1', condition:'denatured' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ],
+                    [
+                        [ id:'map_treated_rep2', sample_id:'map_treated_rep2', principle:'MaP', organism:'Homo sapiens', single_end:true, sample_group:'hek293T', replicate:'rep2', condition:'treated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ]
+                )
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert workflow.out.normalized_xml.size() == 2 },
+                { assert workflow.out.normalized_xml.find { entry -> entry[0].id == 'hek293T_rep1' }[0].rfnorm_scoring_method == 3 },
+                { assert workflow.out.normalized_xml.find { entry -> entry[0].id == 'hek293T_rep1' }[0].rfnorm_norm_method == 3 },
+                { assert workflow.out.normalized_xml.find { entry -> entry[0].id == 'hek293T_rep1' }[0].rfnorm_has_denatured },
+                // rep2 has no untreated of its own, so it reuses rep1's, the arm's only one.
+                { assert workflow.out.normalized_xml.find { entry -> entry[0].id == 'hek293T_rep2' }[0].rfnorm_scoring_method == 3 },
+                { assert workflow.out.normalized_xml.find { entry -> entry[0].id == 'hek293T_rep2' }[0].rfnorm_norm_method == 3 },
+                { assert workflow.out.normalized_xml.find { entry -> entry[0].id == 'hek293T_rep2' }[0].rfnorm_has_untreated }
+            )
+        }
+    }
+
+    test("Passes four-base DMS and RNAalifold arguments to RNA Framework") {
+
+        options "-stub"
+
+        when {
+            params {
+                outdir = "$outputDir"
+                fasta  = "https://raw.githubusercontent.com/nf-core/test-datasets/rnastructurome/testdata/test_transcriptome/Homo_sapiens.GRCh38.ENST00000389680.fa"
+            }
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id:'dms_treated_rep1', sample_id:'dms_treated_rep1', principle:'MaP', method:'DMS', pH:8.5, organism:'Homo sapiens', single_end:true, sample_group:'dms_line', replicate:'rep1', condition:'treated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ],
+                    [
+                        [ id:'dms_untreated_rep1', sample_id:'dms_untreated_rep1', principle:'MaP', method:'DMS', pH:8.5, organism:'Homo sapiens', single_end:true, sample_group:'dms_line', replicate:'rep1', condition:'untreated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ],
+                    [
+                        [ id:'dms_treated_rep2', sample_id:'dms_treated_rep2', principle:'MaP', method:'DMS', pH:8.5, organism:'Homo sapiens', single_end:true, sample_group:'dms_line', replicate:'rep2', condition:'treated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ],
+                    [
+                        [ id:'dms_untreated_rep2', sample_id:'dms_untreated_rep2', principle:'MaP', method:'DMS', pH:8.5, organism:'Homo sapiens', single_end:true, sample_group:'dms_line', replicate:'rep2', condition:'untreated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ]
+                )
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            // Stubs echo their ext.args, so each task's .command.sh shows what the tool would get.
+            def commands = [:]
+            new File("${launchDir}/work").eachFileRecurse { f ->
+                if (f.name == '.command.run') commands[(f.text =~ /### name: '([^']+)'/)[0][1]] = new File(f.parentFile, '.command.sh').text
+            }
+            def argsOf = { proc -> commands.findAll { name, _sh -> name.contains(":${proc} (") }.values() }
+            assertAll(
+                { assert workflow.success },
+                { assert argsOf('RNAFRAMEWORK_RFCOUNT_GENOME').size() == 4 },
+                { assert argsOf('RNAFRAMEWORK_RFCOUNT_GENOME').every { sh -> sh.contains('-om H2N,G2Y -ncl') } },
+                { assert argsOf('RNAFRAMEWORK_RFNORM').size() == 2 },
+                { assert argsOf('RNAFRAMEWORK_RFNORM').every { sh -> sh.contains('-nm 4') && sh.contains('-4d') } },
+                { assert argsOf('RNAFRAMEWORK_RFNORMFACTOR').size() == 1 },
+                { assert argsOf('RNAFRAMEWORK_RFNORMFACTOR').every { sh -> sh.contains('-ni') && !sh.contains('-mn') } },
+                { assert argsOf('RNAFRAMEWORK_RFFOLD').size() == 1 },
+                { assert argsOf('RNAFRAMEWORK_RFFOLD').every { sh -> sh.contains('-ua') } }
+            )
+        }
+    }
+
+    test("Fails rf-norm grouping when sample_group or replicate is missing") {
+
+        options "-stub"
+
+        when {
+            params {
+                outdir = "$outputDir"
+                fasta  = "https://raw.githubusercontent.com/nf-core/test-datasets/rnastructurome/testdata/test_transcriptome/Homo_sapiens.GRCh38.ENST00000389680.fa"
+            }
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id:'missing_norm_key', sample_id:'missing_norm_key', principle:'RT-stop', organism:'Homo sapiens', single_end:true, condition:'treated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ]
+                )
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert !workflow.success },
+                { assert workflow.errorMessage.contains("Missing sample_group or replicate") }
+            )
+        }
+    }
+
+    test("Fuzzy pairing does not borrow a control from another reference") {
+
+        options "-stub"
+
+        when {
+            params {
+                outdir = "$outputDir"
+                fasta  = "https://raw.githubusercontent.com/nf-core/test-datasets/rnastructurome/testdata/test_transcriptome/Homo_sapiens.GRCh38.ENST00000389680.fa"
+            }
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id:'human_infected_rep1', sample_id:'human_infected_rep1', principle:'MaP', organism:'Homo sapiens', single_end:true, sample_group:'hek293T_infected', replicate:'rep1', condition:'treated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_treated_r1.fastq.gz', checkIfExists: true) ]
+                    ],
+                    [
+                        [ id:'mouse_mock_rep1', sample_id:'mouse_mock_rep1', principle:'MaP', organism:'Mus musculus', single_end:true, sample_group:'hek293T_mock', replicate:'rep1', condition:'treated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_treated_r1.fastq.gz', checkIfExists: true) ]
+                    ],
+                    [
+                        [ id:'mouse_mock_untreated_rep1', sample_id:'mouse_mock_untreated_rep1', principle:'MaP', organism:'Mus musculus', single_end:true, sample_group:'hek293T_mock', replicate:'rep1', condition:'untreated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ]
+                )
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert workflow.out.normalized_xml.find { entry -> entry[0].id == 'hek293T_mock_rep1' }[0].rfnorm_has_untreated },
+                { assert !workflow.out.normalized_xml.find { entry -> entry[0].id == 'hek293T_infected_rep1' }[0].rfnorm_has_untreated }
+            )
+        }
+    }
+
+    test("Fails rf-norm when a group spans more than one reference") {
+
+        options "-stub"
+
+        when {
+            params {
+                outdir = "$outputDir"
+                fasta  = "https://raw.githubusercontent.com/nf-core/test-datasets/rnastructurome/testdata/test_transcriptome/Homo_sapiens.GRCh38.ENST00000389680.fa"
+            }
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id:'human_wt_rep1', sample_id:'human_wt_rep1', principle:'MaP', organism:'Homo sapiens', single_end:true, sample_group:'WT', replicate:'rep1', condition:'treated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_treated_r1.fastq.gz', checkIfExists: true) ]
+                    ],
+                    [
+                        [ id:'mouse_wt_rep1', sample_id:'mouse_wt_rep1', principle:'MaP', organism:'Mus musculus', single_end:true, sample_group:'WT', replicate:'rep1', condition:'untreated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ]
+                )
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert !workflow.success },
+                { assert workflow.errorMessage.contains("spans more than one reference") },
+                { assert workflow.errorMessage.contains("human_wt_rep1 (homo_sapiens)") },
+                { assert workflow.errorMessage.contains("mouse_wt_rep1 (mus_musculus)") }
+            )
+        }
+    }
+
+    test("Fails rf-norm when untreated lacks matching treated sample") {
+
+        options "-stub"
+
+        when {
+            params {
+                outdir = "$outputDir"
+                fasta  = "https://raw.githubusercontent.com/nf-core/test-datasets/rnastructurome/testdata/test_transcriptome/Homo_sapiens.GRCh38.ENST00000389680.fa"
+            }
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id:'hek_untreated_rep1', sample_id:'hek_untreated_rep1', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'hek293T', replicate:'rep1', condition:'untreated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ]
+                )
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert !workflow.success },
+                { assert workflow.errorMessage.contains("rf-norm requires a treated sample") },
+                { assert workflow.errorMessage.contains("hek_untreated_rep1 (untreated)") }
+            )
+        }
+    }
+
+    test("Fails rf-norm when a group has more than one untreated sample") {
+
+        options "-stub"
+
+        when {
+            params {
+                outdir = "$outputDir"
+                fasta  = "https://raw.githubusercontent.com/nf-core/test-datasets/rnastructurome/testdata/test_transcriptome/Homo_sapiens.GRCh38.ENST00000389680.fa"
+            }
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id:'hek_treated_rep1', sample_id:'hek_treated_rep1', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'hek293T', replicate:'rep1', condition:'treated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_treated_r1.fastq.gz', checkIfExists: true) ]
+                    ],
+                    [
+                        [ id:'hek_untreated_a', sample_id:'hek_untreated_a', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'hek293T', replicate:'rep1', condition:'untreated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ],
+                    [
+                        [ id:'hek_untreated_b', sample_id:'hek_untreated_b', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'hek293T', replicate:'rep1', condition:'untreated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ]
+                )
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert !workflow.success },
+                { assert workflow.errorMessage.contains("more than one untreated sample") },
+                { assert workflow.errorMessage.contains("hek_untreated_a, hek_untreated_b") }
+            )
+        }
+    }
+
+    test("Fails rf-norm when denatured lacks matching treated and untreated samples") {
+
+        options "-stub"
+
+        when {
+            params {
+                outdir = "$outputDir"
+                fasta  = "https://raw.githubusercontent.com/nf-core/test-datasets/rnastructurome/testdata/test_transcriptome/Homo_sapiens.GRCh38.ENST00000389680.fa"
+            }
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id:'hek_denatured_rep1', sample_id:'hek_denatured_rep1', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'hek293T', replicate:'rep1', condition:'denatured' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ]
+                )
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert !workflow.success },
+                { assert workflow.errorMessage.contains("rf-norm requires a treated sample for denatured controls") },
+                { assert workflow.errorMessage.contains("hek_denatured_rep1 (denatured)") }
+            )
+        }
+    }
+
+    test("Runs with cross-experiment rf-normfactor normalisation enabled") {
+
+        options "-stub"
+
+        when {
+            params {
+                outdir                = "$outputDir"
+                fasta                 = "https://raw.githubusercontent.com/nf-core/test-datasets/rnastructurome/testdata/test_transcriptome/Homo_sapiens.GRCh38.ENST00000389680.fa"
+                gtf                   = "$projectDir/modules/local/ensembl/gtf/tests/fixtures/ensembl/pub/current_gtf/homo_sapiens/Homo_sapiens.test.115.gtf.gz"
+                rfnorm_use_normfactor = true
+            }
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id:'main_rtstop', sample_id:'main_rtstop', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'main_line', replicate:'rep1', condition:'treated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ]
+                )
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                // rf-normfactor only runs when --rfnorm_use_normfactor is set; its presence in the
+                // collated versions confirms the cross-experiment branch executed.
+                { assert path("${outputDir}/pipeline_info/nf_core_rnastructurome_software_mqc_versions.yml").text.contains('RNAFRAMEWORK_RFNORMFACTOR') }
+            )
+        }
+    }
+
+    test("Runs with rf-structextract motif extraction enabled") {
+
+        options "-stub"
+
+        when {
+            params {
+                outdir        = "$outputDir"
+                fasta         = "https://raw.githubusercontent.com/nf-core/test-datasets/rnastructurome/testdata/test_transcriptome/Homo_sapiens.GRCh38.ENST00000389680.fa"
+                gtf           = "$projectDir/modules/local/ensembl/gtf/tests/fixtures/ensembl/pub/current_gtf/homo_sapiens/Homo_sapiens.test.115.gtf.gz"
+                structextract = true
+            }
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id:'main_rtstop', sample_id:'main_rtstop', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'main_line', replicate:'rep1', condition:'treated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ]
+                )
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                // rf-structextract only runs when --structextract is set; its presence in the
+                // collated versions confirms the motif-extraction branch executed.
+                { assert path("${outputDir}/pipeline_info/nf_core_rnastructurome_software_mqc_versions.yml").text.contains('RNAFRAMEWORK_RFSTRUCTEXTRACT') }
+            )
+        }
+    }
+
+    test("Runs rf-correlate replicate QC for a multi-replicate sample group") {
+
+        options "-stub"
+
+        when {
+            params {
+                outdir = "$outputDir"
+                fasta  = "https://raw.githubusercontent.com/nf-core/test-datasets/rnastructurome/testdata/test_transcriptome/Homo_sapiens.GRCh38.ENST00000389680.fa"
+                gtf    = "$projectDir/modules/local/ensembl/gtf/tests/fixtures/ensembl/pub/current_gtf/homo_sapiens/Homo_sapiens.test.115.gtf.gz"
+            }
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id:'main_rtstop_r1', sample_id:'main_rtstop_r1', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'main_line', replicate:'rep1', condition:'treated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ],
+                    [
+                        [ id:'main_rtstop_r2', sample_id:'main_rtstop_r2', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'main_line', replicate:'rep2', condition:'treated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ]
+                )
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                // rf-correlate only runs for sample groups with >1 replicate; its presence in the
+                // collated versions confirms the replicate-QC branch executed.
+                { assert path("${outputDir}/pipeline_info/nf_core_rnastructurome_software_mqc_versions.yml").text.contains('RNAFRAMEWORK_RFCORRELATE') }
+            )
+        }
+    }
+}

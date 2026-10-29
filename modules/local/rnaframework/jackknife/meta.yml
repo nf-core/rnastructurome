@@ -1,0 +1,79 @@
+name: rnaframework_rfjackknife
+description: |
+  Calibrates rf-fold slope and intercept parameters by iterative folding against
+  a set of reference structures, using a jackknife grid search over slope/intercept
+  combinations and scoring with the FMI (Fowlkes–Mallows Index).
+keywords:
+  - rnaframework
+  - structure
+  - calibration
+  - jackknife
+  - folding
+tools:
+  - rnaframework:
+      description: |
+        RNAFramework is a toolkit for processing and analysing RNA structure probing data.
+      homepage: https://rnaframework-docs.readthedocs.io/
+      documentation: https://rnaframework-docs.readthedocs.io/en/latest/rf-jackknife/
+      tool_dev_url: https://github.com/dincarnato/RNAFramework
+      licence: ["GPL-3.0-or-later"]
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample/group information
+          e.g. [ id:'group1' ]
+    - xml:
+        type: file
+        description: |
+          One or more rf-norm XML reactivity files. Passed as individual files
+          or as directory inputs (staged as input*/).
+        pattern: "*.xml"
+        ontologies: []
+  - reference:
+      type: file
+      description: |
+        Reference RNA secondary structures in Vienna/dotbracket format
+        (one entry per transcript, matching XML transcript IDs).
+      pattern: "*.{db,txt}"
+      ontologies: []
+output:
+  csv:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample/group information
+      - "*.csv":
+          type: file
+          description: |
+            CSV file reporting FMI (or mFMI) for each tested slope/intercept
+            combination. Use the optimal values as -sl and -in for rf-fold.
+          pattern: "*.csv"
+          ontologies: []
+  heatmap:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample/group information
+      - "*.pdf":
+          type: file
+          description: Optional FMI heatmap over slope/intercept grid (requires -g flag and R)
+          pattern: "*.pdf"
+          ontologies: []
+  log:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample/group information
+      - "rfjackknife.log":
+          type: file
+          description: rf-jackknife run log
+          pattern: "rfjackknife.log"
+          ontologies: []
+  versions:
+    - "versions.yml":
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies: []
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"

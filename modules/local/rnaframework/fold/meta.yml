@@ -1,0 +1,136 @@
+name: rnaframework_rffold
+description: Predict RNA secondary structure from normalized RNAframework reactivity XML
+keywords:
+  - rnaframework
+  - structure
+  - folding
+  - reactivity
+tools:
+  - rnaframework:
+      description: |
+        RNAFramework is a toolkit for processing and analysing RNA structure probing data.
+      homepage: https://rnaframework-docs.readthedocs.io/
+      documentation: https://rnaframework-docs.readthedocs.io/en/latest/rf-fold/
+      tool_dev_url: https://github.com/dincarnato/RNAFramework
+      licence: ["GPL-3.0-or-later"]
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing group/sample information
+          e.g. [ id:'group1' ]
+    - xml:
+        type: file
+        description: RNAframework normalized reactivity XML file(s)
+        pattern: "*.{xml}"
+        ontologies: []
+output:
+  structures:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing group/sample information
+            e.g. [ id:'group1' ]
+      - "*":
+          type: directory
+          description: RNAframework structure prediction output directory
+          pattern: "*"
+          ontologies: []
+  dotbracket:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing group/sample information
+            e.g. [ id:'group1' ]
+      - "*":
+          type: file
+          description: Dot-bracket or CT structure files from rf-fold
+          pattern: "*_fold_publish/dotbracket/*"
+          ontologies: []
+  structure_plots:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing group/sample information
+            e.g. [ id:'group1' ]
+      - "*":
+          type: file
+          description: 2D structure plots from rf-fold
+          pattern: "*_fold_publish/structures/*"
+          ontologies: []
+  summaries:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing group/sample information
+            e.g. [ id:'group1' ]
+      - "*":
+          type: file
+          description: Summary plots from rf-fold
+          pattern: "*_fold_publish/summaries/*"
+          ontologies: []
+  dotplot:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing group/sample information
+            e.g. [ id:'group1' ]
+      - "*":
+          type: file
+          description: Dot plot files from rf-fold
+          pattern: "*_fold_publish/dotplot/*"
+          ontologies: []
+  shannon_wig:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing group/sample information
+            e.g. [ id:'group1' ]
+      - "*.wig":
+          type: file
+          description: Per-transcript Shannon entropy WIG files from rf-fold
+          pattern: "*_fold_publish/shannon/*.wig"
+          ontologies: []
+  log:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing group/sample information
+            e.g. [ id:'group1' ]
+      - "rffold.log":
+          type: file
+          description: Raw rf-fold console log
+          pattern: "*_fold_publish/rffold.log"
+          ontologies: []
+  missing_transcripts:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing group/sample information
+            e.g. [ id:'group1' ]
+      - "missing_transcripts.txt":
+          type: file
+          description: Transcript IDs expected from XML inputs but missing from rf-fold outputs
+          pattern: "*_fold_publish/missing_transcripts.txt"
+          ontologies: []
+  partial_warning:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing group/sample information
+            e.g. [ id:'group1' ]
+      - "partial_fold_warning.log":
+          type: file
+          description: Warning log emitted when rf-fold produces partial output
+          pattern: "*_fold_publish/partial_fold_warning.log"
+          ontologies: []
+  versions:
+    - "versions.yml":
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies: []
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"

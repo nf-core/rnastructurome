@@ -1,0 +1,39 @@
+nextflow_process {
+
+    name "Test Process FASTA_SORT"
+    script "../main.nf"
+    process "FASTA_SORT"
+
+    tag "modules"
+    tag "modules_local"
+    tag "fasta"
+    tag "fasta/sort"
+    config "./nextflow.config"
+
+    test("sorts FASTA records lexicographically by sequence identifier") {
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'ref' ],
+                    file("${projectDir}/modules/local/fasta/sort/tests/fixtures/unsorted.fa", checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.fasta.size() == 1 },
+                {
+                    def fastaText = path(process.out.fasta[0][1]).text
+                    def headers = fastaText.readLines().findAll { line -> line.startsWith('>') }
+                    assert headers == ['>YAL001C transcript_a', '>YBR002W transcript_b', '>YCR003C transcript_c']
+                },
+                { assert process.out.versions_seqkit[0][1] == 'seqkit' && process.out.versions_seqkit[0][2] }
+            )
+        }
+    }
+}

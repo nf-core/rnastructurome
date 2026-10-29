@@ -1,0 +1,119 @@
+nextflow_process {
+
+    name "Test Process FASTA_SANITIZE"
+    script "../main.nf"
+    process "FASTA_SANITIZE"
+
+    tag "modules"
+    tag "modules_local"
+    tag "fasta"
+    tag "fasta/sanitize"
+    config "./nextflow.config"
+
+    test("normalizes yeast isoform transcript ids from hyphen to underscore") {
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'yeast_ref', organism:'saccharomyces_cerevisiae' ],
+                    file("${projectDir}/modules/local/fasta/sanitize/tests/fixtures/unsorted_yeast.fa", checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.fasta.size() == 1 },
+                {
+                    def fastaText = path(process.out.fasta[0][1]).text
+                    def headers = fastaText.readLines().findAll { line -> line.startsWith('>') }
+                    assert headers == [
+                        '>YAL042C_A_mRNA transcript_two',
+                        '>YAL016C_B_mRNA transcript_one',
+                        '>YAL016C_A_mRNA transcript_zero'
+                    ]
+                },
+                { assert process.out.versions_python[0][1] == 'python' && process.out.versions_python[0][2] }
+            )
+        }
+    }
+
+    test("strips parenthesised and other unsafe characters from header ids") {
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'yeast_ref', organism:'saccharomyces_cerevisiae' ],
+                    file("${projectDir}/modules/local/fasta/sanitize/tests/fixtures/unsafe_chars.fa", checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                {
+                    def fastaText = path(process.out.fasta[0][1]).text
+                    assert fastaText.readLines()[0] == '>tK_UUU_K_tRNA some tRNA'
+                }
+            )
+        }
+    }
+
+    test("leaves ids untouched for organisms that do not need sanitizing") {
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'human_ref', organism:'homo_sapiens' ],
+                    file("${projectDir}/modules/local/fasta/sanitize/tests/fixtures/unsorted_yeast.fa", checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                {
+                    def fastaText = path(process.out.fasta[0][1]).text
+                    def headers = fastaText.readLines().findAll { line -> line.startsWith('>') }
+                    assert headers == [
+                        '>YAL042C-A_mRNA transcript_two',
+                        '>YAL016C-B_mRNA transcript_one',
+                        '>YAL016C-A_mRNA transcript_zero'
+                    ]
+                }
+            )
+        }
+    }
+
+    test("fasta_sanitize - stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'yeast_ref', organism:'saccharomyces_cerevisiae' ],
+                    file("${projectDir}/modules/local/fasta/sanitize/tests/fixtures/unsorted_yeast.fa", checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.fasta.size() == 1 }
+            )
+        }
+    }
+}

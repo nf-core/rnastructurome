@@ -1,0 +1,103 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "ALIGN_READS"
+description: Align trimmed RT-stop and mutational-profiling reads to the reference, coordinate-sort, deduplicate (UMI-tools for UMI samples, samtools markdup otherwise), infer strandedness, and collect alignment QC.
+keywords:
+  - alignment
+  - star
+  - bowtie
+  - deduplication
+  - rnastructurome
+components:
+  - bedops/gtf2bed
+  - bowtie/align
+  - bowtie2/align
+  - buildstaraligninputs
+  - collecttomap
+  - parseinferexperiment
+  - resolvereferencekey
+  - rseqc/inferexperiment
+  - samtools/calmd
+  - samtools/fixmate
+  - samtools/flagstat
+  - samtools/idxstats
+  - samtools/index
+  - samtools/markdup
+  - samtools/qnames
+  - samtools/sort
+  - samtools/stats
+  - samtools/view
+  - star/align
+  - umitools/dedup
+input:
+  - ch_rtstop_trimmed_for_align:
+      type: channel
+      description: |
+        Trimmed RT-stop reads to align. Structure: [ val(meta), [ reads ] ]
+  - ch_map_trimmed_for_align:
+      type: channel
+      description: |
+        Trimmed mutational-profiling (MaP) reads to align. Structure: [ val(meta), [ reads ] ]
+  - ch_star_index:
+      type: channel
+      description: |
+        STAR genome index for the genome route. Structure: [ val(meta), path(index) ]
+  - ch_all_reference_gtf:
+      type: channel
+      description: |
+        Reference GTF annotations. Structure: [ val(meta), path(gtf) ]
+  - ch_bowtie_index_map:
+      type: map
+      description: |
+        Value map of reference_key -> [ val(meta), path(index) ] for Bowtie.
+  - ch_bowtie2_index_map:
+      type: map
+      description: |
+        Value map of reference_key -> [ val(meta), path(index) ] for Bowtie2.
+  - ch_reference_fasta_map:
+      type: map
+      description: |
+        Value map of reference_key -> [ val(meta), path(fasta) ].
+  - ch_genome_transcript_fasta_fai_map:
+      type: map
+      description: |
+        Value map of reference_key -> [ val(meta), path(fasta), path(fai) ]. Transcript FASTA + index
+        for SAMTOOLS_CALMD on STAR's TranscriptomeSAM output (genome route, count_genome=false only).
+  - transcriptome:
+      type: boolean
+      description: |
+        Whether the transcriptome (Bowtie) route is in use, including auto-detection
+        performed by the entry workflow. All other settings are read from params.
+output:
+  - markdup_bam_bai:
+      type: channel
+      description: |
+        Deduplicated, indexed BAM. Structure: [ val(meta), path(bam), path(bai) ]
+  - dedup_bam:
+      type: channel
+      description: |
+        Deduplicated BAM (no index). Structure: [ val(meta), path(bam) ]
+  - transcript_bam_bai:
+      type: channel
+      description: |
+        Dedup-reconciled, calmd-corrected transcript-coordinate BAM from STAR's TranscriptomeSAM output
+        (genome route, count_genome=false only). Structure: [ val(meta), path(bam), path(bai) ]
+  - strandedness_by_id:
+      type: channel
+      description: |
+        Inferred strandedness per sample id. Structure: [ id, strandedness ]
+  - flagstat_pre:
+      type: channel
+      description: |
+        samtools flagstat output before deduplication. Structure: [ val(meta), path(flagstat) ]
+  - flagstat_post:
+      type: channel
+      description: |
+        samtools flagstat output after deduplication. Structure: [ val(meta), path(flagstat) ]
+  - multiqc_files:
+      type: channel
+      description: |
+        QC files collected for MultiQC.
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"

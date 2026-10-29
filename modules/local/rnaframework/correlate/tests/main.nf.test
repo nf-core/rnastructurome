@@ -1,0 +1,43 @@
+nextflow_process {
+
+    name "Test Process RNAFRAMEWORK_RFCORRELATE"
+    script "../main.nf"
+    process "RNAFRAMEWORK_RFCORRELATE"
+
+    tag "modules"
+    tag "modules_local"
+    tag "rnaframework"
+    tag "rnaframework/correlate"
+    config "./nextflow.config"
+
+    test("rfcorrelate - stub") {
+
+        options "-stub"
+
+        when {
+            params {
+                module_args = ''
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'HEK293T', correlate_replicate_sizes:[1, 1], correlate_replicate_labels:['rep1', 'rep2'] ],
+                    [
+                        file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.single_end.sorted.bam', checkIfExists: true),
+                        file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
+                    ]
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.matrix.size() == 1 },
+                { assert process.out.log.size() == 1 },
+                { assert process.out.versions_rnaframework[0][1] == 'rnaframework' && process.out.versions_rnaframework[0][2] }
+            )
+        }
+    }
+}

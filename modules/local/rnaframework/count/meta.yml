@@ -1,0 +1,119 @@
+name: rnaframework_rfcount
+description: Generate per-base RT-stop or mutation counts from aligned reads
+keywords:
+  - rnaframework
+  - structure
+  - map
+  - rt-stop
+  - counting
+tools:
+  - rnaframework:
+      description: |
+        RNAFramework is a toolkit for processing and analysing RNA structure probing data.
+      homepage: https://rnaframework-docs.readthedocs.io/
+      documentation: https://rnaframework-docs.readthedocs.io/en/latest/rf-count/
+      tool_dev_url: https://github.com/dincarnato/RNAFramework
+      licence: ["GPL-3.0-or-later"]
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. [ id:'test', principle:'RT-stop' ]
+    - bam:
+        type: file
+        description: Coordinate-sorted BAM file
+        pattern: "*.{bam}"
+        ontologies: []
+    - bai:
+        type: file
+        description: BAM index
+        pattern: "*.{bai}"
+        ontologies: []
+  - - meta_ref:
+        type: map
+        description: |
+          Groovy Map containing reference information
+          e.g. [ id:'homo_sapiens', organism:'homo_sapiens' ]
+    - fasta:
+        type: file
+        description: Reference FASTA file
+        pattern: "*.{fa,fasta}"
+        ontologies: []
+output:
+  rc:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. [ id:'test', principle:'RT-stop' ]
+      - "*.rc":
+          type: file
+          description: RNAframework raw count file
+          pattern: "*.{rc}"
+          ontologies: []
+  rci:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. [ id:'test', principle:'RT-stop' ]
+      - "*.rc.rci":
+          type: file
+          description: Optional RNAframework raw count index sidecar file
+          pattern: "*.{rci}"
+          ontologies: []
+  index_rci:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. [ id:'test', principle:'RT-stop' ]
+      - "index.rci":
+          type: file
+          description: Optional RNAframework global count index file
+          pattern: "index.rci"
+          ontologies: []
+  error_log:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. [ id:'test', principle:'RT-stop' ]
+      - "error.out":
+          type: file
+          description: Optional RNAframework error log produced during counting
+          pattern: "error.out"
+          ontologies: []
+  samtools_log:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. [ id:'test', principle:'RT-stop' ]
+      - "samtools.log":
+          type: file
+          description: Optional samtools log produced by RNAframework during counting
+          pattern: "samtools.log"
+          ontologies: []
+  plots:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. [ id:'test', principle:'RT-stop' ]
+      - "*.pdf":
+          type: file
+          description: Optional RNAframework rf-count plots
+          pattern: "*.{pdf}"
+          ontologies: []
+  versions:
+    - "versions.yml":
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies: []
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"

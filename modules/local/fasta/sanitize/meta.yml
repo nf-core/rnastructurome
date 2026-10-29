@@ -1,0 +1,49 @@
+name: fasta_sanitize
+description: Normalize bespoke organism-specific FASTA header quirks (yeast isoform ids, unsafe characters)
+keywords:
+  - fasta
+  - reference
+  - sanitize
+tools:
+  - python:
+      description: Python runtime used to rewrite FASTA header ids.
+      homepage: https://www.python.org/
+      documentation: https://docs.python.org/3/
+      licence: ["Python-2.0"]
+
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing reference metadata
+          e.g. [ id:'saccharomyces_cerevisiae', organism:'saccharomyces_cerevisiae' ]
+    - fasta:
+        type: file
+        description: Reference FASTA whose header ids may contain yeast systematic isoform
+          hyphens (e.g. YAL016C-A_mRNA) or characters (e.g. parentheses in yeast tRNA IDs
+          like tK(UUU)K) that hang RNAframework's XML parser
+        pattern: "*.{fa,fasta,fa.gz,fasta.gz}"
+
+output:
+  fasta:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing reference metadata
+            e.g. [ id:'saccharomyces_cerevisiae', organism:'saccharomyces_cerevisiae' ]
+      - "*.sanitized.fa":
+          type: file
+          description: FASTA with header ids sanitized
+          pattern: "*.sanitized.fa"
+          ontologies: []
+  versions:
+    - "versions.yml":
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies: []
+
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"

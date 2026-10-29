@@ -1,0 +1,76 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "QUANTIFY_REACTIVITY"
+description: Count per-base mutations/RT-stops from deduplicated alignments with rf-count (transcriptome or genome route) and extract per-reference RC files for downstream normalisation.
+keywords:
+  - reactivity
+  - rf-count
+  - mutation counting
+  - rt-stop
+  - rnastructurome
+components:
+  - collecttomap
+  - resolvereferencekey
+  - rnaframework/rfcount
+  - rnaframework/rfcount/genome
+  - rnaframework/rfrctools/extract
+input:
+  - ch_markdup_bam_bai:
+      type: channel
+      description: |
+        Deduplicated, indexed genome-coordinate BAM. Structure: [ val(meta), path(bam), path(bai) ]
+  - ch_transcript_bam_bai:
+      type: channel
+      description: |
+        Dedup-reconciled, calmd-corrected transcript-coordinate BAM (genome route, count_genome=false
+        only). Structure: [ val(meta), path(bam), path(bai) ]
+  - ch_strandedness_by_id:
+      type: channel
+      description: |
+        Inferred strandedness per sample id. Structure: [ id, strandedness ]
+  - ch_reference_genome_fasta_keyed:
+      type: channel
+      description: |
+        Genome FASTA keyed by reference. Structure: [ key, [ val(meta), path(fasta) ] ]
+  - ch_reference_gtf_map:
+      type: map
+      description: |
+        Value map of reference_key -> [ val(meta), path(gtf) ].
+  - ch_reference_fasta_map:
+      type: map
+      description: |
+        Value map of reference_key -> [ val(meta), path(fasta) ].
+  - ch_genome_transcript_fasta_map:
+      type: map
+      description: |
+        Value map of reference_key -> [ val(meta), path(fasta) ]. Genome-derived transcript FASTA
+        (genome route, count_genome=false only).
+  - transcriptome:
+      type: boolean
+      description: |
+        Whether the transcriptome (Bowtie) route is in use, including auto-detection
+        performed by the entry workflow. All other settings are read from params.
+output:
+  - rc:
+      type: channel
+      description: |
+        rf-count RC files. Structure: [ val(meta), path(rc) ]
+  - rci:
+      type: channel
+      description: |
+        rf-count RC index files. Structure: [ val(meta), path(rci) ]
+  - summary:
+      type: channel
+      description: |
+        rf-count summary table. Structure: [ val(meta), path(summary_tsv) ]
+  - plots:
+      type: channel
+      description: |
+        rf-count per-transcript coverage plots. Structure: [ val(meta), path(plots) ]
+  - versions:
+      type: channel
+      description: |
+        Collected software version files. Structure: [ path(versions.yml) ]
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"

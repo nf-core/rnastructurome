@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data combined="FALSE" max="10" norm="raw" offset="1000000000" pseudo="1" reactive="ACGT" remap="0" scoring="Ding" tool="rf-norm" win="1000000000">
+    <transcript id="TX1" length="10">
+        <sequence>ACGTACGTAC</sequence>
+        <reactivity>0.1, 0.2, NaN, 0.4, 0.5, 0.6, NaN, 0.8, 0.9, 1.0</reactivity>
+    </transcript>
+</data>

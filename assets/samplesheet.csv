@@ -1,3 +1,5 @@
-sample,fastq_1,fastq_2
-SAMPLE_PAIRED_END,/path/to/fastq/files/AEG588A1_S1_L002_R1_001.fastq.gz,/path/to/fastq/files/AEG588A1_S1_L002_R2_001.fastq.gz
-SAMPLE_SINGLE_END,/path/to/fastq/files/AEG588A4_S4_L003_R1_001.fastq.gz,
+sample,sample_id,fastq_1,fastq_2,method,principle,chemical,RT_enzyme,sample_group,condition,replicate,organism,pH,adapter_3p,adapter_5p,umi_pattern
+HEK293T_SHAPE_treated_r1,GSM000001,/data/HEK293T_SHAPE_treated_r1.fastq.gz,,SHAPE,MaP,NAI,M-MLV,HEK293T,treated,1,Homo sapiens,,AGATCGGAAGAGC,,NNNNNNNN
+HEK293T_SHAPE_untreated_r1,GSM000002,/data/HEK293T_SHAPE_untreated_r1.fastq.gz,,SHAPE,MaP,NAI,M-MLV,HEK293T,untreated,1,Homo sapiens,,AGATCGGAAGAGC,,NNNNNNNN
+HEK293T_SHAPE_treated_r2,GSM000003,/data/HEK293T_SHAPE_treated_r2.fastq.gz,,SHAPE,MaP,NAI,M-MLV,HEK293T,treated,2,Homo sapiens,,AGATCGGAAGAGC,,NNNNNNNN
+HEK293T_SHAPE_untreated_r2,GSM000004,/data/HEK293T_SHAPE_untreated_r2.fastq.gz,,SHAPE,MaP,NAI,M-MLV,HEK293T,untreated,2,Homo sapiens,,AGATCGGAAGAGC,,NNNNNNNN

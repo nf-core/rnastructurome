@@ -1,0 +1,57 @@
+name: ensembl_gtf
+description: Download Ensembl GTF annotation for a species
+keywords:
+  - ensembl
+  - annotation
+  - gtf
+tools:
+  - ensembl:
+      description: |
+        Ensembl provides genome-scale reference annotation resources, including GTF gene annotation files.
+      homepage: https://www.ensembl.org
+      documentation: https://www.ensembl.org/info/data/ftp/index.html
+      licence: ["Apache-2.0"]
+
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing reference metadata
+          e.g. [ id:'homo_sapiens', organism:'Homo sapiens' ]
+    - ensembl_species:
+        type: string
+        description: |
+          Ensembl species name or Latin binomial to resolve against the Ensembl GTF tree.
+
+output:
+  gtf:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing reference metadata
+            e.g. [ id:'homo_sapiens', organism:'homo_sapiens' ]
+      - "*.annotation.gtf.gz":
+          type: file
+          description: Ensembl gene annotation in GTF format
+          pattern: "*.annotation.gtf.gz"
+          ontologies:
+            - edam: "http://edamontology.org/format_2306"
+            - edam: "http://edamontology.org/format_3989"
+  source_urls:
+    - "ensembl_source_url.txt":
+        type: file
+        description: Text file listing the Ensembl GTF URL used for download
+        pattern: "ensembl_source_url.txt"
+        ontologies:
+          - edam: "http://edamontology.org/format_2330"
+  versions:
+    - "versions.yml":
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies: []
+
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"

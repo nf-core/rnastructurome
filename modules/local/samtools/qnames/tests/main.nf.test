@@ -1,0 +1,37 @@
+nextflow_process {
+
+    name "Test Process SAMTOOLS_QNAMES"
+    script "../main.nf"
+    process "SAMTOOLS_QNAMES"
+
+    tag "modules"
+    tag "modules_local"
+    tag "samtools"
+    tag "samtools/qnames"
+    config "./nextflow.config"
+
+    test("samtools_qnames - stub produces qnames file and versions") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'test', single_end:false ],
+                    file("${projectDir}/modules/local/samtools/qnames/tests/fixtures/placeholder.bam", checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.qnames.size() == 1 },
+                { assert process.out.qnames[0][1].toString().endsWith('.qnames.txt') },
+                { assert process.out.versions_samtools[0][1] == 'samtools' && process.out.versions_samtools[0][2] }
+            )
+        }
+    }
+}

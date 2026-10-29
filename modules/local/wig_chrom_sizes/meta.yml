@@ -1,0 +1,47 @@
+name: "wig_chrom_sizes"
+description: Derive a chrom.sizes file from a WIG track using a helper Python script
+keywords:
+  - wig
+  - chrom.sizes
+  - chromosome
+  - bigwig
+  - genome
+tools:
+  - "python":
+      description: "Python helper script that scans a WIG file and writes per-chromosome sizes."
+      homepage: "https://www.python.org"
+      documentation: "https://docs.python.org/3/"
+      licence: ["PSF-2.0"]
+      identifier: ""
+
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. `[ id:'sample1' ]`
+    - wig:
+        type: file
+        description: WIG track file to derive chromosome sizes from
+        pattern: "*.{wig,wig.gz}"
+output:
+  - sizes:
+      - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1' ]`
+      - "${prefix}.chrom.sizes":
+          type: file
+          description: Tab-delimited chromosome name and length file
+          pattern: "*.chrom.sizes"
+  - versions:
+      - "versions.yml":
+          type: file
+          description: File containing software versions
+          pattern: "versions.yml"
+
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"

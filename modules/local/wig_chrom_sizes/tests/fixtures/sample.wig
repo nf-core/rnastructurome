@@ -1,0 +1,9 @@
+track type=wiggle_0
+fixedStep chrom=TX1 start=1 step=1
+0.5
+1.2
+0.8
+variableStep chrom=TX2
+1 4.0
+50 2.0
+100 1.0

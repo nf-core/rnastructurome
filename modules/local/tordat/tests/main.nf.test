@@ -1,0 +1,131 @@
+nextflow_process {
+
+    name "Test Process RNAFRAMEWORK_TORDAT"
+    script "../main.nf"
+    process "RNAFRAMEWORK_TORDAT"
+
+    tag "modules"
+    tag "modules_local"
+    tag "tordat"
+    config "./nextflow.config"
+
+    test("tordat - produces rdat from xml and dotbracket") {
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group1' ],
+                    file("${projectDir}/modules/local/tordat/tests/fixtures/xml/TX1.xml", checkIfExists: true),
+                    file("${projectDir}/modules/local/tordat/tests/fixtures/fold_group", type: 'dir', checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.rdat.size() == 1 },
+                {
+                    def rdatOut = process.out.rdat[0][1]
+                    def fileList = rdatOut instanceof List ? rdatOut : [rdatOut]
+                    assert fileList.size() == 1
+                    def lines = path(fileList[0].toString()).text.readLines()
+                    assert lines.any { it == 'NAME\tTX1' }
+                    assert lines.any { it == 'SEQUENCE\tACGUACGUAC' }
+                    assert lines.any { it == 'STRUCTURE\t(((....)))' }
+                    assert lines.any { it.startsWith('REACTIVITY\t') }
+                    def reactLine = lines.find { it.startsWith('REACTIVITY\t') }
+                    def values = reactLine.tokenize('\t')[1].split(' ')
+                    assert values[0] == '0.1'
+                    assert values[2] == 'NaN'
+                    assert values[9] == '1'
+                    assert !lines.any { it.startsWith('REACTIVITY_ERROR\t') }
+                },
+                {
+                    // Structure pairs only: 4-7 is in the dot plot but not the structure, 3-8 the reverse.
+                    def bpp = path(process.out.bpp[0][1].toString()).text.readLines()
+                    assert bpp == [ 'i\tj\tprobability', '1\t10\t0.9', '2\t9\t0.5', '3\t8\tNaN' ]
+                },
+                { assert process.out.versions_python[0][1] == 'python' && process.out.versions_python[0][2] }
+            )
+        }
+    }
+
+    test("tordat - aggregates replicate xml reactivities and writes standard error") {
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group1' ],
+                    [
+                        file("${projectDir}/modules/local/tordat/tests/fixtures/xml/rep1/TX1.xml", checkIfExists: true),
+                        file("${projectDir}/modules/local/tordat/tests/fixtures/xml/rep2/TX1.xml", checkIfExists: true)
+                    ],
+                    file("${projectDir}/modules/local/tordat/tests/fixtures/fold_group", type: 'dir', checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.rdat.size() == 1 },
+                {
+                    def rdatOut = process.out.rdat[0][1]
+                    def fileList = rdatOut instanceof List ? rdatOut : [rdatOut]
+                    assert fileList.size() == 1
+                    def lines = path(fileList[0].toString()).text.readLines()
+                    def reactLine = lines.find { it.startsWith('REACTIVITY\t') }
+                    def reactErrLine = lines.find { it.startsWith('REACTIVITY_ERROR\t') }
+                    assert reactLine
+                    assert reactErrLine
+
+                    def reactValues = reactLine.tokenize('\t')[1].split(' ')
+                    assert reactValues[0] == '0.15'
+                    assert reactValues[1] == '0.2'
+                    assert reactValues[2] == '0.3'
+                    assert reactValues[3] == '0.5'
+                    assert reactValues[8] == '1'
+                    assert reactValues[9] == '0.95'
+
+                    def errorValues = reactErrLine.tokenize('\t')[1].split(' ')
+                    assert errorValues[0] == '0.05'
+                    assert errorValues[1] == 'NaN'
+                    assert errorValues[2] == 'NaN'
+                    assert errorValues[3] == '0.1'
+                    assert errorValues[8] == '0.1'
+                    assert errorValues[9] == '0.05'
+                },
+                { assert process.out.versions_python[0][1] == 'python' && process.out.versions_python[0][2] }
+            )
+        }
+    }
+
+    test("tordat - stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'group1' ],
+                    file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta', checkIfExists: true),
+                    file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta', checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.rdat.size() == 1 }
+            )
+        }
+    }
+}

@@ -1,0 +1,105 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "PREPARE_REFERENCES"
+description: Resolve and fetch reference genomes/transcriptomes and GTFs (Ensembl, NCBI, or local FASTA), sort FASTAs, and build STAR/Bowtie/Bowtie2 indices for the resolved references.
+keywords:
+  - reference
+  - genome
+  - index
+  - star
+  - bowtie
+  - rnastructurome
+components:
+  - bowtie/build
+  - bowtie2/build
+  - collecttomap
+  - ensembl/genome
+  - ensembl/gtf
+  - ensembl/transcriptome
+  - fasta/sanitize
+  - fasta/sort
+  - gffread
+  - gtf/sanitize
+  - ncbi/fasta
+  - ncbi/gtf
+  - resolvereferencekey
+  - resolvereferenceresolution
+  - samtools/faidx
+  - star/genomegenerate
+  - uniquereferenceresolution
+input:
+  - ch_samplesheet_for_branching:
+      type: channel
+      description: |
+        Reads after lane concatenation, used to determine which references are needed. Structure: [ val(meta), [ reads ] ]
+  - transcriptome:
+      type: boolean
+      description: |
+        Whether the transcriptome (Bowtie) route is in use, including auto-detection
+        performed by the entry workflow. All other settings are read from params.
+output:
+  - fasta_map:
+      type: map
+      description: |
+        Value map of reference_key -> [ val(meta), path(fasta) ].
+  - gtf_map:
+      type: map
+      description: |
+        Value map of reference_key -> [ val(meta), path(gtf) ].
+  - all_gtf:
+      type: channel
+      description: |
+        All reference GTFs. Structure: [ val(meta), path(gtf) ]
+  - genome_fasta_keyed:
+      type: channel
+      description: |
+        Genome FASTA keyed by reference. Structure: [ key, [ val(meta), path(fasta) ] ]
+  - genome_transcript_fasta_map:
+      type: map
+      description: |
+        Value map of reference_key -> [ val(meta), path(fasta) ]. Spliced transcript FASTA extracted
+        from the genome FASTA + GTF via gffread (genome route, count_genome=false only).
+  - genome_transcript_fasta_fai_map:
+      type: map
+      description: |
+        Value map of reference_key -> [ val(meta), path(fasta), path(fai) ]. Same transcript FASTA as
+        genome_transcript_fasta_map, plus its samtools faidx index (genome route, count_genome=false only).
+  - star_index:
+      type: channel
+      description: |
+        STAR index (genome route). Structure: [ val(meta), path(index) ]
+  - bowtie_index_map:
+      type: map
+      description: |
+        Value map of reference_key -> [ val(meta), path(index) ] for Bowtie.
+  - bowtie2_index_map:
+      type: map
+      description: |
+        Value map of reference_key -> [ val(meta), path(index) ] for Bowtie2.
+  - ensembl_fasta_source_url:
+      type: channel
+      description: |
+        Ensembl FASTA source URL provenance. Structure: [ val(meta), path(urls) ]
+  - gtf_local:
+      type: channel
+      description: |
+        Locally provided GTF. Structure: [ val(meta), path(gtf) ]
+  - local_fasta_sorted:
+      type: channel
+      description: |
+        Sorted FASTA for the --fasta route. Structure: [ val(meta), path(fasta) ]
+  - ncbi_source_accessions:
+      type: channel
+      description: |
+        NCBI source accessions provenance. Structure: [ val(meta), path(acc) ]
+  - ensembl_gtf_source_urls:
+      type: channel
+      description: |
+        Ensembl GTF source URL provenance; empty when --stop_after_jackknife with transcriptome. Structure: [ val(meta), path(urls) ]
+  - versions:
+      type: channel
+      description: |
+        Collected software version files. Structure: [ path(versions.yml) ]
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"

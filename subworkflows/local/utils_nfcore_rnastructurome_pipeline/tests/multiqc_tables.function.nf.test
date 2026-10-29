@@ -1,0 +1,60 @@
+nextflow_function {
+
+    name "MultiQC table builders (row-shape normalisation)"
+    script "../main.nf"
+
+    // buildSimpleMultiqcTable is exercised via rffoldStatsMultiqc.
+
+    test("rffoldStatsMultiqc: single flattened [id, map] row") {
+        function "rffoldStatsMultiqc"
+        when { function { """ input[0] = [ 'HEK293T', [ folded: 12L, discarded: 3L ] ] """ } }
+        then {
+            assert function.success
+            assert function.result.contains('  HEK293T:')
+            assert function.result.contains('    folded: 12')
+            assert function.result.contains('    discarded: 3')
+        }
+    }
+
+    test("rffoldStatsMultiqc: flattened multi-row [id,map,id,map] sorts by id") {
+        function "rffoldStatsMultiqc"
+        when { function { """ input[0] = [ 'B', [ folded: 1L, discarded: 0L ], 'A', [ folded: 2L, discarded: 0L ] ] """ } }
+        then {
+            assert function.success
+            // 'A' must be rendered before 'B'
+            assert function.result.indexOf('  A:') < function.result.indexOf('  B:')
+        }
+    }
+
+    test("rffoldStatsMultiqc: nested [[id,map],...] rows") {
+        function "rffoldStatsMultiqc"
+        when { function { """ input[0] = [ [ 'A', [ folded: 2L, discarded: 0L ] ], [ 'B', [ folded: 1L, discarded: 0L ] ] ] """ } }
+        then {
+            assert function.success
+            assert function.result.contains('  A:')
+            assert function.result.contains('  B:')
+        }
+    }
+
+    test("countProgressionMultiqc: BigDecimal pct formatted to 2dp") {
+        function "countProgressionMultiqc"
+        when { function { """ input[0] = [ 's1', [ mapped_reads_pre_dedup: 100L, mapped_reads_post_dedup: 80L, pct_removed_by_dedup: 20.0, rfcount_covered_transcripts: 5L ] ] """ } }
+        then {
+            assert function.success
+            assert function.result.contains('  s1:')
+            assert function.result.contains('pct_removed_by_dedup: 20.00')
+        }
+    }
+
+    test("normaliseMqcRows: unrecognised shape with label errors") {
+        function "normaliseMqcRows"
+        when { function { """ input[0] = 'nonsense'; input[1] = 'count progression' """ } }
+        then { assert function.failed }
+    }
+
+    test("normaliseMqcRows: unrecognised shape without label yields empty") {
+        function "normaliseMqcRows"
+        when { function { """ input[0] = 'nonsense'; input[1] = null """ } }
+        then { assert function.success; assert function.result == [] }
+    }
+}

@@ -1,0 +1,39 @@
+name: merge_shannon_wig
+description: Merge per-transcript Shannon entropy WIG files into a single combined WIG file
+keywords:
+  - wig
+  - shannon
+  - entropy
+  - rnaframework
+tools:
+  - bash:
+      description: Bash shell used to concatenate per-transcript WIG files
+      homepage: https://www.gnu.org/software/bash/
+      documentation: https://www.gnu.org/software/bash/manual/
+      licence: ["GPL-3.0-or-later"]
+input:
+  - - meta:
+        type: map
+        description: Groovy Map containing group metadata (e.g. sample_group, condition)
+    - wig:
+        type: file
+        description: One or more per-transcript Shannon entropy WIG files
+        pattern: "*.wig"
+output:
+  merged_wig:
+    - - meta:
+          type: map
+          description: Groovy Map containing group metadata
+      - "*.merged.wig":
+          type: file
+          description: Combined Shannon entropy WIG file
+          pattern: "*.merged.wig"
+  versions:
+    - "versions.yml":
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"

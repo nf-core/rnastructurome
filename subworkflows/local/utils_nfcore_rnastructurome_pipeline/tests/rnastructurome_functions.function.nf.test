@@ -1,0 +1,369 @@
+nextflow_function {
+
+    name "rnastructurome pure helper functions"
+    script "../main.nf"
+
+    test("resolveReferenceKey normalises a binomial organism") {
+        function "resolveReferenceKey"
+        when { function { """ input[0] = [ id: 's1', organism: 'Homo sapiens' ] """ } }
+        then { assert function.success; assert function.result == 'homo_sapiens' }
+    }
+
+    test("resolveReferenceKey falls back to --organism") {
+        function "resolveReferenceKey"
+        when {
+            params { organism = 'mus_musculus' }
+            function { """ input[0] = [ id: 's2' ] """ }
+        }
+        then { assert function.success; assert function.result == 'mus_musculus' }
+    }
+
+    test("resolveRfNormNormMethod default depends on scoring method") {
+        function "resolveRfNormNormMethod"
+        when { function { """ input[0] = 2 """ } }
+        then { assert function.success; assert function.result == 2 }
+    }
+
+    test("resolveRfNormNormMethod default for non-2 scoring method is 3") {
+        function "resolveRfNormNormMethod"
+        when { function { """ input[0] = 1 """ } }
+        then { assert function.success; assert function.result == 3 }
+    }
+
+    test("resolveRfNormNormMethod allows the 2-8% override") {
+        function "resolveRfNormNormMethod"
+        when {
+            params { rfnorm_norm_method = 1 }
+            function { """ input[0] = 1 """ }
+        }
+        then { assert function.success; assert function.result == 1 }
+    }
+
+    test("renderRfNormSummary forces norm method 4 under four-base DMS even when another is set") {
+        function "renderRfNormSummary"
+        when {
+            params { four_base_dms = true; rfnorm_norm_method = 3 }
+            function { """ input[0] = [ principles: ['MaP'], conditions: ['treated', 'untreated'], methods: ['DMS'], pH: 8.0 ] """ }
+        }
+        then { assert function.success; assert function.result.rfnorm_args.contains('-nm 4 ') }
+    }
+
+    test("renderRfNormSummary defaults to norm method 4 under four-base DMS") {
+        function "renderRfNormSummary"
+        when {
+            params { four_base_dms = true }
+            function { """ input[0] = [ principles: ['MaP'], conditions: ['treated', 'untreated'], methods: ['DMS'], pH: 8.0 ] """ }
+        }
+        then { assert function.success; assert function.result.rfnorm_args.contains('-nm 4 ') }
+    }
+
+    test("checkFourBaseDmsOptions rejects Ding or Rouskin scoring when any sample is four-base DMS") {
+        function "checkFourBaseDmsOptions"
+        when {
+            params { four_base_dms = true; rfnorm_score_method = 2 }
+            function { """ input[0] = [ [ principle: 'RT-stop', method: 'SHAPE', pH: 7.5 ], [ principle: 'MaP', method: 'DMS', pH: 8.5 ] ] """ }
+        }
+        then { assert function.failed }
+    }
+
+    test("checkFourBaseDmsOptions allows Ding scoring when no sample is four-base DMS") {
+        function "checkFourBaseDmsOptions"
+        when {
+            params { four_base_dms = true; rfnorm_score_method = 1 }
+            function { """ input[0] = [ [ principle: 'MaP', method: 'DMS', pH: 7.5 ] ] """ }
+        }
+        then { assert function.success }
+    }
+
+    test("parseInputSamplesheetMetadata reads pH from the samplesheet") {
+        function "parseInputSamplesheetMetadata"
+        when {
+            function {
+                """
+                def sheet = new File("$outputDir/ph.csv")
+                sheet.text = 'sample,fastq_1,method,principle,condition,pH\\ns1,r1.fq.gz,DMS,MaP,treated,8.5\\ns2,r2.fq.gz,DMS,MaP,untreated,9\\n'
+                input[0] = sheet.toString()
+                """
+            }
+        }
+        then { assert function.success; assert function.result.pH == 8.5 }
+    }
+
+    test("parseInputSamplesheetMetadata falls back to --pH for a sample with no pH") {
+        function "parseInputSamplesheetMetadata"
+        when {
+            params { pH = 8.2 }
+            function {
+                """
+                def sheet = new File("$outputDir/ph.csv")
+                sheet.text = 'sample,fastq_1,method,principle,condition,pH\\ns1,r1.fq.gz,DMS,MaP,treated,\\ns2,r2.fq.gz,DMS,MaP,untreated,9\\n'
+                input[0] = sheet.toString()
+                """
+            }
+        }
+        then { assert function.success; assert function.result.pH == 8.2 }
+    }
+
+    test("isFourBaseDms is on for DMS-MaP at pH 8") {
+        function "isFourBaseDms"
+        when {
+            params { four_base_dms = true }
+            function { """ input[0] = [ principle: 'MaP', method: 'DMS', pH: 8.0 ] """ }
+        }
+        then { assert function.success; assert function.result == true }
+    }
+
+    test("isFourBaseDms is off below pH 8") {
+        function "isFourBaseDms"
+        when {
+            params { four_base_dms = true }
+            function { """ input[0] = [ principle: 'MaP', method: 'DMS', pH: 7.5 ] """ }
+        }
+        then { assert function.success; assert function.result == false }
+    }
+
+    test("isFourBaseDms is off for RT-stop DMS") {
+        function "isFourBaseDms"
+        when {
+            params { four_base_dms = true }
+            function { """ input[0] = [ principle: 'RT-stop', method: 'DMS', pH: 8.0 ] """ }
+        }
+        then { assert function.success; assert function.result == false }
+    }
+
+    test("isFourBaseDms is off without a pH") {
+        function "isFourBaseDms"
+        when {
+            params { four_base_dms = true }
+            function { """ input[0] = [ principle: 'MaP', method: 'DMS', pH: null ] """ }
+        }
+        then { assert function.success; assert function.result == false }
+    }
+
+    test("isFourBaseDms ignores the case of principle and method") {
+        function "isFourBaseDms"
+        when {
+            params { four_base_dms = true }
+            function { """ input[0] = [ principle: 'map', method: 'dms', pH: 8.0 ] """ }
+        }
+        then { assert function.success; assert function.result == true }
+    }
+
+    test("isFourBaseDms is off with --four_base_dms false") {
+        function "isFourBaseDms"
+        when {
+            params { four_base_dms = false }
+            function { """ input[0] = [ principle: 'MaP', method: 'DMS', pH: 8.0 ] """ }
+        }
+        then { assert function.success; assert function.result == false }
+    }
+
+    test("markdupEnabled is off by default") {
+        function "markdupEnabled"
+        then { assert function.success; assert function.result == false }
+    }
+
+    test("markdupEnabled follows --markdup") {
+        function "markdupEnabled"
+        when { params { markdup = true } }
+        then { assert function.success; assert function.result == true }
+    }
+
+    test("markdupEnabled inverts the deprecated --skip_markdup") {
+        function "markdupEnabled"
+        when { params { skip_markdup = false } }
+        then { assert function.success; assert function.result == true }
+    }
+
+    test("exactUntreatedPairing is off by default") {
+        function "exactUntreatedPairing"
+        then { assert function.success; assert function.result == false }
+    }
+
+    test("exactUntreatedPairing inverts the deprecated --fuzzy_untreated_pairing") {
+        function "exactUntreatedPairing"
+        when { params { fuzzy_untreated_pairing = false } }
+        then { assert function.success; assert function.result == true }
+    }
+
+    test("resolveRfNormScoreMethod defaults by principle and untreated control") {
+        function "resolveRfNormScoreMethod"
+        when { function { """ input[0] = 'rt-stop'; input[1] = true """ } }
+        then { assert function.success; assert function.result == 1 }
+    }
+
+    test("resolveRfNormScoreMethod allows explicit scoring override") {
+        function "resolveRfNormScoreMethod"
+        when {
+            params { rfnorm_score_method = 2 }
+            function { """ input[0] = 'rt-stop'; input[1] = true """ }
+        }
+        then { assert function.success; assert function.result == 2 }
+    }
+
+    test("resolveRfNormScoreMethod rejects unsupported scoring override") {
+        function "resolveRfNormScoreMethod"
+        when {
+            params { rfnorm_score_method = 99 }
+            function { """ input[0] = 'rt-stop'; input[1] = true """ }
+        }
+        then { assert function.failed }
+    }
+
+    test("rfNormScoringLabel maps known codes") {
+        function "rfNormScoringLabel"
+        when { function { """ input[0] = 1 """ } }
+        then { assert function.success; assert function.result == 'Ding' }
+    }
+
+    test("rfNormNormLabel maps known codes") {
+        function "rfNormNormLabel"
+        when { function { """ input[0] = 3 """ } }
+        then { assert function.success; assert function.result == 'Box-plot normalisation' }
+    }
+
+    test("resolveReferenceResolution fasta: local --fasta wins (genome route)") {
+        function "resolveReferenceResolution"
+        when {
+            params { transcriptome = false; fasta = '/x.fa' }
+            function { """ input[0] = [ id: 's', organism: 'homo_sapiens' ]; input[1] = 'fasta' """ }
+        }
+        then { assert function.success; assert function.result == [ 'homo_sapiens', 'path::/x.fa', 'homo_sapiens' ] }
+    }
+
+    test("resolveReferenceResolution fasta: defaults to ensembl by key") {
+        function "resolveReferenceResolution"
+        when {
+            params { fasta = null; gtf = null }
+            function { """ input[0] = [ id: 's', organism: 'homo_sapiens' ]; input[1] = 'fasta' """ }
+        }
+        then { assert function.success; assert function.result == [ 'homo_sapiens', 'ensembl::homo_sapiens', 'homo_sapiens' ] }
+    }
+
+    test("resolveReferenceResolution fasta: ensembl_species_map maps alias") {
+        function "resolveReferenceResolution"
+        when {
+            params { fasta = null; gtf = null; ensembl_species_map = [ human: 'homo_sapiens' ] }
+            function { """ input[0] = [ id: 's', organism: 'human' ]; input[1] = 'fasta' """ }
+        }
+        then { assert function.success; assert function.result == [ 'human', 'ensembl::homo_sapiens', 'human' ] }
+    }
+
+    test("resolveReferenceResolution fasta: ncbi accessions list joins") {
+        function "resolveReferenceResolution"
+        when {
+            params { fasta = null; gtf = null; ncbi_accessions_map = [ ec: [ 'X1', 'X2' ] ] }
+            function { """ input[0] = [ id: 's', organism: 'ec' ]; input[1] = 'fasta' """ }
+        }
+        then { assert function.success; assert function.result == [ 'ec', 'ncbi::X1,X2', 'ec' ] }
+    }
+
+    test("resolveReferenceResolution gtf: --gtf path wins") {
+        function "resolveReferenceResolution"
+        when {
+            params { gtf = '/a.gtf' }
+            function { """ input[0] = [ id: 's', organism: 'homo_sapiens' ]; input[1] = 'gtf' """ }
+        }
+        then { assert function.success; assert function.result == [ 'homo_sapiens', 'path::/a.gtf', 'homo_sapiens' ] }
+    }
+
+    test("resolveReferenceResolution gtf: ncbi accessions yield none:: (synthetic GTF)") {
+        function "resolveReferenceResolution"
+        when {
+            params { fasta = null; gtf = null; ncbi_accessions_map = [ ec: 'X1' ] }
+            function { """ input[0] = [ id: 's', organism: 'ec' ]; input[1] = 'gtf' """ }
+        }
+        then { assert function.success; assert function.result == [ 'ec', 'none::', 'ec' ] }
+    }
+
+    test("renderBowtie1Args renders deterministic default args") {
+        function "renderBowtie1Args"
+        when {
+            params {
+                bowtie_all = true
+                bowtie_k = 1
+                bowtie_trim5 = 0
+                bowtie_trim3 = 0
+                bowtie_v = null
+                bowtie_n = 2
+                bowtie_max = 1
+                bowtie_chunkmbs = 512
+            }
+        }
+        then {
+            assert function.success
+            assert function.result == '-a -l 28 -n 2 --best --strata --chunkmbs 512'
+        }
+    }
+
+    test("sharedGroupPrefixLength counts leading tokens in common") {
+        function "sharedGroupPrefixLength"
+        when { function { """ input[0] = 'HFF_infected_HCMV_05hpi'; input[1] = 'HFF_infected_HCMV_72hpi' """ } }
+        then { assert function.success; assert function.result == 3 }
+    }
+
+    test("sharedGroupPrefixLength separates the arms of an infection timecourse") {
+        function "sharedGroupPrefixLength"
+        when { function { """ input[0] = 'HFF_infected_HCMV_05hpi'; input[1] = 'HFF_uninfected' """ } }
+        then { assert function.success; assert function.result == 1 }
+    }
+
+    test("sharedGroupPrefixLength keeps the cell-line fallback working") {
+        function "sharedGroupPrefixLength"
+        when { function { """ input[0] = 'MDA-MB-231_MTX'; input[1] = 'MDA-MB-231_DMSO' """ } }
+        then { assert function.success; assert function.result == 1 }
+    }
+
+    test("sharedGroupPrefixLength returns the whole list when one group is a prefix of the other") {
+        function "sharedGroupPrefixLength"
+        when { function { """ input[0] = 'HEK293T'; input[1] = 'HEK293T_MTX' """ } }
+        then { assert function.success; assert function.result == 1 }
+    }
+
+    test("sharedGroupPrefixLength is zero for unrelated groups") {
+        function "sharedGroupPrefixLength"
+        when { function { """ input[0] = 'K562_invitro'; input[1] = 'HEK293T' """ } }
+        then { assert function.success; assert function.result == 0 }
+    }
+
+    test("sharedGroupPrefixLength does not match on a partial token") {
+        function "sharedGroupPrefixLength"
+        when { function { """ input[0] = 'HFF_infected'; input[1] = 'HFFX_infected' """ } }
+        then { assert function.success; assert function.result == 0 }
+    }
+    test("selectClosestControl prefers the candidate sharing the most of the group name") {
+        function "selectClosestControl"
+        when { function { """ input[0] = 'untreated'; input[1] = 'HFF_HCMV_05hpi_1'; input[2] = [ [ prefix: 1, same_replicate: true, control_group: 'HFF_uninfected_1', rc: 'HFF_uninfected_1.rc' ], [ prefix: 2, same_replicate: true, control_group: 'HFF_HCMV_72hpi_1', rc: 'HFF_HCMV_72hpi_1.rc' ] ] """ } }
+        then { assert function.success; assert function.result == [ 'HFF_HCMV_05hpi_1', 'HFF_HCMV_72hpi_1.rc' ] }
+    }
+
+    test("selectClosestControl prefers the same replicate among equally close candidates") {
+        function "selectClosestControl"
+        when { function { """ input[0] = 'untreated'; input[1] = 'A_x_2'; input[2] = [ [ prefix: 1, same_replicate: false, control_group: 'A_y_1', rc: 'A_y_1.rc' ], [ prefix: 1, same_replicate: true, control_group: 'A_z_2', rc: 'A_z_2.rc' ] ] """ } }
+        then { assert function.success; assert function.result == [ 'A_x_2', 'A_z_2.rc' ] }
+    }
+
+    test("selectClosestControl reuses a lone control across replicates") {
+        function "selectClosestControl"
+        when { function { """ input[0] = 'untreated'; input[1] = 'HFF_uninfected_2'; input[2] = [ [ prefix: 2, same_replicate: false, control_group: 'HFF_uninfected_1', rc: 'HFF_uninfected_1.rc' ], [ prefix: 1, same_replicate: false, control_group: 'HFF_HCMV_72hpi_1', rc: 'HFF_HCMV_72hpi_1.rc' ] ] """ } }
+        then { assert function.success; assert function.result == [ 'HFF_uninfected_2', 'HFF_uninfected_1.rc' ] }
+    }
+
+    test("selectClosestControl errors on a tie at the same replicate for untreated") {
+        function "selectClosestControl"
+        when { function { """ input[0] = 'untreated'; input[1] = 'A_z_1'; input[2] = [ [ prefix: 1, same_replicate: true, control_group: 'A_x_1', rc: 'A_x_1.rc' ], [ prefix: 1, same_replicate: true, control_group: 'A_y_1', rc: 'A_y_1.rc' ] ] """ } }
+        then { assert function.failed }
+    }
+
+    test("selectClosestControl errors on a tie at the same replicate for denatured too") {
+        function "selectClosestControl"
+        when { function { """ input[0] = 'denatured'; input[1] = 'A_z_1'; input[2] = [ [ prefix: 1, same_replicate: true, control_group: 'A_x_1', rc: 'A_x_1.rc' ], [ prefix: 1, same_replicate: true, control_group: 'A_y_1', rc: 'A_y_1.rc' ] ] """ } }
+        then { assert function.failed }
+    }
+
+    test("selectClosestControl returns nothing when two arms are equally distant") {
+        function "selectClosestControl"
+        when { function { """ input[0] = 'untreated'; input[1] = 'A_z_3'; input[2] = [ [ prefix: 1, same_replicate: false, control_group: 'A_x_1', rc: 'A_x_1.rc' ], [ prefix: 1, same_replicate: false, control_group: 'A_y_2', rc: 'A_y_2.rc' ] ] """ } }
+        then { assert function.success; assert function.result == [ 'A_z_3', null ]; assert path("$metaDir/nextflow.log").text.contains("No untreated for 'A_z_3'") }
+    }
+}

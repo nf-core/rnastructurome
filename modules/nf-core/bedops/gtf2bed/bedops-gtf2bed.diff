@@ -1,0 +1,20 @@
+Changes in component 'nf-core/bedops/gtf2bed'
+'modules/nf-core/bedops/gtf2bed/environment.yml' is unchanged
+'modules/nf-core/bedops/gtf2bed/meta.yml' is unchanged
+Changes in 'bedops/gtf2bed/main.nf':
+--- modules/nf-core/bedops/gtf2bed/main.nf
++++ modules/nf-core/bedops/gtf2bed/main.nf
+@@ -22,8 +22,7 @@
+     def prefix = task.ext.prefix ?: "${gtf.baseName}"
+ 
+     """
+-    cat \\
+-    $gtf \\
++    awk -F'\\t' '\$3 == "exon"' ${gtf} \\
+     | gtf2bed \\
+     $args \\
+     --attribute-key=exon_id \\
+
+'modules/nf-core/bedops/gtf2bed/tests/main.nf.test.snap' is unchanged
+'modules/nf-core/bedops/gtf2bed/tests/main.nf.test' is unchanged
+************************************************************

@@ -1,0 +1,2 @@
+chr1	ensembl	exon	101	150	.	+	.	gene_id "GENE1"; transcript_id "ENST000001";
+chr1	ensembl	exon	201	250	.	+	.	gene_id "GENE1"; transcript_id "ENST000001";

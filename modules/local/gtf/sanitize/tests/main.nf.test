@@ -1,0 +1,42 @@
+nextflow_process {
+
+    name "Test Process GTF_SANITIZE"
+    script "../main.nf"
+    process "GTF_SANITIZE"
+
+    tag "modules"
+    tag "modules_local"
+    tag "gtf"
+    tag "gtf/sanitize"
+    config "./nextflow.config"
+
+    test("strips parenthesised and other unsafe characters from transcript_id/gene_id") {
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'saccharomyces_cerevisiae', organism:'saccharomyces_cerevisiae' ],
+                    file("${projectDir}/modules/local/gtf/sanitize/tests/fixtures/unsanitized.gtf", checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.gtf.size() == 1 },
+                {
+                    def gtfText = path(process.out.gtf[0][1]).text
+                    assert gtfText.contains('transcript_id "tK_UUU_K_tRNA"')
+                    assert gtfText.contains('gene_id "tK_UUU_K"')
+                    assert gtfText.contains('transcript_id "YNL042W-B.1_mRNA"')
+                    assert gtfText.contains('note "keep(this)"')
+                    assert gtfText.startsWith('#!genome-build R64\n')
+                },
+                { assert process.out.versions_python[0][1] == 'python' && process.out.versions_python[0][2] }
+            )
+        }
+    }
+}

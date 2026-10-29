@@ -1,0 +1,40 @@
+name: rnaframework_wiggle
+description: Convert RNAFramework XML reactivity files to WIG format using rf-wiggle
+keywords:
+  - rnaframework
+  - wig
+  - reactivity
+  - xml
+tools:
+  - rnaframework:
+      description: RNAFramework is a modular toolkit for the analysis of RNA structure probing data
+      homepage: https://rnaframework-docs.readthedocs.io/
+      documentation: https://rnaframework-docs.readthedocs.io/en/latest/rf-wiggle/
+      tool_dev_url: https://github.com/dincarnato/RNAFramework
+      licence: ["GPL-3.0-or-later"]
+input:
+  - - meta:
+        type: map
+        description: Groovy Map containing sample metadata (e.g. id, condition, replicate)
+    - xml:
+        type: file
+        description: RNAFramework XML reactivity file(s)
+        pattern: "*.xml"
+output:
+  wig:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample metadata
+      - "${prefix}_wiggle/*.wig":
+          type: file
+          description: Per-transcript WIG reactivity tracks
+          pattern: "*.wig"
+  versions:
+    - "versions.yml":
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+authors:
+  - "@vicbeg"
+maintainers:
+  - "@vicbeg"
