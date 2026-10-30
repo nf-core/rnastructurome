@@ -3,6 +3,18 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.1.1dev - [unreleased]
+
+### `Added`
+
+### `Fixed`
+
+- A gzipped local `--gtf` now goes through `GTF_SANITIZE`, which writes it out as plain text, for every organism. Before, only yeast did, so on the genome route gffread wrote an empty transcript FASTA and STAR rejected the GTF.
+
+### `Dependencies`
+
+### `Deprecated`
+
 ## v1.1.0 - Copper Hairpin - [22 October 2026]
 
 Contributors: @Vicbeg. Reviewers: @vagkaratzas, @piplus2, @nschan, @d4straub.

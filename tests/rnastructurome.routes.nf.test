@@ -92,4 +92,39 @@ nextflow_workflow {
             )
         }
     }
+
+    test("Decompresses a gzipped GTF before gffread for an organism that needs no ID sanitising") {
+
+        options "-stub"
+
+        when {
+            params {
+                outdir       = "$outputDir"
+                gtf          = "$projectDir/modules/local/ensembl/gtf/tests/fixtures/ensembl/pub/current_gtf/homo_sapiens/Homo_sapiens.test.115.gtf.gz"
+                // the default genome route, where gffread cuts the transcript FASTA from the genome and GTF
+                count_genome = false
+            }
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id:'workflow_rtstop', sample_id:'workflow_rtstop', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'workflow_line', replicate:'rep1', condition:'treated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ]
+                )
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            def versions = path("${outputDir}/pipeline_info/nf_core_rnastructurome_software_mqc_versions.yml").text
+            assertAll(
+                { assert workflow.success },
+                // gffread and STAR cannot read gzip, so the human GTF must pass through GTF_SANITIZE, which writes plain text.
+                { assert versions.contains('GTF_SANITIZE') },
+                { assert versions.contains('GFFREAD') }
+            )
+        }
+    }
 }

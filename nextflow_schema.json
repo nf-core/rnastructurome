@@ -456,8 +456,8 @@
                 "rfcount_map_max_coverage": {
                     "type": "integer",
                     "minimum": 1000,
-                    "description": "In mutation mode (`-m`), downsample each transcript above this coverage in rf-count (`--max-coverage`). Unset means off. Ignored with `--count_genome true`.",
-                    "help_text": "rf-count counts one transcript at a time, so a transcript at extreme depth (mitochondrial transcripts, or a viral genome at ~10^6x) can take days. Only transcripts above the cap are downsampled. 20000 is recommended. When set, rf-count also skips reads that start within one read length of each transcript's 3' end."
+                    "description": "In mutation mode (`-m`), downsample reads in rf-count (`--max-coverage`) towards this mean coverage. Unset means off; leave it unset for small RNAs. Ignored with `--count_genome true`.",
+                    "help_text": "rf-count counts one transcript at a time, so a transcript at extreme depth (mitochondrial transcripts, or a viral genome at ~10^6x) can take days. 20000 is recommended for long transcripts. Once set, it applies to every transcript: rf-count skips reads that start within one median read length of each transcript's 3' end and keeps at most a fixed number of reads per start position. On transcripts close to the read length, such as tRNAs and other small RNAs, this discards most reads and can leave the 3' part without coverage, so leave it unset for small-RNA libraries."
                 },
                 "rfcount_paired_only": {
                     "type": "boolean",
