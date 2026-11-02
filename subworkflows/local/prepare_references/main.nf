@@ -167,9 +167,9 @@ workflow PREPARE_REFERENCES {
 
     // Strip regex/shell-unsafe characters from transcript_id/gene_id (e.g. yeast tRNA IDs like
     // tK(UUU)K) that hang RNAframework's XML parser; single source feeding ch_reference_gtf_map.
-    // Only organisms in idSanitizeOrganisms() actually need this — skip it for everything else.
-    def gtf_sanitize_branches = ch_all_reference_gtf.branch { meta, _gtf ->
-        needs_sanitize: meta.organism in idSanitizeOrganisms()
+    // Only organisms in idSanitizeOrganisms() need the ID fix; gzipped GTFs also go through, as it writes plain text for gffread and STAR.
+    def gtf_sanitize_branches = ch_all_reference_gtf.branch { meta, gtf ->
+        needs_sanitize: meta.organism in idSanitizeOrganisms() || gtf.name.endsWith('.gz')
         clean:          true
     }
 

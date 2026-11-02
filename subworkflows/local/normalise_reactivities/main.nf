@@ -84,10 +84,11 @@ workflow NORMALISE_REACTIVITIES {
                 def samples = entries.collect { entry -> "${entry.meta.id} (${resolveReferenceKey(entry.meta)})" }.sort().join(', ')
                 error("Group '${group}' spans more than one reference: ${samples}. Give each organism its own sample_group.")
             }
-            ['untreated', 'denatured'].each { control ->
-                def ids = entries.findAll { entry -> entry.condition == control }.collect { entry -> entry.meta.id }.sort()
+            // rf-norm takes one RC file per condition, so a second treated sample would be silently ignored.
+            ['treated', 'untreated', 'denatured'].each { condition ->
+                def ids = entries.findAll { entry -> entry.condition == condition }.collect { entry -> entry.meta.id }.sort()
                 if (ids.size() > 1) {
-                    error("Group '${group}' has more than one ${control} sample: ${ids.join(', ')}. Give runs of the same control the same sample name so they are concatenated.")
+                    error("Group '${group}' has more than one ${condition} sample: ${ids.join(', ')}. Give runs of the same sample the same sample name so they are concatenated.")
                 }
             }
             // Always use the treated sample's meta so principle drives scoring-method selection correctly.

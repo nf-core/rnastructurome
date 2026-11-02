@@ -22,38 +22,47 @@ import sys
 from pathlib import Path
 
 
-def parse_wig(filepath):
+HEADERS = (b"variableStep", b"fixedStep")
+
+
+def header_fields(line):
+    return dict(p.split(b"=", 1) for p in line.split() if b"=" in p)
+
+
+# Byte offsets of each chromosome's block headers, so one chromosome can be read at a time.
+def index_blocks(filepath):
+    blocks = {}
+    offset = 0
+    with filepath.open("rb") as fh:
+        for line in fh:
+            if line.startswith(HEADERS):
+                blocks.setdefault(header_fields(line)[b"chrom"].decode(), []).append(offset)
+            offset += len(line)
+    return blocks
+
+
+def read_chrom(filepath, offsets):
     data = {}
-    chrom = None
-    is_fixed = False
-    fixed_start = 1
-    fixed_step = 1
-    pos_counter = 0
-    for line in filepath.read_text().splitlines():
-        line = line.strip()
-        if not line or line.startswith("track"):
-            continue
-        if line.startswith("variableStep"):
-            parts = dict(p.split("=") for p in line.split() if "=" in p)
-            chrom = parts.get("chrom")
-            is_fixed = False
-            data.setdefault(chrom, {})
-        elif line.startswith("fixedStep"):
-            parts = dict(p.split("=") for p in line.split() if "=" in p)
-            chrom = parts.get("chrom")
-            fixed_start = int(parts.get("start", 1))
-            fixed_step = int(parts.get("step", 1))
-            is_fixed = True
-            pos_counter = 0
-            data.setdefault(chrom, {})
-        else:
-            if is_fixed:
-                pos = fixed_start + pos_counter * fixed_step
-                pos_counter += 1
-                data[chrom][pos] = float(line)
-            else:
-                p, v = line.split()
-                data[chrom][int(p)] = float(v)
+    with filepath.open("rb") as fh:
+        for offset in offsets:
+            fh.seek(offset)
+            header = fh.readline()
+            parts = header_fields(header)
+            is_fixed = header.startswith(b"fixedStep")
+            pos = int(parts.get(b"start", 1))
+            step = int(parts.get(b"step", 1))
+            for line in fh:
+                line = line.strip()
+                if not line or line.startswith(b"track"):
+                    continue
+                if line.startswith(HEADERS):
+                    break
+                if is_fixed:
+                    data[pos] = float(line)
+                    pos += step
+                else:
+                    p, v = line.split()
+                    data[int(p)] = float(v)
     return data
 
 
@@ -64,16 +73,23 @@ output_path = Path(f"{prefix}.merged.wig")
 if len(wig_files) == 1:
     output_path.write_bytes(wig_files[0].read_bytes())
 else:
-    all_data = [parse_wig(f) for f in wig_files]
-    all_chroms = set().union(*(d.keys() for d in all_data))
+    # Holding every replicate genome-wide in memory was OOM-killed at 96 GB on 6 human replicates.
+    indexes = [(f, index_blocks(f)) for f in wig_files]
+    all_chroms = set().union(*(blocks.keys() for _, blocks in indexes))
     with output_path.open("w") as fh:
         fh.write("track type=wiggle_0\\n")
         for chrom in sorted(all_chroms):
-            all_pos = set().union(*(d[chrom].keys() for d in all_data if chrom in d))
+            sums = {}
+            counts = {}
+            for f, blocks in indexes:
+                if chrom not in blocks:
+                    continue
+                for pos, val in read_chrom(f, blocks[chrom]).items():
+                    sums[pos] = sums.get(pos, 0.0) + val
+                    counts[pos] = counts.get(pos, 0) + 1
             fh.write(f"variableStep chrom={chrom}\\n")
-            for pos in sorted(all_pos):
-                vals = [d[chrom][pos] for d in all_data if chrom in d and pos in d[chrom]]
-                fh.write(f"{pos} {sum(vals)/len(vals):.6g}\\n")
+            for pos in sorted(sums):
+                fh.write(f"{pos} {sums[pos]/counts[pos]:.6g}\\n")
 PY
     """
 
