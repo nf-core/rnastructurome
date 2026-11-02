@@ -681,6 +681,45 @@ nextflow_workflow {
         }
     }
 
+    test("Fails rf-norm when a group has more than one treated sample") {
+
+        options "-stub"
+
+        when {
+            params {
+                outdir = "$outputDir"
+                fasta  = "https://raw.githubusercontent.com/nf-core/test-datasets/rnastructurome/testdata/test_transcriptome/Homo_sapiens.GRCh38.ENST00000389680.fa"
+            }
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [ id:'hek_treated_a', sample_id:'hek_treated_a', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'hek293T', replicate:'rep1', condition:'treated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_treated_r1.fastq.gz', checkIfExists: true) ]
+                    ],
+                    [
+                        [ id:'hek_treated_b', sample_id:'hek_treated_b', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'hek293T', replicate:'rep1', condition:'treated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_treated_r1.fastq.gz', checkIfExists: true) ]
+                    ],
+                    [
+                        [ id:'hek_untreated_rep1', sample_id:'hek_untreated_rep1', principle:'RT-stop', organism:'Homo sapiens', single_end:true, sample_group:'hek293T', replicate:'rep1', condition:'untreated' ],
+                        [ file(params.pipelines_testdata_base_path + 'rnastructurome/testdata/HEK293T_untreated_r1.fastq.gz', checkIfExists: true) ]
+                    ]
+                )
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert !workflow.success },
+                { assert workflow.errorMessage.contains("more than one treated sample") },
+                { assert workflow.errorMessage.contains("hek_treated_a, hek_treated_b") }
+            )
+        }
+    }
+
     test("Fails rf-norm when denatured lacks matching treated and untreated samples") {
 
         options "-stub"

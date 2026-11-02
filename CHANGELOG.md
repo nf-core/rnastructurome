@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - A gzipped local `--gtf` now goes through `GTF_SANITIZE`, which writes it out as plain text, for every organism. Before, only yeast did, so on the genome route gffread wrote an empty transcript FASTA and STAR rejected the GTF.
 - RT-stop runs with `--bowtie_all false` no longer fail at alignment: `--strata` is now passed to bowtie only with `-a`, `-m` or `-k` above 1, since bowtie 1 exits on it otherwise.
+- A `sample_group`/`replicate` group with more than one treated sample now stops with an error, as groups with more than one control already did. `rf-norm` takes one treated RC file, so every treated sample after the first was silently left out of the reactivities; give runs of the same sample the same `sample` name so they are concatenated.
 - `AVERAGE_WIG` now averages replicate WIGs one chromosome at a time instead of loading every replicate genome-wide, which ran out of memory at 96 GB on six human replicates. The output is unchanged.
 
 ### `Dependencies`
